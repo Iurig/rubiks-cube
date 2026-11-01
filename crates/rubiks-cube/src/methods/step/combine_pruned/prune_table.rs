@@ -24,13 +24,17 @@ impl<P: Puzzle, L: Marker<P, Label: Send + Sync> + Clone + Eq + Hash + Send + Sy
 {
     /// The distance from `goal` of every state `moveset` can reach, with `goal` at 0.
     pub(crate) fn from_goal(goal: &Labeled<P, L>, moveset: &AlgSet<P>) -> Self {
-        let mut table = Self::from_iter([(goal.clone(), 0)]);
+        let table = Self::from_iter([(goal.clone(), 0)]);
         table.populate(moveset);
         table
     }
     /// Fills the table outward from the keys already in it. Each sequence of `moveset` is one
     /// step of distance, the same unit [`PrunedCombine`](super::PrunedCombine) searches in.
-    pub(crate) fn populate(&mut self, algset: &AlgSet<P>) {
+    #[expect(
+        clippy::indexing_slicing,
+        reason = "vector made to always comport the lenght: breaking this invariant should fail loudly"
+    )]
+    pub(crate) fn populate(&self, algset: &AlgSet<P>) {
         // Every key in the frontier is at `depth`, so the depth lives once, outside the loop.
         let Some(&first_depth) = self.table.pin().values().next() else {
             return;
