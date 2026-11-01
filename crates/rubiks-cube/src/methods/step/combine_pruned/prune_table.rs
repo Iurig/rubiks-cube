@@ -1,9 +1,6 @@
-use crate::{AlgSet, Labeled, Marker, Puzzle, fast_hash::FxHasher};
+use crate::{AlgSet, Indexed, Labeled, Marker, Puzzle, fast_hash::FxHasher};
 
-use std::{
-    hash::{BuildHasherDefault, Hash},
-    ops::Mul,
-};
+use std::hash::{BuildHasherDefault, Hash};
 
 use rayon::prelude::*;
 
@@ -31,19 +28,9 @@ impl<P: Puzzle, L: Marker<P, Label: Send + Sync> + Clone + Eq + Hash + Send + Sy
         table.populate(moveset);
         table
     }
-}
-
-impl<K: Clone + Eq + Hash> PruneTable<K> {
-    pub(crate) fn get_distance(&self, state: &K) -> Option<u8> {
-        self.table.pin().get(state).copied()
-    }
-
     /// Fills the table outward from the keys already in it. Each sequence of `moveset` is one
     /// step of distance, the same unit [`PrunedCombine`](super::PrunedCombine) searches in.
-    pub(crate) fn populate<P: Puzzle>(&mut self, algset: &AlgSet<P>)
-    where
-        K: Mul<P::Move, Output = K> + Send + Sync,
-    {
+    pub(crate) fn populate(&mut self, algset: &AlgSet<P>) {
         // Every key in the frontier is at `depth`, so the depth lives once, outside the loop.
         let Some(&first_depth) = self.table.pin().values().next() else {
             return;
@@ -53,7 +40,10 @@ impl<K: Clone + Eq + Hash> PruneTable<K> {
             "the keys already in the table must all be at the same distance"
         );
         let mut depth = first_depth;
-        let mut frontier: Vec<K> = self.table.pin().keys().cloned().collect();
+        let mut frontier: Vec<Labeled<P, L>> = self.table.pin().keys().cloned().collect();
+        let moves_as_puzzles = <P::Move as Indexed>::all()
+            .map(|m| P::default() * m)
+            .collect::<Vec<_>>();
 
         while !frontier.is_empty() {
             log::debug!("depth = {depth}, frontier = {}", frontier.len());
@@ -65,7 +55,11 @@ impl<K: Clone + Eq + Hash> PruneTable<K> {
                     algset
                         .algs()
                         .iter()
-                        .map(|alg| alg.iter().fold(representation.clone(), |rep, m| rep * *m))
+                        .map(|alg| {
+                            alg.iter().fold(representation.clone(), |rep, m| {
+                                rep.composed_with(&moves_as_puzzles[m.index()])
+                            })
+                        })
                         .filter(|state| !self.table.pin().contains_key(state))
                 })
                 .filter_map(|state| {
@@ -77,5 +71,11 @@ impl<K: Clone + Eq + Hash> PruneTable<K> {
                 })
                 .collect();
         }
+    }
+}
+
+impl<K: Clone + Eq + Hash> PruneTable<K> {
+    pub(crate) fn get_distance(&self, state: &K) -> Option<u8> {
+        self.table.pin().get(state).copied()
     }
 }
