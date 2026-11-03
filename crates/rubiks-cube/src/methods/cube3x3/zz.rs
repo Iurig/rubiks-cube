@@ -1,4 +1,3 @@
-use std::io::BufRead;
 use std::sync::{Arc, LazyLock};
 
 use super::helpers::set_options;
