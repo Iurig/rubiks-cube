@@ -289,7 +289,7 @@ impl Step<Cube3x3> for LastLayer {
     }
 
     fn is_done(&self, puzzle: &Cube3x3) -> bool {
-        // U moves never change the orientation of U-layer pieces, so only the
+        // `U` moves never change the orientation of U-layer pieces, so only the
         // permutation needs an AUF.
         self.oriented.applies_to(puzzle) && self.post_auf(puzzle).is_some()
     }

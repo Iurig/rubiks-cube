@@ -33,7 +33,7 @@ fn face_turns() -> AlgSet<Cube3x3> {
         .collect()
 }
 
-/// Phase 2's moveset, the moves that keep a cube in the domino subgroup: any turn of U or D,
+/// Phase 2's moveset, the moves that keep a cube in the domino subgroup: any turn of `U` or `D`,
 /// and half turns of the other faces.
 fn domino_turns() -> AlgSet<Cube3x3> {
     Move3x3::all()

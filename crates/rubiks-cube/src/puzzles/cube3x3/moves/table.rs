@@ -422,7 +422,7 @@ mod tests {
 
     #[test]
     fn wide_moves_equal_opposite_face_plus_rotation() {
-        // Rw = L x, Uw = D y, Fw = B z: reaches each wide move by a different
+        // `Rw = L x`, `Uw = D y`, `Fw = B z`: reaches each wide move by a different
         // route than the table's own derivation (face then parallel slice).
         for (wide, opposite, rotation) in [
             (Face::R, Face::L, Rotation::X),

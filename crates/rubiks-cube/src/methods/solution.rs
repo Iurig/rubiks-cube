@@ -5,7 +5,7 @@ use crate::{Algorithm, ParseSequenceError, puzzles::Puzzle};
 /// The moves a method found, as one segment per step, in solving order.
 ///
 /// Each segment is the moves a step applied and the name of the step. `Display` prints one line
-/// per segment: the moves in notation, then a tab, `//`, and the step name. That text is valid
+/// per segment: the moves in notation, then a tab, `//`, and the step name. The text is valid
 /// notation, so a scramble followed by its printed solution replays to the solved state:
 ///
 /// ```text

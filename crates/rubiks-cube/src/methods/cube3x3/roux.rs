@@ -40,7 +40,7 @@ pub enum FirstBlock {
     /// One search for the whole block.
     #[default]
     OneLook,
-    /// A 1x2x2 square, front or back, then the pair that finishes the block.
+    /// A 1x2x2 square, in the front or back, then the pair that finishes the block.
     SquarePair,
     /// The DL edge, then a square, then the pair.
     EdgePairPair,
@@ -52,7 +52,7 @@ pub enum FirstBlock {
 pub enum SecondBlock {
     /// One search for the whole block.
     OneLook,
-    /// A 1x2x2 square, front or back, then the pair that finishes the block.
+    /// A 1x2x2 square, in the front or back, then the pair that finishes the block.
     SquarePair,
     /// The DR edge, then a square, then the pair.
     #[default]
@@ -161,7 +161,7 @@ impl Method<Cube3x3> for Roux {
                     .build()
                     .expect("manually constructed step should construct"),
             )],
-            //LseOptions::EO => (),
+            //[`LseOptions::EO`] => (),
         };
 
         [fb_tech, sb_tech, cmll_tech, lse_tech]
@@ -201,7 +201,7 @@ mod test {
     }
 
     /// Every `to_technique` call builds new step objects, so memos are shared through the global
-    /// cache, keyed by `after` and the movesets. A step built again with the same goals shares its
+    /// cache, keyed by `after` and the move sets. A step built again with the same goals shares its
     /// memo, and so does the one-look block with the pair that finishes it, because the pair's
     /// `before` lies inside its `after`.
     #[test]
@@ -229,8 +229,8 @@ mod test {
         assert!(!fb.shares_memo_with(&fb_square));
     }
 
-    /// R, U, and F turns never touch the L center, DBL, BL, or DL, so the back square stays
-    /// solved and costs nothing, while F breaks the front square.
+    /// `R`, `U`, and `F` turns never touch the L center, DBL, BL, or DL, so the back square stays
+    /// solved and costs nothing, while `F` breaks the front square.
     #[test]
     fn split_fb_builds_the_back_square_when_it_is_cheaper() -> anyhow::Result<()> {
         let roux = Roux {
@@ -254,7 +254,7 @@ mod test {
     }
 
     /// `R U R'` displaces the FR edge and DFR corner but returns DR, BR, and DBR home, and
-    /// neither R nor U touches the first block. So the second block's back square is solved
+    /// neither `R` nor `U` touches the first block. So the second block's back square is solved
     /// and its front square is not.
     #[test]
     fn split_sb_builds_the_back_square_when_it_is_cheaper() -> anyhow::Result<()> {

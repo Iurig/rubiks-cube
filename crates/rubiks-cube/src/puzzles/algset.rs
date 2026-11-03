@@ -27,7 +27,7 @@ use crate::{
 ///
 /// Two collections with the same sequences are equal and hash alike, whatever order the
 /// sequences were given in and however often each was repeated.
-// Every constructor goes through `FromIterator`, which sorts and dedups, so the derived
+// Every constructor goes through `FromIterator`, which sorts and dedupes, so the derived
 // `PartialEq` and `Hash` compare the sequences as a set.
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct AlgSet<P: Puzzle>(Arc<[Algorithm<P>]>);
@@ -200,7 +200,7 @@ mod tests {
             assert_eq!(same, algset);
         }
 
-        // A missing, extra, or different sequence does.
+        // Missing, extra, or different sequence matters.
         for different in ["", "R U", "R U\nF\nF'", "U R\nF"] {
             let different = AlgSet::from_str(different)?;
             assert_ne!(algset, different);

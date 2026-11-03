@@ -64,7 +64,7 @@ pub trait Pow: std::ops::Mul<Self, Output = Self> + Clone {
     /// ```
     #[must_use = "returns the power instead of applying it in place"]
     fn pow(self, exponent: u32) -> Self {
-        // values 0, 1 and 2 are needed for recursion on `_` branch
+        // Values 0, 1 and 2 are needed for recursion on `_` branch
         match exponent {
             0 => Self::identity(),
             1 => self,

@@ -180,8 +180,8 @@ impl Cube3x3 {
     ///
     /// # Errors
     ///
-    /// Errors when a whitespace separated &str outside of comments is not parseable
-    /// as a move; the error names that &str and its line and position, both counted
+    /// Errors when a whitespace separated `&str` outside of comments is not parseable
+    /// as a move; the error names that `&str` and its line and position, both counted
     /// from 1, using the type [`ParseSequenceError`]
     pub fn apply_moves(&self, moves: &str) -> Result<Self, ParseSequenceError> {
         Ok(self.apply(&moves.parse()?))
@@ -345,7 +345,7 @@ mod tests {
     #[test]
     fn mul_carries_orientation_along_with_the_piece() -> anyhow::Result<()> {
         // Pre-twist the piece at UFR, then apply R: that piece lands at UBR and
-        // its twist is added to the twist R gives the UBR slot.
+        // its twist is added to the twist `R` gives the UBR slot.
         let r = Cube3x3::from_moves("R")?;
         let mut twisted = Cube3x3::default();
         twisted.corners.orientation[Corner::Ufr as usize] = Zn::new(1);

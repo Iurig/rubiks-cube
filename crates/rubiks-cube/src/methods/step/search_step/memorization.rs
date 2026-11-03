@@ -213,7 +213,7 @@ mod tests {
         }
     }
 
-    /// A memo over the whole cube, searched with R and U moves only.
+    /// A memo over the whole cube, searched with `R` and `U` moves only.
     fn r_u_memo(depth: u32) -> (BfsMemo<Cube3x3>, PieceSet<Cube3x3>) {
         let goal = PieceSet::<Cube3x3>::from_pieces(Piece3x3::all());
         let allowed = AlgSet::from_moves("R R' R2 U U' U2").unwrap();

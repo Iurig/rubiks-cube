@@ -243,7 +243,7 @@ impl<P: Puzzle> Mask<P> {
                     .is_none_or(|orient| puzzle.orientation_at(slot) == orient)
         })
     }
-    /// Composes two instances of [`Mask<P>`], marking pieces if they are tracked by both one.
+    /// Composes two instances of [`Mask<P>`], marking pieces if they are tracked by both.
     ///
     /// Zeroes the orientations that are tracked - is meant to be used in goal-type values.
     #[must_use]

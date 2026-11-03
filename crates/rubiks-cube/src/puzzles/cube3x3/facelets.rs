@@ -17,7 +17,7 @@ use super::{
 };
 use crate::{Mask, Piece, Puzzle, piece::index};
 
-/// The colour on each facelet of a [`Cube3x3`], one `[Center; 9]` per face
+/// The color on each facelet of a [`Cube3x3`], one `[Center; 9]` per face
 /// in [`Center::ALL`] order, each read row by row as in [`Display`].
 ///
 /// ```
@@ -155,8 +155,8 @@ const fn corner_faces(corner: Corner) -> [Center; 3] {
     }
 }
 
-/// The two faces of an edge slot, the one that defines its flip first: U or
-/// D when the slot has one, otherwise F or B.
+/// The two faces of an edge slot, the one that defines its flip first: `U` or
+/// `D` when the slot has one, otherwise `F` or `B`.
 ///
 /// As with corners this is also the sticker order of the edge piece. An edge
 /// is oriented when its first sticker is on the slot's first face.
@@ -346,11 +346,11 @@ impl Display for Cube3x3 {
 
 /// The net of what the mask asks for, one character per facelet:
 ///
-/// - a face letter where the mask names both the piece and its orientation, so the sticker is known
-///   (and on every facelet of a named center);
-/// - `?` where the mask names the piece but not its orientation;
+/// - A face letter where the mask names both the piece and its orientation (and facelets of a named
+///   center), since the sticker is known.
+/// - `?` where the mask names the piece but not its orientation.
 /// - `o` where the mask names only an orientation, on the facelet that must show the piece's U or D
-///   sticker (for edges, its U/D sticker or else its F/B one); the slot's other facelets show `.`;
+///   sticker (for edges, its U/D sticker or else its F/B one); the slot's other facelets show `.`.
 /// - `.` where the mask asks nothing.
 ///
 /// ```
@@ -470,7 +470,7 @@ mod tests {
         );
     }
 
-    // Physical facts: `R` carries F stickers to U, U to B, B to D, D to F.
+    // Physical facts: `R` carries `F` stickers to `U`, `U` to `B`, `B` to `D`, `D` to `F`.
     #[test]
     fn r_moves_the_right_column_of_each_face_along_the_ring() -> anyhow::Result<()> {
         assert_eq!(
@@ -490,7 +490,7 @@ mod tests {
         Ok(())
     }
 
-    // `U` carries F stickers to L, L to B, B to R, R to F.
+    // `U` carries `F` stickers to `L`, `L` to `B`, `B` to `R`, `R` to `F`.
     #[test]
     fn u_moves_the_top_row_of_the_side_faces() -> anyhow::Result<()> {
         assert_eq!(
@@ -510,7 +510,7 @@ mod tests {
         Ok(())
     }
 
-    // `F` carries U stickers to R, R to D, D to L, L to U. It twists the four
+    // `F` carries `U` stickers to `R`, `R` to `D`, `D` to `L`, `L` to `U`. It twists the four
     // F corners and flips the four F edges, so this pins both conventions.
     #[test]
     fn f_moves_the_ring_around_the_front_face() -> anyhow::Result<()> {
@@ -531,7 +531,7 @@ mod tests {
         Ok(())
     }
 
-    // `M` follows `L`: U stickers go to F, F to D, D to B, B to U.
+    // `M` follows `L`: `U` stickers go to `F`, `F` to `D`, `D` to `B`, `B` to `U`.
     #[test]
     fn m_moves_the_middle_column_and_the_centers() -> anyhow::Result<()> {
         assert_eq!(
@@ -551,7 +551,7 @@ mod tests {
         Ok(())
     }
 
-    // `y` follows `U`: the whole cube turns, so R stickers show at F.
+    // `y` follows `U`: the whole cube turns, so `R` stickers show at `F`.
     #[test]
     fn y_rotates_the_side_faces_whole() -> anyhow::Result<()> {
         assert_eq!(

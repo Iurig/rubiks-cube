@@ -90,6 +90,7 @@ pub use methods::{
     Method, PuzzleCondition, Segment, Solution, Technique, TechniqueBuilder,
     context::BuildContext,
     cube3x3::{kociemba::Kociemba, roux, roux::Roux, zz, zz::ZZ},
+    neutrality::Neutrality,
     step::{
         Step, StepBuilder,
         choose::Shortest,

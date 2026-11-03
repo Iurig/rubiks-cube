@@ -1,4 +1,4 @@
-// tests/api/stats.rs
+// `tests/api/stats.rs`
 use statrs::stats_tests::chisquare::chisquare;
 
 /// Seeded tests are deterministic, so this is how surprising a fixed sample

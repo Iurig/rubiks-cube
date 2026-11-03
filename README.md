@@ -15,7 +15,7 @@ group multiplication. Everything is `Copy`, and the move table is built on first
 > ZZ, and Kociemba solvers work, and their public APIs are still changing. See
 > [Current state](#current-state).
 
-## Quick example
+## Quick Example
 
 ```rust
 use rubiks_cube::{Cube3x3, Inv, Pow, Puzzle};
@@ -101,7 +101,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 
 A printed solution has one line per step: the moves, then `//` and the step's name. One run of
-[examples/main.rs](crates/rubiks-cube/examples/main.rs) printed this for the scramble above:
+[`examples/main.rs`](crates/rubiks-cube/examples/main.rs) printed this for the scramble above:
 
 ```text
 U' F' B2 D R2 B D2	//FB
@@ -114,7 +114,7 @@ U2 M' U M' U2 M U2 M' U' M' U2 M'	//LSE
 
 `Roux`'s builder methods pick how each stage is split. `first_block` and `second_block` choose
 between one search, a square plus a pair, or an edge, then a square, then a pair, `cmll` chooses
-between one algorithm and two, and lse between one-look and eolr. With a split block the solver
+between one algorithm and two, and `lse` between `one_look` and `eolr`. With a split block the solver
 tries both the front and the back square and keeps the shorter:
 
 ```rust
@@ -133,7 +133,7 @@ The [API documentation](#api-documentation) describes each type.
 `cargo bench --bench solves` times two passes of 1000 seeded Roux solves and reports time, moves,
 and heap use per step.
 
-## How it works
+## How It Works
 
 The cube is the direct product of three independent piece groups:
 
@@ -165,12 +165,12 @@ sticker belongs to when solved (`println!("{cube}")`); `cube.facelets()` gives t
 physical cube would look like, so a wrong twist or flip convention is visible at a glance.
 
 Only the nine base moves (six faces, three slices) are written by hand, as explicit cycles in
-[moves/table.rs](crates/rubiks-cube/src/puzzles/cube3x3/moves/table.rs). Rotations (`x = R M' L'`,
+[`moves/table.rs`](crates/rubiks-cube/src/puzzles/cube3x3/moves/table.rs). Rotations (`x = R M' L'`,
 `y = U E' D'`, `z = F S B'`), wide moves (a face turn followed by its parallel slice), and every
 inverse and double are derived from those nine, on first use, into a single `ALL_MOVES` table that
 string parsing looks up. A derived move therefore cannot drift from its base moves.
 
-## API documentation
+## API Documentation
 
 Every public item has a doc comment. Build and open the documentation with:
 
@@ -190,7 +190,7 @@ The main entry points:
   **`Mask`** says what a step needs and what it solves.
 - **`Solution`**, and **`SolveError`** are what a solve returns.
 
-## Project layout
+## Project Layout
 
 The repository is a Cargo workspace. Commands run from the root cover every crate.
 
@@ -249,7 +249,7 @@ crates/
           kociemba.rs         Kociemba's two-phase method
           helpers.rs          helpers for defining methods and steps
           algsets/            algorithm lists shared between methods
-            cmll/             CMLL 
+            cmll/             CMLL
             oll/              OLL
             pll/              PLL
             zbll/             ZBLL
@@ -267,13 +267,13 @@ crates/
       main.rs                 solves one scramble with two option sets and prints the solutions
       sketch.rs               a design sketch
       DESIGN.md               a document for writing things down while writing to sketch.rs
-    docs/                     
+    docs/
       design/                 settled designs
         step-builders.md      the "Technique builds from StepBuilders" design
   rubiks-cube-cli/            the command-line tool
     src/
       main.rs
-  twisty-puzzles-py/          exported python library 
+  twisty-puzzles-py/          exported python library
     src/
       lib.rs
     python/
@@ -281,13 +281,13 @@ tools/
   cargo-bin/                  tool for automatically downloading and executing formatting bins
 ```
 
-## Building and testing
+## Building and Testing
 
 Requires a Rust toolchain with the 2024 edition. The library depends on `fastrand` for random cube
 states, and no public function takes or returns a `fastrand` type. It also depends on `log`, through
 which the solver reports each step at the `debug` level. It never prints. `rayon` runs the searches
 and the prune-table builds in parallel. `thiserror`helps define errors. `itertools`makes some
-iterator method chains less verbose. `dyn-clone` allows for cloning dyn types internally. None of
+iterator method chains less verbose. `dyn-clone` allows for cloning `dyn` types internally. None of
 their types are ever returned.
 
 ```sh
@@ -298,19 +298,19 @@ RUST_LOG=rubiks_cube=debug cargo run --example main
 cargo run -p rubiks-cube-cli -- --method roux --number 3
 ```
 
-## Current state
+## Current State
 
 All unit, integration, and doc tests pass; none are `#[ignore]`d.
 
 What works today:
 
 - All six face turns, the three slice moves `M`, `E`, `S`, the three rotations `x`, `y`, `z`, and
-  the six wide moves `Rw` ... `Bw` (also as lowercase `r` ... `b`), each with the `'`, `2`, and `2'`
+  the six wide moves `Rw` … `Bw` (also as lowercase `r` … `b`), each with the `'`, `2`, and `2'`
   modifiers. Rotations and wide moves are derived on first use from the face and slice moves, so
   they cannot drift out of sync with them. The base moves are pinned by handedness tests, and the
   whole notation is exercised by CFOP and Roux reconstructions.
 - Move strings return `Result`: an unknown token is an `Err` naming it, never a panic.
-- `is_solved` is rotation-aware: it re-orients the cube by its centers before comparing with the
+- `is_solved` is rotation-aware: it reorients the cube by its centers before comparing with the
   identity, so `Cube3x3::from_moves("x y2 z'")` reports solved.
 - A cube state can be queried: `cube.corners().piece_at(Corner::Ubr)` says which piece sits in the
   UBR slot, and `orientation_at` reads its twist or flip. The handedness tests are written against
@@ -330,7 +330,7 @@ What works today:
   meeting its goal.
 - A method can mix step types, and `Shortest` picks between alternatives by move count.
 
-## Roadmap
+## Road Map
 
 - Fingertrick-aware output. A solution already prints as notation; this is why `2'` is kept distinct
   from `2` in the `Move` label even though they share a cube state.

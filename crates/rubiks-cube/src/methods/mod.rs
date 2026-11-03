@@ -127,8 +127,8 @@ impl<P: Puzzle> TechniqueBuilder<P> {
     /// Adds a [`Step`] to the final technique, constructed from a [`StepBuilder`].
     ///
     /// It constructs the step's goal to be the next step's
-    /// [`assumed_solved`](StepBuilder::assumed_solved) and its own
-    /// [`assumed_solved`](StepBuilder::assumed_solved) based on
+    /// [`get_prereq`](StepBuilder::get_prereq) and its own
+    /// [`get_prereq`](StepBuilder::get_prereq) based on
     /// its [`allowed_sequences`](StepBuilder::allowed_sequences). If either can't be constructed
     /// because the [`StepBuilder`] doesn't provide one, it must be provided.
     pub fn then(&mut self, step: impl StepBuilder<P> + 'static) -> &mut Self {
@@ -144,7 +144,7 @@ impl<P: Puzzle> TechniqueBuilder<P> {
 
     /// Adds the final [`Step`] of a technique.
     ///
-    /// It constructs its [`assumed_solved`](StepBuilder::assumed_solved) based on its
+    /// It constructs its [`get_prereq`](StepBuilder::get_prereq) based on its
     /// [`allowed_sequences`](StepBuilder::allowed_sequences).
     ///
     /// # Errors
@@ -246,8 +246,8 @@ impl<P: Puzzle> Technique<P> {
 
     /// Creates a [`TechniqueBuilder`] with a starting given `step` given by [`StepBuilder`].
     ///
-    /// It constructs [`assumed_solved`](StepBuilder::assumed_solved) to be empty. If
-    /// [`assumed_solved`](StepBuilder::assumed_solved) is given in the builder, it will fail to
+    /// It constructs [`get_prereq`](StepBuilder::get_prereq) to be empty. If
+    /// [`get_prereq`](StepBuilder::get_prereq) is given in the builder, it will fail to
     /// construct the [`Technique`].
     pub fn start_with(step: impl StepBuilder<P> + 'static) -> TechniqueBuilder<P> {
         TechniqueBuilder {
