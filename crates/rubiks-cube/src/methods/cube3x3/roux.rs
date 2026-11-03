@@ -156,7 +156,7 @@ impl Method<Cube3x3> for Roux {
         let lse_tech: Vec<Arc<dyn Step<Cube3x3>>> = match self.lse {
             Lse::Eolr => vec![Arc::new(
                 SearchStep::builder("LSE", LSE_MOVES.clone())
-                    .expect_solved(after_cmll)
+                    .prerequisite(after_cmll)
                     .goal(PieceSet::from_pieces(Piece3x3::all()))
                     .build()
                     .expect("manually constructed step should construct"),
@@ -213,7 +213,7 @@ mod test {
 
         let search = |name: &'static str, before: &PieceSet<Cube3x3>, after: &PieceSet<Cube3x3>| {
             SearchStep::builder(name, FB_MOVES.clone())
-                .expect_solved(before.clone())
+                .prerequisite(before.clone())
                 .goal(after.clone())
                 .build()
                 .unwrap()

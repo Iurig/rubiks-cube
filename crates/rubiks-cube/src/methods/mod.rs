@@ -1,12 +1,11 @@
-pub mod cube3x3;
-//pub mod neutrality;
 pub mod context;
+pub mod cube3x3;
+pub mod neutrality;
 mod solution;
 pub mod step;
 #[cfg(test)]
 mod test_steps;
 
-use dyn_clone::arc_make_mut;
 pub use solution::{Segment, Solution};
 
 use std::{fmt::Debug, ops::Index, sync::Arc};
@@ -15,10 +14,51 @@ use crate::{
     PieceSet, SolveError, TechniqueError,
     methods::{
         context::{BuildContext, GLOBAL},
+        neutrality::Neutrality,
         step::{Step, StepBuilder},
     },
     puzzles::Puzzle,
 };
+
+#[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum ConditionStates<P: Puzzle> {
+    Pieces(PieceSet<P>),
+    Opaque,
+}
+
+/// The types of puzzle conditions steps either require or guarantee - usually a set of pieces and
+/// orientations to be solved, but possibly an opaque, more complex state.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PuzzleCondition<P: Puzzle>(ConditionStates<P>);
+
+impl<P: Puzzle> From<PieceSet<P>> for PuzzleCondition<P> {
+    fn from(value: PieceSet<P>) -> Self {
+        PuzzleCondition::pieces(value)
+    }
+}
+
+impl<P: Puzzle> PuzzleCondition<P> {
+    /// Creates a [`PuzzleCondition`] that describes the pieces in `pieces` as solved.
+    pub fn pieces(pieces: PieceSet<P>) -> Self {
+        Self(ConditionStates::Pieces(pieces))
+    }
+
+    /// Creates a [`PuzzleCondition`] that doesn't describe the state directly. Used on
+    /// [`StepBuilder`]s that define their puzzle conditions some other way than by pieces.
+    pub fn opaque() -> Self {
+        Self(ConditionStates::Opaque)
+    }
+
+    /// Returns the pieces that describe the [`PuzzleCondition`], if it can be defined as a
+    /// [`PieceSet`].
+    pub fn as_pieces(self) -> Option<PieceSet<P>> {
+        match self.0 {
+            ConditionStates::Pieces(pieces) => Some(pieces),
+            _ => None,
+        }
+    }
+}
 
 /// The ordered list of [`Step`]s that a [`Method`] runs, built by
 /// [`to_technique`](Method::to_technique) from the method's options.
@@ -40,12 +80,12 @@ use crate::{
 #[derive(Clone, Debug)]
 pub struct Technique<P: Puzzle> {
     steps: Vec<Arc<dyn Step<P>>>,
-    // neutrality: Neutrality<P>,
+    neutrality: Neutrality<P>,
 }
 
 /// Builder for [`Technique`].
 ///
-/// Can be used to build a [`Technique`] from uncomplete [`StepBuilder`]s.
+/// Can be used to build a [`Technique`] from incomplete [`StepBuilder`]s.
 ///
 /// # Examples
 ///
@@ -77,6 +117,7 @@ pub struct Technique<P: Puzzle> {
 #[derive(Clone, Debug)]
 pub struct TechniqueBuilder<P: Puzzle> {
     step_builders: Vec<Arc<dyn StepBuilder<P>>>,
+    neutrality: Neutrality<P>,
 }
 
 impl<P: Puzzle> TechniqueBuilder<P> {
@@ -92,6 +133,12 @@ impl<P: Puzzle> TechniqueBuilder<P> {
         self
     }
 
+    /// Adds a given [`Neutrality`] to a [`TechniqueBuilder`].
+    pub fn neutrality(&mut self, neutrality: Neutrality<P>) -> &mut Self {
+        self.neutrality = neutrality;
+        self
+    }
+
     /// Adds the final [`Step`] of a technique.
     ///
     /// It constructs its [`assumed_solved`](StepBuilder::assumed_solved) based on its
@@ -102,10 +149,6 @@ impl<P: Puzzle> TechniqueBuilder<P> {
     /// Errors if the provided `step`, or any before it, can't [`build`](StepBuilder::build) based
     /// on the provided or constructed information. It also errors if the first step has a
     /// requisite, or the last a goal.
-    #[expect(
-        clippy::indexing_slicing,
-        reason = "directly related to split points - if it fails, it should do so loudly."
-    )]
     pub fn finish_in(
         &self,
         step: impl StepBuilder<P> + 'static,
@@ -116,38 +159,35 @@ impl<P: Puzzle> TechniqueBuilder<P> {
         let last = builders.len() - 1;
 
         let mut steps = Vec::with_capacity(builders.len());
-        for index in (0..builders.len()).rev() {
-            let (builder_first, builder_second) = &mut builders.split_at_mut(index + 1);
-
-            let builder = arc_make_mut(&mut builder_first[index]);
-
-            if index != 0 && builder.assumed_solved().is_none() {
-                *builder.assumed_solved() = builder
-                    .allowed_sequences()
-                    .map(|algs| PieceSet::from_algset(&algs));
-            }
-
-            if index == 0 && builder.assumed_solved().is_some() {
+        let mut next_prereq = None;
+        for (index, builder) in builders.iter().enumerate().rev() {
+            if index == 0 && builder.get_prereq().is_some() {
                 return Err(TechniqueError::InvalidFirstStep);
             }
-
-            if index == last {
-                if builder.goal().is_some() {
-                    return Err(TechniqueError::InvalidLastStep);
-                }
-            } else if builder.goal().is_none() {
-                builder
-                    .goal()
-                    .clone_from(arc_make_mut(&mut builder_second[0]).assumed_solved());
+            if index == last && builder.get_goal().is_some() {
+                return Err(TechniqueError::InvalidLastStep);
             }
 
-            steps.push(builder.build_in(context).map_err(|source| {
-                TechniqueError::CantConstruct {
-                    index: index + 1,
-                    step: builder.name().to_string(),
-                    source,
-                }
-            })?);
+            let prereq = (index != 0)
+                .then_some(
+                    builder.get_prereq().or(builder
+                        .allowed_sequences()
+                        .map(|algs| PieceSet::from_algset(&algs).into())),
+                )
+                .flatten();
+
+            let goal = builder.get_goal().or(next_prereq);
+
+            steps.push(
+                builder
+                    .build_wired(prereq.clone(), goal, context)
+                    .map_err(|source| TechniqueError::CantConstruct {
+                        index: index + 1,
+                        step: builder.name().to_string(),
+                        source,
+                    })?,
+            );
+            next_prereq = prereq;
         }
         Ok(steps.into_iter().rev().collect())
     }
@@ -179,7 +219,7 @@ impl<P: Puzzle> FromIterator<Arc<dyn Step<P>>> for Technique<P> {
     fn from_iter<T: IntoIterator<Item = Arc<dyn Step<P>>>>(iter: T) -> Self {
         Self {
             steps: iter.into_iter().collect(),
-            // neutrality: Neutrality::default(),
+            neutrality: Neutrality::default(),
         }
     }
 }
@@ -197,7 +237,7 @@ impl<P: Puzzle> Technique<P> {
     pub fn new(steps: impl IntoIterator<Item = Arc<dyn Step<P>>>) -> Self {
         Self {
             steps: steps.into_iter().collect(),
-            // neutrality: Neutrality::default(),
+            neutrality: Neutrality::default(),
         }
     }
 
@@ -209,6 +249,7 @@ impl<P: Puzzle> Technique<P> {
     pub fn start_with(step: impl StepBuilder<P> + 'static) -> TechniqueBuilder<P> {
         TechniqueBuilder {
             step_builders: vec![Arc::new(step)],
+            neutrality: Neutrality::default(),
         }
     }
 
@@ -239,20 +280,20 @@ impl<P: Puzzle> Technique<P> {
     #[must_use]
     pub fn with_neutrality(
         steps: impl IntoIterator<Item = Arc<dyn Step<P>>>,
-        // neutrality: Neutrality<P>,
+        neutrality: Neutrality<P>,
     ) -> Self {
         Self {
             steps: steps.into_iter().collect(),
-            // neutrality,
+            neutrality,
         }
     }
-    /*
-    /// Sets the neutrality of the [`Technique`].{}
+
+    /// Sets the neutrality of the [`Technique`].
     #[must_use]
     pub fn neutrality(mut self, neutrality: Neutrality<P>) -> Self {
         self.neutrality = neutrality;
         self
-    } */
+    }
 }
 
 /// Runs `steps` in order on `puzzle`, one per `next()`. Before each step it checks
@@ -347,7 +388,10 @@ mod tests {
 
     use crate::{AlgSet, Cube3x3, Edge, PieceSet, SearchStep, SolveErrorKind, StepError};
 
-    use super::{test_steps::FixedStep, *};
+    use super::{
+        test_steps::{FixedStep, RecordingBuilder, Wired},
+        *,
+    };
 
     fn fixed_failure() -> StepError {
         StepError::Custom("fixed failure".into())
@@ -397,7 +441,7 @@ mod tests {
         // No moves: if the step searched, it could not move and would return `UnreachableGoal`.
         let step = SearchStep::builder("UF then DF", AlgSet::new())
             .goal(PieceSet::<Cube3x3>::from_pieces([Edge::Uf, Edge::Df]))
-            .expect_solved(uf_solved)
+            .prerequisite(uf_solved)
             .build()?;
         let scrambled = Cube3x3::from_moves("U")?;
         let mut cube = scrambled;
@@ -506,7 +550,7 @@ mod tests {
     fn starting_step_with_prereq_returns_error() {
         let technique = Technique::<Cube3x3>::start_with(
             SearchStep::builder("throwaway", AlgSet::new())
-                .expect_solved(PieceSet::new())
+                .prerequisite(PieceSet::new())
                 .clone(),
         )
         .finish(SearchStep::builder("end", AlgSet::new()));
@@ -524,7 +568,7 @@ mod tests {
                 )
                 .finish(
                     SearchStep::builder("end", AlgSet::new())
-                        .expect_solved(PieceSet::from_algset(&AlgSet::new()))
+                        .prerequisite(PieceSet::from_algset(&AlgSet::new()))
                         .clone(),
                 );
         assert_matches!(
@@ -541,7 +585,7 @@ mod tests {
     fn failed_to_start_returns_state() -> anyhow::Result<()> {
         let one_step_method = Technique::new(vec![Arc::new(
             SearchStep::builder("end", AlgSet::new())
-                .expect_solved(PieceSet::from_algset(&AlgSet::new()))
+                .prerequisite(PieceSet::from_algset(&AlgSet::new()))
                 .clone()
                 .build()?,
         ) as Arc<dyn Step<Cube3x3>>]);
@@ -558,5 +602,100 @@ mod tests {
             )
         );
         Ok(())
+    }
+
+    /// What `parts` cannot touch, as a condition: the prerequisite `finish` derives from them.
+    fn untouched_by(parts: &'static str) -> PuzzleCondition<Cube3x3> {
+        PieceSet::from_algset(&AlgSet::from_static_parts(parts)).into()
+    }
+
+    fn wired(
+        prerequisite: Option<PuzzleCondition<Cube3x3>>,
+        goal: Option<PuzzleCondition<Cube3x3>>,
+    ) -> Wired {
+        Wired { prerequisite, goal }
+    }
+
+    #[test]
+    fn each_step_is_wired_to_keep_what_the_next_step_cannot_touch() {
+        let first = RecordingBuilder::new("First").sequences(AlgSet::from_static_parts("F U"));
+        let second = RecordingBuilder::new("Second").sequences(AlgSet::from_static_parts("R U"));
+        let third = RecordingBuilder::new("Third").sequences(AlgSet::from_static_parts("U"));
+
+        let technique = Technique::start_with(first.clone())
+            .then(second.clone())
+            .finish(third.clone())
+            .unwrap();
+
+        assert_eq!(first.received(), wired(None, Some(untouched_by("R U"))));
+        assert_eq!(
+            second.received(),
+            wired(Some(untouched_by("R U")), Some(untouched_by("U")))
+        );
+        assert_eq!(third.received(), wired(Some(untouched_by("U")), None));
+        let names: Vec<&str> = technique.steps().map(Step::name).collect();
+        assert_eq!(names, ["First", "Second", "Third"]);
+    }
+
+    #[test]
+    fn explicit_conditions_win_over_derived_ones() {
+        let prerequisite = untouched_by("F");
+        let goal = untouched_by("B");
+        let first = RecordingBuilder::new("First").sequences(AlgSet::from_static_parts("F U"));
+        let second = RecordingBuilder::new("Second")
+            .sequences(AlgSet::from_static_parts("R U"))
+            .prerequisite(prerequisite.clone())
+            .goal(goal.clone());
+        let third = RecordingBuilder::new("Third").sequences(AlgSet::from_static_parts("U"));
+
+        Technique::start_with(first.clone())
+            .then(second.clone())
+            .finish(third)
+            .unwrap();
+
+        assert_eq!(first.received(), wired(None, Some(prerequisite.clone())));
+        assert_eq!(second.received(), wired(Some(prerequisite), Some(goal)));
+    }
+
+    #[test]
+    fn opaque_conditions_are_kept_and_reach_the_step_before() {
+        let first = RecordingBuilder::new("First").sequences(AlgSet::from_static_parts("F U"));
+        let second = RecordingBuilder::new("Second")
+            .sequences(AlgSet::from_static_parts("R U"))
+            .prerequisite(PuzzleCondition::opaque())
+            .goal(PuzzleCondition::opaque());
+        let third = RecordingBuilder::new("Third").sequences(AlgSet::from_static_parts("U"));
+
+        Technique::start_with(first.clone())
+            .then(second.clone())
+            .finish(third)
+            .unwrap();
+
+        assert_eq!(
+            first.received(),
+            wired(None, Some(PuzzleCondition::opaque()))
+        );
+        assert_eq!(
+            second.received(),
+            wired(
+                Some(PuzzleCondition::opaque()),
+                Some(PuzzleCondition::opaque())
+            )
+        );
+    }
+
+    #[test]
+    fn a_step_with_no_sequences_has_nothing_to_derive_a_prerequisite_from() {
+        let first = RecordingBuilder::new("First").sequences(AlgSet::from_static_parts("F U"));
+        let second = RecordingBuilder::new("Second");
+        let third = RecordingBuilder::new("Third").sequences(AlgSet::from_static_parts("U"));
+
+        Technique::start_with(first.clone())
+            .then(second.clone())
+            .finish(third)
+            .unwrap();
+
+        assert_eq!(first.received(), wired(None, None));
+        assert_eq!(second.received(), wired(None, Some(untouched_by("U"))));
     }
 }

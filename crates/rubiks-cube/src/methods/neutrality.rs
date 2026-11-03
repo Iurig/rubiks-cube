@@ -14,6 +14,7 @@ impl<P: Puzzle> Default for Neutrality<P> {
         Self::new()
     }
 }
+
 impl<P: Puzzle> Neutrality<P> {
     pub fn new() -> Self {
         Self {
@@ -21,12 +22,15 @@ impl<P: Puzzle> Neutrality<P> {
         }
     }
 
-    pub fn valid_neutralities(&self, solved: &Mask<P>) -> Vec<P> {
-        self.puzzles
-            .iter()
-            .filter(|&puzzle| solved.applies_to(puzzle))
-            .cloned()
-            .collect()
+    pub fn remaining_neutralities(&self, solved: &Mask<P>) -> Self {
+        Self {
+            puzzles: self
+                .puzzles
+                .iter()
+                .filter(|&puzzle| solved.applies_to(puzzle))
+                .cloned()
+                .collect(),
+        }
     }
 
     pub fn from_moves(moves: AlgTree<P>) -> Self {

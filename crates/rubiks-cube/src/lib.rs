@@ -84,10 +84,10 @@ pub use error::{
     SolveErrorKind, StepError, TechniqueError,
 };
 pub use indexed::Indexed;
-// Methods with options are re-exported as modules too (`roux::Cmll`), so the options need no method
+// Methods with options are reexported as modules too (`roux::Cmll`), so the options need no method
 // prefix. `kociemba` has no options.
 pub use methods::{
-    Method, Segment, Solution, Technique, TechniqueBuilder,
+    Method, PuzzleCondition, Segment, Solution, Technique, TechniqueBuilder,
     context::BuildContext,
     cube3x3::{kociemba::Kociemba, roux, roux::Roux, zz, zz::ZZ},
     step::{

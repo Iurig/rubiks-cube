@@ -11,7 +11,7 @@ use rubiks_cube::{cube3x3_method_helpers::*, *};
 fn main() {
     use rubiks_cube::{AlgSet, Cube3x3, PieceSet, SearchStep, Technique};
     let eolr = SearchStep::builder("EOLR", AlgSet::from_static_parts("M U"))
-        .goal(PieceSet::from_algset(&AlgSet::<Cube3x3>::from_static(
+        .set_goal(PieceSet::from_algset(&AlgSet::<Cube3x3>::from_static(
             "M' U2 M U2\n M U2 M' U2",
         )))
         .clone();

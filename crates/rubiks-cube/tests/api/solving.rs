@@ -1,3 +1,5 @@
+use std::iter::repeat_n;
+
 use anyhow::Context;
 use rubiks_cube::*;
 
@@ -19,7 +21,7 @@ fn full_solve_and_checking_bfs() -> anyhow::Result<()> {
 #[test]
 fn every_roux_option_solves_on_multiple_seeds() -> anyhow::Result<()> {
     use rubiks_cube::roux::*;
-    let seeds = 2;
+    let seeds = 3;
     let scrambles: Vec<Cube3x3> = (2026..2026 + seeds)
         .map(Cube3x3::scrambled_with_seed)
         .collect();
@@ -118,8 +120,8 @@ fn every_zz_option_combination_solves() -> anyhow::Result<()> {
             last_layers.push(LL::TwoLook { first, second });
         }
     }
-    for (seed, ll) in (0..).zip(last_layers) {
-        let zz = ZZ::default().ll(ll);
+    for (seed, ll) in (0..).zip(repeat_n(last_layers.iter(), 5).flatten()) {
+        let zz = ZZ::default().ll(*ll);
         let mut cube = Cube3x3::scrambled_with_seed(seed);
         zz.solve(&mut cube)
             .with_context(|| format!("{zz:?}, seed {seed}"))?;
@@ -139,7 +141,7 @@ fn a_goal_mixing_named_and_orientation_only_slots_is_met() -> anyhow::Result<()>
     let eo_line_moves = AlgSet::from_static_parts("F B U R L D");
     let step = SearchStep::builder("EO Line", eo_line_moves.clone())
         .goal(PieceSet::from_algset(&AlgSet::from_static_parts("U R L")))
-        .expect_solved(PieceSet::from_algset(&eo_line_moves))
+        .prerequisite(PieceSet::from_algset(&eo_line_moves))
         .build()?;
     for seed in 0..4 {
         let mut cube = Cube3x3::scrambled_with_seed(seed);

@@ -1,8 +1,8 @@
 use std::sync::{Arc, LazyLock};
 
-use super::helpers::{include_multiple_str, set_options};
+use super::helpers::set_options;
 use crate::methods::cube3x3::helpers::{
-    BlockGoal, LastLayer, chain_steps, into_steps, split_by_blocks,
+    BlockGoal, LastLayer, ZBLL_ALGS, chain_steps, into_steps, split_by_blocks,
 };
 
 use crate::{AlgSet, Cube3x3, Method, PieceSet, Step, Technique};
@@ -100,30 +100,20 @@ impl Method<Cube3x3> for ZZ {
                 second: pll,
             } => {
                 let oll_tech = match oll {
-                    FirstLook::Ocll => into_steps(LastLayer::ocll(&AlgSet::from_static(
-                        include_str!("algsets/oll/ocll.txt"),
-                    ))),
-                    FirstLook::Coll => into_steps(LastLayer::coll(&AlgSet::from_static(
-                        include_str!("algsets/oll/coll.txt"),
-                    ))),
+                    FirstLook::Ocll => into_steps(LastLayer::ocll()),
+                    FirstLook::Coll => into_steps(LastLayer::coll()),
                 };
                 let pll_tech = match pll {
-                    SecondLook::OneLook => into_steps(LastLayer::pll(&AlgSet::from_static(
-                        include_str!("algsets/pll/one_look.txt"),
-                    ))),
+                    SecondLook::OneLook => into_steps(LastLayer::pll()),
                     SecondLook::TwoLook => {
-                        let corners = into_steps(LastLayer::cpll(&AlgSet::from_static(
-                            include_str!("algsets/pll/corner.txt"),
-                        )));
-                        let edges = into_steps(LastLayer::epll(&AlgSet::from_static(
-                            include_str!("algsets/pll/edge.txt"),
-                        )));
+                        let corners = into_steps(LastLayer::cpll());
+                        let edges = into_steps(LastLayer::epll());
                         [corners, edges].concat()
                     }
                 };
                 [oll_tech, pll_tech].concat()
             }
-            LL::OneLook => into_steps(LastLayer::zbll(&ZBLL_ALGS)),
+            LL::OneLook => into_steps(LastLayer::zbll()),
         };
 
         [eoline_tech, f2l_tech, ll_tech]
@@ -151,15 +141,81 @@ static F2L_BLOCKS: LazyLock<[BlockGoal; 2]> = LazyLock::new(|| {
         ),
     ]
 });
-static ZBLL_ALGS: LazyLock<AlgSet<Cube3x3>> = LazyLock::new(|| {
-    AlgSet::from_static(include_multiple_str!(
-        "algsets/zbll/t.txt",
-        "algsets/zbll/u.txt",
-        "algsets/zbll/l.txt",
-        "algsets/zbll/pi.txt",
-        "algsets/zbll/h.txt",
-        "algsets/zbll/sune.txt",
-        "algsets/zbll/anti_sune.txt"
-    ))
-    .or_skip()
-});
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Puzzle;
+
+    /// How many last layers each option has to solve.
+    const LAST_LAYERS: usize = 500;
+
+    /// Random products of last-layer algorithms: what ZZ's F2L can leave, with F2L solved and
+    /// every edge oriented.
+    fn random_last_layers() -> Vec<Cube3x3> {
+        let pool = LastLayer::pll()
+            .algs
+            .combined_with(&LastLayer::ocll().algs)
+            .combined_with(&LastLayer::coll().algs)
+            .combined_with(&AlgSet::from_static_parts("U"));
+        let after_f2l = PieceSet::from_algset(&ZBLL_ALGS);
+        let algs = pool.algs();
+        let mut random = fastrand::Rng::with_seed(0);
+        (0..LAST_LAYERS)
+            .map(|_| {
+                let state = (0..6).fold(Cube3x3::default(), |cube, _| {
+                    cube.apply(&algs[random.usize(..algs.len())])
+                });
+                assert!(after_f2l.applies_to(&state), "not a last layer:\n{state}");
+                state
+            })
+            .collect()
+    }
+
+    /// Runs `steps` in order on every random last layer, reporting all the ones that fail.
+    fn assert_solves_every_last_layer(steps: &[LastLayer]) {
+        let mut failures = Vec::new();
+        for start in random_last_layers() {
+            let mut cube = start;
+            let failed = steps
+                .iter()
+                .find_map(|step| step.solve(&mut cube).err().map(|e| (step.name(), e)));
+            if let Some((step, error)) = failed {
+                failures.push(format!("{step}: {error}\n{start}"));
+            } else if !cube.is_solved() {
+                failures.push(format!("ended unsolved\n{start}"));
+            }
+        }
+        assert!(
+            failures.is_empty(),
+            "{} of {LAST_LAYERS} last layers failed. The first:\n{}",
+            failures.len(),
+            failures[0]
+        );
+    }
+
+    #[test]
+    fn zbll_solves_every_last_layer() {
+        assert_solves_every_last_layer(&[LastLayer::zbll()]);
+    }
+
+    #[test]
+    fn ocll_then_pll_solves_every_last_layer() {
+        assert_solves_every_last_layer(&[LastLayer::ocll(), LastLayer::pll()]);
+    }
+
+    #[test]
+    fn ocll_then_two_look_pll_solves_every_last_layer() {
+        assert_solves_every_last_layer(&[LastLayer::ocll(), LastLayer::cpll(), LastLayer::epll()]);
+    }
+
+    #[test]
+    fn coll_then_pll_solves_every_last_layer() {
+        assert_solves_every_last_layer(&[LastLayer::coll(), LastLayer::pll()]);
+    }
+
+    #[test]
+    fn coll_then_two_look_pll_solves_every_last_layer() {
+        assert_solves_every_last_layer(&[LastLayer::coll(), LastLayer::cpll(), LastLayer::epll()]);
+    }
+}

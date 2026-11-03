@@ -185,11 +185,17 @@ pub enum BuildStepError {
     /// didn't provide one.
     #[error("the step needs a goal to be built, but one wasn't available")]
     GoalNeeded,
+    /// This step type cannot be constructed from the goal type provided.
+    #[error("this step kind cannot receive goals of this shape")]
+    InvalidGoal,
     /// The step being built required a prerequisite to be defined, but either the
     /// [`StepBuilder`](crate::StepBuilder) or the [`TechniqueBuilder`](crate::TechniqueBuilder)
     /// didn't provide one.
     #[error("the step needs a prerequisite to be built, but one wasn't available")]
     RequisiteNeeded,
+    /// This step type cannot be constructed from the requisite type provided.
+    #[error("this step kind cannot receive prerequisites of this shape")]
+    InvalidRequisite,
     /// Error specific to this particular [`StepBuilder`](crate::StepBuilder).
     #[error(transparent)]
     Custom(Box<dyn Error + Send + Sync>),

@@ -16,7 +16,6 @@ macro_rules! include_multiple_str {
         concat!($( include_str!($str)),+)
     };
 }
-pub(crate) use include_multiple_str;
 
 pub(super) fn into_steps<P: Puzzle>(step: impl Step<P> + 'static) -> Vec<Arc<dyn Step<P>>> {
     vec![Arc::new(step)]
@@ -128,7 +127,7 @@ macro_rules! __chain_steps {
         let row: Vec<::std::sync::Arc<dyn $crate::Step<$crate::Cube3x3>>> = vec![$(
             ::std::sync::Arc::new(
                 $crate::SearchStep::builder($name, $moves.clone())
-                    .expect_solved($before)
+                    .prerequisite($before)
                     .free_algs($free.clone())
                     .goal($after)
                     .build()
@@ -178,6 +177,20 @@ static AUF: LazyLock<[Algorithm<Cube3x3>; 4]> = LazyLock::new(|| {
 fn aufs() -> &'static [Algorithm<Cube3x3>; 4] {
     &AUF
 }
+
+pub(super) static ZBLL_ALGS: LazyLock<AlgSet<Cube3x3>> = LazyLock::new(|| {
+    AlgSet::from_static(include_multiple_str!(
+        "algsets/zbll/t.txt",
+        "algsets/zbll/u.txt",
+        "algsets/zbll/l.txt",
+        "algsets/zbll/pi.txt",
+        "algsets/zbll/h.txt",
+        "algsets/zbll/sune.txt",
+        "algsets/zbll/anti_sune.txt",
+        "algsets/pll/one_look.txt"
+    ))
+    .or_skip()
+});
 
 #[expect(
     clippy::struct_excessive_bools,
@@ -231,11 +244,16 @@ impl LastLayer {
     }
 
     #[must_use]
-    pub fn coll(algs: &AlgSet<Cube3x3>) -> Self {
+    pub fn coll() -> Self {
+        let algs = AlgSet::from_static(include_multiple_str!(
+            "algsets/oll/coll.txt",
+            "algsets/pll/corner.txt"
+        ));
         Self::new("COLL", algs.or_skip(), LastLayerGoal::SET_UP_EPLL)
     }
     #[must_use]
-    pub fn ocll(algs: &AlgSet<Cube3x3>) -> Self {
+    pub fn ocll() -> Self {
+        let algs = AlgSet::from_static(include_str!("algsets/oll/ocll.txt"));
         let ocll_goal = LastLayerGoal {
             corner_orientation: true,
             corner_permutation: false,
@@ -245,20 +263,23 @@ impl LastLayer {
         Self::new("OCLL", algs.or_skip(), ocll_goal)
     }
     #[must_use]
-    pub fn pll(algs: &AlgSet<Cube3x3>) -> Self {
+    pub fn pll() -> Self {
+        let algs = AlgSet::from_static(include_str!("algsets/pll/one_look.txt"));
         Self::new("PLL", algs.or_skip(), LastLayerGoal::SOLVE_LL)
     }
     #[must_use]
-    pub fn cpll(algs: &AlgSet<Cube3x3>) -> Self {
+    pub fn cpll() -> Self {
+        let algs = AlgSet::from_static(include_str!("algsets/pll/corner.txt"));
         Self::new("CPLL", algs.or_skip(), LastLayerGoal::SET_UP_EPLL)
     }
     #[must_use]
-    pub fn epll(algs: &AlgSet<Cube3x3>) -> Self {
+    pub fn epll() -> Self {
+        let algs = AlgSet::from_static(include_str!("algsets/pll/edge.txt"));
         Self::new("EPLL", algs.or_skip(), LastLayerGoal::SOLVE_LL)
     }
     #[must_use]
-    pub fn zbll(algs: &AlgSet<Cube3x3>) -> Self {
-        Self::new("ZBLL", algs.or_skip(), LastLayerGoal::SOLVE_LL)
+    pub fn zbll() -> Self {
+        Self::new("ZBLL", ZBLL_ALGS.or_skip(), LastLayerGoal::SOLVE_LL)
     }
 }
 
@@ -289,5 +310,127 @@ impl Step<Cube3x3> for LastLayer {
                 .copied()
                 .collect(),
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Segment;
+
+    const T_PERM: &str = "R U R' U' R' F R2 U' R' U' R U R' F'";
+    /// Cycles three edges, leaving the corners solved.
+    const U_PERM: &str = "M2 U M U2 M' U M2";
+    /// Cycles three corners, leaving them oriented and the edges solved.
+    const A_PERM: &str = "R' F R' B2 R F' R' B2 R2";
+    /// Twists three corners.
+    const SUNE: &str = "R U R' U R U2 R'";
+    /// Flips two edges, leaving the corners oriented.
+    const EDGE_FLIP: &str = "r U R' U' M U R U' R'";
+
+    fn cube(moves: &str) -> Cube3x3 {
+        Cube3x3::from_moves(moves).unwrap()
+    }
+
+    /// `is_done` does not depend on the algorithms, so these steps only differ by their goals.
+    #[test]
+    fn each_goal_asks_for_exactly_what_its_constructor_promises() {
+        let goals = [
+            ("OCLL", LastLayer::ocll()),
+            ("COLL", LastLayer::coll()),
+            ("CPLL", LastLayer::cpll()),
+            ("PLL", LastLayer::pll()),
+            ("EPLL", LastLayer::epll()),
+            ("ZBLL", LastLayer::zbll()),
+        ];
+        let cases = [
+            ("solved", "", [true, true, true, true, true, true]),
+            ("off by an AUF", "U", [true, true, true, true, true, true]),
+            (
+                "edges unpermuted",
+                U_PERM,
+                [true, true, true, false, false, false],
+            ),
+            (
+                "corners unpermuted",
+                A_PERM,
+                [true, false, false, false, false, false],
+            ),
+            (
+                "corners unoriented",
+                SUNE,
+                [false, false, false, false, false, false],
+            ),
+            (
+                "edges flipped",
+                EDGE_FLIP,
+                [false, false, false, false, false, false],
+            ),
+        ];
+
+        for (state, moves, expected) in cases {
+            for ((name, goal), done) in goals.iter().zip(expected) {
+                assert_eq!(goal.is_done(&cube(moves)), done, "{name} on {state}");
+            }
+        }
+    }
+
+    #[test]
+    fn a_turn_before_the_algorithm_lines_the_case_up() {
+        let pll = LastLayer::pll();
+        let mut state = cube(&format!("{T_PERM} U"));
+
+        let solution = pll.solve(&mut state).unwrap();
+
+        assert!(state.is_solved(), "{solution}\n{state}");
+        let names: Vec<&str> = solution.iter().map(Segment::name).collect();
+        assert_eq!(names, ["PLL"]);
+    }
+
+    #[test]
+    fn a_turn_after_the_algorithm_finishes_the_permutation() {
+        let pll = LastLayer::pll();
+        let mut state = cube(&format!("U {T_PERM}"));
+
+        let solution = pll.solve(&mut state).unwrap();
+
+        assert!(state.is_solved(), "{solution}\n{state}");
+    }
+
+    #[test]
+    fn a_solved_goal_takes_no_algorithm() {
+        let pll = LastLayer::pll();
+        let mut state = Cube3x3::default();
+
+        let solution = pll.solve(&mut state).unwrap();
+
+        assert_eq!(solution.move_count(), 0, "{solution}");
+        assert!(state.is_solved(), "{state}");
+    }
+
+    #[test]
+    fn a_goal_that_leaves_permutation_free_stops_once_it_is_met() {
+        let ocll = LastLayer::ocll();
+        let mut state = cube(&format!("{U_PERM} {SUNE}"));
+
+        ocll.solve(&mut state).unwrap();
+
+        assert!(ocll.is_done(&state), "{state}");
+        assert!(!state.is_solved(), "{state}");
+    }
+
+    #[test]
+    fn a_case_no_algorithm_solves_is_unreachable_and_leaves_the_cube_alone() {
+        let pll = LastLayer::pll();
+        let start = cube(SUNE);
+        let mut state = start;
+
+        let result = pll.solve(&mut state);
+
+        assert!(
+            matches!(result, Err(StepError::UnreachableGoal)),
+            "{result:?}"
+        );
+        assert_eq!(state, start);
     }
 }

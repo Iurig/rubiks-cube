@@ -1,5 +1,5 @@
 use crate::{
-    AlgSet, PieceSet, Puzzle, Solution, StepError,
+    AlgSet, Puzzle, PuzzleCondition, Solution, StepError,
     error::BuildStepError,
     methods::context::{BuildContext, GLOBAL},
 };
@@ -8,6 +8,7 @@ use dyn_clone::DynClone;
 
 use std::{borrow::Cow, fmt::Debug, sync::Arc};
 
+// pub mod all;
 pub mod choose;
 pub mod combine_pruned;
 pub mod search_step;
@@ -15,8 +16,8 @@ pub mod search_step;
 /// One stage of a solving method, such as building the first block in Roux.
 ///
 /// A [`Technique`](crate::Technique) runs its steps in order. Before each step,
-/// [`can_solve`](Step::can_solve) is called to check that the requirements for the step are met,
-/// and after each step [`is_done`](Step::is_done) is called to check if the step delivered what it
+/// [`can_solve`](Step::can_solve) is called to check that the requirements for the step are met.
+/// After each step [`is_done`](Step::is_done) is called to check if the step delivered what it
 /// promised, and the solve stops with a [`SolveError`](crate::SolveError) if the step couldn't
 /// start, failed, or its goal is not met.
 ///
@@ -41,7 +42,7 @@ pub trait Step<P: Puzzle>: Send + Sync + Debug {
     /// step may leave `puzzle` changed when it fails.
     fn solve(&self, puzzle: &mut P) -> Result<Solution<P>, StepError>;
 
-    /// Whether `puzzle` meets this step's pre-requisites. Expensive for expensive-to-solve steps -
+    /// Whether `puzzle` meets this step's prerequisites. Expensive for expensive-to-solve steps -
     /// override recommended for those.
     fn can_solve(&self, puzzle: &P) -> bool {
         let mut puzzle_copy = puzzle.clone();
@@ -55,29 +56,36 @@ pub trait Step<P: Puzzle>: Send + Sync + Debug {
 /// A type that can build a [`Step`].
 ///
 /// This trait is also used to build techniques with [`TechniqueBuilder`](crate::TechniqueBuilder)
-/// on insufficient information that is deduceable in context of the build.
+/// on insufficient information that is deducible in context of the build.
 pub trait StepBuilder<P: Puzzle>: DynClone + Debug + Send + Sync {
-    /// Used to read or write to a [`StepBuilder`]'s goal.
-    ///
-    /// Builders for [`Step`]s for which the goal cannot be represented as a [`PieceSet`] should
-    /// always return [`None`].
-    fn goal(&mut self) -> &mut Option<PieceSet<P>>;
-
     /// The name of the [`Step`] being built
     fn name(&self) -> Cow<'_, str>;
 
-    /// Setter for the assumptions of the [`StepBuilder`].
-    fn assumed_solved(&mut self) -> &mut Option<PieceSet<P>>;
+    /// The expected condition the puzzle needs to be in before the step can be solved.
+    fn get_prereq(&self) -> Option<PuzzleCondition<P>>;
+
+    /// What the step claims to guarantee upon being solved.
+    fn get_goal(&self) -> Option<PuzzleCondition<P>>;
 
     /// Getter for the move sequences a built step might use.
-    fn allowed_sequences(&mut self) -> Option<AlgSet<P>>;
+    fn allowed_sequences(&self) -> Option<AlgSet<P>>;
+
+    /// The function that builds the step, changing its prerequisite or goal if provided.
+    fn build_wired(
+        &self,
+        prereq: Option<PuzzleCondition<P>>,
+        goal: Option<PuzzleCondition<P>>,
+        context: &BuildContext,
+    ) -> Result<Arc<dyn Step<P>>, BuildStepError>;
 
     /// Builds the step within a given [`BuildContext`].
     ///
     /// # Errors
     /// Errors if there is not enough information in the builder to build the step. The required
     /// information depends on the step and its [`StepBuilder`]'s implementation.
-    fn build_in(&self, context: &BuildContext) -> Result<Arc<dyn Step<P>>, BuildStepError>;
+    fn build_in(&self, context: &BuildContext) -> Result<Arc<dyn Step<P>>, BuildStepError> {
+        self.build_wired(self.get_prereq(), self.get_goal(), context)
+    }
 
     /// Builds the step in a global context.
     ///

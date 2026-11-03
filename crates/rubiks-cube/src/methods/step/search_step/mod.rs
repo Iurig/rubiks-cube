@@ -8,8 +8,8 @@ use std::{
 use rayon::prelude::*;
 
 use crate::{
-    AlgSet, Algorithm, BuildContext, BuildStepError, Inv, Mask, PieceSet, Solution, Step,
-    StepError,
+    AlgSet, Algorithm, BuildContext, BuildStepError, Inv, Mask, PieceSet, PuzzleCondition,
+    Solution, Step, StepError,
     error::SearchStepError,
     fast_hash::FxMap,
     methods::{
@@ -37,8 +37,7 @@ type SharedMemo<P> = Arc<Mutex<BfsMemo<P>>>;
 /// One shared memo per memo key, so steps that search for the same thing with the same
 /// sequences grow the same memo, even when built at different times by different methods.
 ///
-/// Statics cannot be generic, so each puzzle type that has methods keeps its own cache in a
-/// static.
+/// Statics cannot be generic, so each puzzle type that has methods keeps its own cache in static.
 #[derive(Debug, Default)]
 pub struct SearchCache<P: Puzzle> {
     memos: Mutex<FxMap<MemoKey<P>, SharedMemo<P>>>,
@@ -112,13 +111,19 @@ pub struct SearchStepBuilder<P: Puzzle> {
 }
 
 impl<P: Puzzle> StepBuilder<P> for SearchStepBuilder<P> {
-    fn assumed_solved(&mut self) -> &mut Option<PieceSet<P>> {
-        &mut self.before
-    }
     fn name(&self) -> Cow<'_, str> {
         self.name.clone()
     }
-    fn allowed_sequences(&mut self) -> Option<AlgSet<P>> {
+
+    fn get_prereq(&self) -> Option<PuzzleCondition<P>> {
+        self.before.clone().map(|prereq| prereq.into())
+    }
+
+    fn get_goal(&self) -> Option<PuzzleCondition<P>> {
+        self.after.clone().map(|goal| goal.into())
+    }
+
+    fn allowed_sequences(&self) -> Option<AlgSet<P>> {
         Some(
             self.search_algs
                 .iter()
@@ -127,21 +132,46 @@ impl<P: Puzzle> StepBuilder<P> for SearchStepBuilder<P> {
                 .collect(),
         )
     }
+    fn build_wired(
+        &self,
+        prerequisite: Option<PuzzleCondition<P>>,
+        goal: Option<PuzzleCondition<P>>,
+        context: &BuildContext,
+    ) -> Result<Arc<dyn Step<P>>, BuildStepError> {
+        let mut mut_self = self.clone();
+        match prerequisite {
+            Some(req) if let Some(pieces) = req.clone().as_pieces() => {
+                mut_self.prerequisite(pieces);
+            }
+            Some(_) => {
+                return Err(BuildStepError::InvalidRequisite);
+            }
 
-    fn goal(&mut self) -> &mut Option<PieceSet<P>> {
-        &mut self.after
-    }
+            None => (),
+        }
 
-    fn build_in(&self, context: &BuildContext) -> Result<Arc<dyn Step<P>>, BuildStepError> {
+        match goal {
+            Some(goal) if let Some(pieces) = goal.clone().as_pieces() => {
+                mut_self.goal(pieces);
+            }
+            Some(_) => {
+                return Err(BuildStepError::InvalidGoal);
+            }
+
+            None => (),
+        }
+
         Ok(Arc::new(
-            Self::build_in(self, context).map_err(|e| BuildStepError::Custom(Box::new(e)))?,
+            mut_self
+                .build_in(context)
+                .map_err(|e| BuildStepError::Custom(Box::new(e)))?,
         ))
     }
 }
 
 impl<P: Puzzle> SearchStepBuilder<P> {
     /// Sets a prerequisite to be checked before solving with the [`SearchStep`] being built.
-    pub fn expect_solved(&mut self, pieces: PieceSet<P>) -> &mut Self {
+    pub fn prerequisite(&mut self, pieces: PieceSet<P>) -> &mut Self {
         self.before = Some(pieces);
         self
     }
@@ -231,7 +261,7 @@ fn keep_cheaper<P: Puzzle>(
 }
 
 impl<P: Puzzle> SearchStep<P> {
-    /// Constructor for [`SearchStepBuilder`]. The constructed builder builds a [`SearchStep`] over
+    /// Constructor for [`SearchStepBuilder`]. The constructed builder builds a [`SearchStep`] using
     /// all moves of the given [`Puzzle`].
     #[must_use]
     pub fn builder(name: impl Into<Cow<'static, str>>, algs: AlgSet<P>) -> SearchStepBuilder<P> {
@@ -497,6 +527,34 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn an_opaque_prerequisite_cannot_be_searched_from() {
+        let result = SearchStep::<Cube3x3>::builder("Opaque", AlgSet::new()).build_wired(
+            Some(PuzzleCondition::opaque()),
+            None,
+            &BuildContext::new(),
+        );
+
+        assert!(
+            matches!(result, Err(BuildStepError::InvalidRequisite)),
+            "{result:?}"
+        );
+    }
+
+    #[test]
+    fn an_opaque_goal_cannot_be_searched_for() {
+        let result = SearchStep::<Cube3x3>::builder("Opaque", AlgSet::new()).build_wired(
+            None,
+            Some(PuzzleCondition::opaque()),
+            &BuildContext::new(),
+        );
+
+        assert!(
+            matches!(result, Err(BuildStepError::InvalidGoal)),
+            "{result:?}"
+        );
     }
 
     #[test]
