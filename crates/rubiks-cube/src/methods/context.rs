@@ -38,6 +38,7 @@ pub type UntypedCache = Arc<dyn Any + Send + Sync>;
 /// assert_eq!(other.get_or_create::<NodeCounter>().0.load(Ordering::Relaxed), 0);
 /// ```
 #[derive(Default, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct BuildContext {
     caches: Mutex<FxMap<TypeId, UntypedCache>>,
 }

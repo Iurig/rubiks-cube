@@ -697,6 +697,7 @@ dependencies = [
  "log",
  "papaya",
  "rayon",
+ "serde",
  "statrs",
  "thiserror",
 ]
