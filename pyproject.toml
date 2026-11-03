@@ -1,0 +1,2 @@
+[tool.uv.workspace]
+members = ["crates/twisty-puzzles-py"]
