@@ -4,15 +4,26 @@ requires = ["maturin>=1.15,<2.0"]
 
 [project]
 classifiers = [
-  "Programming Language :: Rust",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
 name = "twisty-puzzles-py"
 requires-python = ">=3.10"
-[project.optional-dependencies]
-tests = ["pytest"]
 [tool.maturin]
 exclude = ["**/__pycache__", "**/*.pyc", "**/*.pyo"]
 python-source = "python"
+
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "Cargo.toml" },
+    { file = "src/**/*" },
+    { file = "../rubiks-cube/Cargo.toml" },
+    { file = "../rubiks-cube/src/**/*" },
+    { file = "../../Cargo.lock" },
+]
+
+[dependency-groups]
+dev = ["pytest>=9.2.0"]

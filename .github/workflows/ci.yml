@@ -35,7 +35,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --all-targets
       - run: cargo test
       - run: cargo doc --no-deps
+      - run: uv python install
+      - run: uv sync
+      - run: uv run pytest
