@@ -34,26 +34,29 @@ pub struct PuzzleCondition<P: Puzzle>(ConditionStates<P>);
 
 impl<P: Puzzle> From<PieceSet<P>> for PuzzleCondition<P> {
     fn from(value: PieceSet<P>) -> Self {
-        PuzzleCondition::pieces(value)
+        Self::pieces(value)
     }
 }
 
 impl<P: Puzzle> PuzzleCondition<P> {
     /// Creates a [`PuzzleCondition`] that describes the pieces in `pieces` as solved.
-    pub fn pieces(pieces: PieceSet<P>) -> Self {
+    #[must_use]
+    pub const fn pieces(pieces: PieceSet<P>) -> Self {
         Self(ConditionStates::Pieces(pieces))
     }
 
     /// Creates a [`PuzzleCondition`] that doesn't describe the state directly. Used on
     /// [`StepBuilder`]s that define their puzzle conditions some other way than by pieces.
-    pub fn opaque() -> Self {
+    #[must_use]
+    pub const fn opaque() -> Self {
         Self(ConditionStates::Opaque)
     }
 
     /// Returns the pieces that describe the [`PuzzleCondition`], if it can be defined as a
     /// [`PieceSet`].
-    pub fn as_pieces(self) -> Option<PieceSet<P>> {
-        match self.0 {
+    #[must_use]
+    pub fn as_pieces(&self) -> Option<PieceSet<P>> {
+        match self.0.clone() {
             ConditionStates::Pieces(pieces) => Some(pieces),
             _ => None,
         }
@@ -169,11 +172,11 @@ impl<P: Puzzle> TechniqueBuilder<P> {
             }
 
             let prereq = (index != 0)
-                .then_some(
-                    builder.get_prereq().or(builder
+                .then_some(builder.get_prereq().or_else(|| {
+                    builder
                         .allowed_sequences()
-                        .map(|algs| PieceSet::from_algset(&algs).into())),
-                )
+                        .map(|algs| PieceSet::from_algset(&algs).into())
+                }))
                 .flatten();
 
             let goal = builder.get_goal().or(next_prereq);

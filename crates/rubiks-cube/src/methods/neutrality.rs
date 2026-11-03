@@ -56,7 +56,7 @@ pub struct AlgTree<P: Puzzle> {
 
 impl<P: Puzzle> FromStr for AlgTree<P> {
     type Err = ParseSequenceError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+    fn from_str(_s: &str) -> Result<Self, Self::Err> {
         todo!()
     }
 }

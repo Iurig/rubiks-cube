@@ -71,6 +71,10 @@ pub trait StepBuilder<P: Puzzle>: DynClone + Debug + Send + Sync {
     fn allowed_sequences(&self) -> Option<AlgSet<P>>;
 
     /// The function that builds the step, changing its prerequisite or goal if provided.
+    ///
+    /// # Errors
+    /// Errors if the given `prereq` or goal are `Some(puzzlecondition)` for a [`PuzzleCondition`]
+    /// that this step type cannot take.
     fn build_wired(
         &self,
         prereq: Option<PuzzleCondition<P>>,

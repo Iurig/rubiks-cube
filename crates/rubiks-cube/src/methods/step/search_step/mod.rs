@@ -116,11 +116,11 @@ impl<P: Puzzle> StepBuilder<P> for SearchStepBuilder<P> {
     }
 
     fn get_prereq(&self) -> Option<PuzzleCondition<P>> {
-        self.before.clone().map(|prereq| prereq.into())
+        self.before.clone().map(std::convert::Into::into)
     }
 
     fn get_goal(&self) -> Option<PuzzleCondition<P>> {
-        self.after.clone().map(|goal| goal.into())
+        self.after.clone().map(std::convert::Into::into)
     }
 
     fn allowed_sequences(&self) -> Option<AlgSet<P>> {
