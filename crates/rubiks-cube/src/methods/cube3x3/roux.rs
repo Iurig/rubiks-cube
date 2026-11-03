@@ -2,7 +2,8 @@ use std::sync::{Arc, LazyLock};
 
 use super::helpers::{chain_steps, set_options};
 use crate::{
-    AlgSet, Cube3x3, Indexed, Method, Piece3x3, PieceSet, SearchStep, Step, methods::Technique,
+    AlgSet, BuildContext, Cube3x3, Indexed, Method, Piece3x3, PieceSet, SearchStep, Step,
+    methods::Technique,
 };
 
 /// The Roux method for the 3x3 Rubik's Cube: first block, second block, CMLL, then the last six
@@ -91,19 +92,19 @@ static LSE_KEEPING_CORNERS: LazyLock<AlgSet<Cube3x3>> =
     LazyLock::new(|| AlgSet::from_static("M\n U M U'"));
 
 impl Method<Cube3x3> for Roux {
-    fn to_technique(&self) -> Technique<Cube3x3> {
+    fn to_technique_in(&self, context: &BuildContext) -> Technique<Cube3x3> {
         let fb_tech = match self.first_block {
             FirstBlock::OneLook => chain_steps!(
-                moves: &FB_MOVES, goal: &SB_MOVES,
+                context: context, moves: &FB_MOVES, goal: &SB_MOVES,
                 "FB",
             ),
             FirstBlock::SquarePair => chain_steps!(
-                moves: &FB_MOVES, goal: &SB_MOVES,
+                context: context, moves: &FB_MOVES, goal: &SB_MOVES,
                 "FB Square" => (AlgSet::from_static_parts("B"), AlgSet::from_static_parts("F")),
                 "FB Pair",
             ),
             FirstBlock::EdgePairPair => chain_steps!(
-                moves: &FB_MOVES, goal: &SB_MOVES,
+                context: context, moves: &FB_MOVES, goal: &SB_MOVES,
                 "DL" => (AlgSet::from_static_parts("F B")),
                 "FB Square" => (AlgSet::from_static_parts("B"), AlgSet::from_static_parts("F")),
                 "FB Pair",
@@ -112,16 +113,16 @@ impl Method<Cube3x3> for Roux {
 
         let sb_tech = match self.second_block {
             SecondBlock::OneLook => chain_steps!(
-                moves: &SB_MOVES, goal: &CMLL_ALGS,
+                context: context, moves: &SB_MOVES, goal: &CMLL_ALGS,
                 "SB"
             ),
             SecondBlock::SquarePair => chain_steps!(
-                moves: &SB_MOVES, goal: &CMLL_ALGS,
+                context: context, moves: &SB_MOVES, goal: &CMLL_ALGS,
                 "SB Square" => (AlgSet::from_static("r U r'"), AlgSet::from_static("r' U r")),
                 "SB Pair"
             ),
             SecondBlock::EdgePairPair => chain_steps!(
-                moves: &SB_MOVES, goal: &CMLL_ALGS,
+                context: context, moves: &SB_MOVES, goal: &CMLL_ALGS,
                 "DR" => (AlgSet::from_static("r U r'\n r' U r")),
                 "SB Square" => (AlgSet::from_static("r U r'"), AlgSet::from_static("r' U r")),
                 "SB Pair",
@@ -132,20 +133,20 @@ impl Method<Cube3x3> for Roux {
 
         let cmll_tech: Vec<Arc<dyn Step<Cube3x3>>> = match self.cmll {
             Cmll::OneLook => chain_steps!(
-                moves: &CMLL_ALGS.combined_with(&LSE_MOVES),
+                context: context, moves: &CMLL_ALGS.combined_with(&LSE_MOVES),
                 goal: &LSE_KEEPING_CORNERS,
                 free: &FREE_AUF,
                 "CMLL",
             ),
             Cmll::TwoLook => [
                 chain_steps!(
-                    moves: &AlgSet::from_static(include_str!("algsets/cmll/co.txt")).combined_with(&LSE_KEEPING_CORNERS),
+                    context: context, moves: &AlgSet::from_static(include_str!("algsets/cmll/co.txt")).combined_with(&LSE_KEEPING_CORNERS),
                     goal: &LSE_MOVES,
                     free: &FREE_AUF,
                     "CO",
                 ),
                 chain_steps!(
-                    moves: &AlgSet::from_static(include_str!("algsets/cmll/cp.txt")).combined_with(&LSE_KEEPING_CORNERS),
+                    context: context, moves: &AlgSet::from_static(include_str!("algsets/cmll/cp.txt")).combined_with(&LSE_KEEPING_CORNERS),
                     goal: &LSE_KEEPING_CORNERS,
                     "CP",
                 ),
@@ -158,7 +159,7 @@ impl Method<Cube3x3> for Roux {
                 SearchStep::builder("LSE", LSE_MOVES.clone())
                     .prerequisite(after_cmll)
                     .goal(PieceSet::from_pieces(Piece3x3::all()))
-                    .build()
+                    .build_in(context)
                     .expect("manually constructed step should construct"),
             )],
             //[`LseOptions::EO`] => (),

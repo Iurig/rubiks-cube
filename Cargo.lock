@@ -709,6 +709,7 @@ dependencies = [
  "anyhow",
  "clap",
  "rubiks-cube",
+ "serde",
 ]
 
 [[package]]

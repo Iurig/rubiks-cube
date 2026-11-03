@@ -1,6 +1,6 @@
 pub mod context;
 pub mod cube3x3;
-pub mod neutrality;
+// pub mod neutrality;
 mod solution;
 pub mod step;
 #[cfg(test)]
@@ -14,7 +14,7 @@ use crate::{
     PieceSet, SolveError, TechniqueError,
     methods::{
         context::{BuildContext, GLOBAL},
-        neutrality::Neutrality,
+        // neutrality::Neutrality,
         step::{Step, StepBuilder},
     },
     puzzles::Puzzle,
@@ -83,7 +83,7 @@ impl<P: Puzzle> PuzzleCondition<P> {
 #[derive(Clone, Debug)]
 pub struct Technique<P: Puzzle> {
     steps: Vec<Arc<dyn Step<P>>>,
-    neutrality: Neutrality<P>,
+    // neutrality: Neutrality<P>,
 }
 
 /// Builder for [`Technique`].
@@ -120,7 +120,7 @@ pub struct Technique<P: Puzzle> {
 #[derive(Clone, Debug)]
 pub struct TechniqueBuilder<P: Puzzle> {
     step_builders: Vec<Arc<dyn StepBuilder<P>>>,
-    neutrality: Neutrality<P>,
+    // neutrality: Neutrality<P>,
 }
 
 impl<P: Puzzle> TechniqueBuilder<P> {
@@ -137,10 +137,10 @@ impl<P: Puzzle> TechniqueBuilder<P> {
     }
 
     /// Adds a given [`Neutrality`] to a [`TechniqueBuilder`].
-    pub fn neutrality(&mut self, neutrality: Neutrality<P>) -> &mut Self {
+    /*pub fn neutrality(&mut self, neutrality: Neutrality<P>) -> &mut Self {
         self.neutrality = neutrality;
         self
-    }
+    }*/
 
     /// Adds the final [`Step`] of a technique.
     ///
@@ -222,7 +222,7 @@ impl<P: Puzzle> FromIterator<Arc<dyn Step<P>>> for Technique<P> {
     fn from_iter<T: IntoIterator<Item = Arc<dyn Step<P>>>>(iter: T) -> Self {
         Self {
             steps: iter.into_iter().collect(),
-            neutrality: Neutrality::default(),
+            // neutrality: Neutrality::default(),
         }
     }
 }
@@ -240,7 +240,7 @@ impl<P: Puzzle> Technique<P> {
     pub fn new(steps: impl IntoIterator<Item = Arc<dyn Step<P>>>) -> Self {
         Self {
             steps: steps.into_iter().collect(),
-            neutrality: Neutrality::default(),
+            // neutrality: Neutrality::default(),
         }
     }
 
@@ -252,7 +252,7 @@ impl<P: Puzzle> Technique<P> {
     pub fn start_with(step: impl StepBuilder<P> + 'static) -> TechniqueBuilder<P> {
         TechniqueBuilder {
             step_builders: vec![Arc::new(step)],
-            neutrality: Neutrality::default(),
+            // neutrality: Neutrality::default(),
         }
     }
 
@@ -279,8 +279,8 @@ impl<P: Puzzle> Technique<P> {
         run_steps(self.steps.iter().cloned(), puzzle)
     }
 
-    /// Constructs the [`Technique`] with a given neutrality.
-    #[must_use]
+    // Constructs the [`Technique`] with a given neutrality.
+    /*#[must_use]
     pub fn with_neutrality(
         steps: impl IntoIterator<Item = Arc<dyn Step<P>>>,
         neutrality: Neutrality<P>,
@@ -296,7 +296,7 @@ impl<P: Puzzle> Technique<P> {
     pub fn neutrality(mut self, neutrality: Neutrality<P>) -> Self {
         self.neutrality = neutrality;
         self
-    }
+    }*/
 }
 
 /// Runs `steps` in order on `puzzle`, one per `next()`. Before each step it checks
@@ -337,8 +337,15 @@ fn run_steps<P: Puzzle>(
 /// by defining a type to hold such parameters, then how to get a sequence of steps from such
 /// parameters.
 pub trait Method<P: Puzzle>: Debug {
-    /// Converts a parametrized [`Method`] to a specific [`Technique`]
-    fn to_technique(&self) -> Technique<P>;
+    /// Converts a parametrized [`Method`] to a specific [`Technique`] in the given
+    /// [`BuildContext`].
+    fn to_technique_in(&self, context: &BuildContext) -> Technique<P>;
+
+    /// Converts a parametrized [`Method`] to a specific [`Technique`] in the global
+    /// [`BuildContext`].
+    fn to_technique(&self) -> Technique<P> {
+        self.to_technique_in(&GLOBAL)
+    }
 
     /// Runs every step in order and joins their solutions: [`solve_steps`](Self::solve_steps),
     /// collected.

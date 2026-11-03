@@ -86,51 +86,60 @@ macro_rules! __chain_steps {
     // `free` sequences, such as an AUF, may be added to every step's solution without counting
     // toward its depth. This rule must come before the one without `free`, whose `$stages` would
     // otherwise swallow `free: ...` as a stage.
-    (moves: $moves:expr, goal: $goal:expr, free: $free:expr, $($stages:tt)+) => {{
+    (context: $context:ident, moves: $moves:expr, goal: $goal:expr, free: $free:expr, $($stages:tt)+) => {{
         let moves: &$crate::AlgSet<$crate::Cube3x3> = $moves;
         let goal: &$crate::AlgSet<$crate::Cube3x3> = $goal;
         let free: &$crate::AlgSet<$crate::Cube3x3> = $free;
-        $crate::__chain_steps!(@stages moves, free, goal, ($crate::PieceSet::from_algset(moves)), [], $($stages)+)
+        $crate::__chain_steps!(@stages moves, free, goal, $context, ($crate::PieceSet::from_algset(moves)), [], $($stages)+)
     }};
+
+    (moves: $moves:expr, goal: $goal:expr, free: $free:expr, $($stages:tt)+) => {{
+        let context: &$crate::BuildContext = &$crate::methods::context::GLOBAL;
+        $crate::__chain_steps!(context: context, moves: $moves, goal: $goal, free:$free, $($stages)+)
+    }};
+
+    (context: $context:ident, moves: $moves:expr, goal: $goal:expr, $($stages:tt)+) => {
+        $crate::__chain_steps!(context: $context, moves: $moves, goal: $goal, free: &$crate::AlgSet::new(), $($stages)+)
+    };
 
     (moves: $moves:expr, goal: $goal:expr, $($stages:tt)+) => {
         $crate::__chain_steps!(moves: $moves, goal: $goal, free: &$crate::AlgSet::new(), $($stages)+)
     };
 
-    (@stages $moves:ident, $free:ident, $goal:ident, $befores:tt, [$($steps:expr),*],
+    (@stages $moves:ident, $free:ident, $goal:ident, $context:ident, $befores:tt, [$($steps:expr),*],
      $name:literal $(,)?) => {{
         let steps: Vec<::std::sync::Arc<dyn $crate::Step<$crate::Cube3x3>>> = vec![
             $($steps,)*
-            $crate::__chain_steps!(@choose $moves, $free, $name, $befores, ($crate::PieceSet::from_algset($goal))),
+            $crate::__chain_steps!(@choose $moves, $free, $name, $befores, ($crate::PieceSet::from_algset($goal)), $context),
         ];
         steps
     }};
 
-    (@stages $moves:ident, $free:ident, $goal:ident, $befores:tt, [$($steps:expr),*],
+    (@stages $moves:ident, $free:ident, $goal:ident, $context:ident, $befores:tt, [$($steps:expr),*],
      $name:literal => ($($divider:expr),+ $(,)?), $($rest:tt)+) => {
         $crate::__chain_steps!(
-            @stages $moves, $free, $goal,
+            @stages $moves, $free, $goal, $context,
             ($($crate::PieceSet::from_algset(&$goal.combined_with(&$divider))),+),
             [$($steps,)* $crate::__chain_steps!(@choose $moves, $free, $name, $befores,
-                ($($crate::PieceSet::from_algset(&$goal.combined_with(&$divider))),+))],
+                ($($crate::PieceSet::from_algset(&$goal.combined_with(&$divider))),+), $context)],
             $($rest)+
         )
     };
-    (@choose $moves:ident, $free:ident, $name:literal, ($($before:expr),+), $afters:tt) => {
+    (@choose $moves:ident, $free:ident, $name:literal, ($($before:expr),+), $afters:tt, $context:ident) => {
         ::std::sync::Arc::new($crate::Shortest::named(
             $name,
-            [$($crate::__chain_steps!(@row $moves, $free, $name, $before, $afters)),+].concat(),
+            [$($crate::__chain_steps!(@row $moves, $free, $name, $before, $afters, $context)),+].concat(),
         ))
     };
 
-    (@row $moves:ident, $free:ident, $name:literal, $before:expr, ($($after:expr),+)) => {{
+    (@row $moves:ident, $free:ident, $name:literal, $before:expr, ($($after:expr),+), $context:ident) => {{
         let row: Vec<::std::sync::Arc<dyn $crate::Step<$crate::Cube3x3>>> = vec![$(
             ::std::sync::Arc::new(
                 $crate::SearchStep::builder($name, $moves.clone())
                     .prerequisite($before)
                     .free_algs($free.clone())
                     .goal($after)
-                    .build()
+                    .build_in($context)
                     .expect("each chain_steps stage keeps the stage before it solved"),
             )
         ),+];

@@ -1,10 +1,10 @@
 use std::sync::{Arc, LazyLock};
 
 use crate::{
-    AlgSet, Algorithm, ByIdentity, ByMembership, Cube3x3, Edge, Indexed, Mask, Method,
-    Orientation3x3, Piece3x3, PieceSet, Puzzle, Step,
+    AlgSet, Algorithm, BuildContext, ByIdentity, ByMembership, Cube3x3, Edge, Indexed, Mask,
+    Method, Orientation3x3, Piece3x3, PieceSet, Puzzle, Step,
     methods::{
-        Technique,
+        Technique, context,
         step::combine_pruned::{PruneTable, PrunedCombine, PrunedGoal},
     },
     puzzles::cube3x3::{
@@ -165,7 +165,7 @@ fn phase_2() -> PrunedCombine<Cube3x3> {
 pub struct Kociemba;
 
 impl Method<Cube3x3> for Kociemba {
-    fn to_technique(&self) -> Technique<Cube3x3> {
+    fn to_technique_in(&self, context: &BuildContext) -> Technique<Cube3x3> {
         Technique::new([
             Arc::new(phase_1()) as Arc<dyn Step<Cube3x3>>,
             Arc::new(phase_2()),

@@ -1,3 +1,4 @@
+use std::io::BufRead;
 use std::sync::{Arc, LazyLock};
 
 use super::helpers::set_options;
@@ -5,7 +6,7 @@ use crate::methods::cube3x3::helpers::{
     BlockGoal, LastLayer, ZBLL_ALGS, chain_steps, into_steps, split_by_blocks,
 };
 
-use crate::{AlgSet, Cube3x3, Method, PieceSet, Step, Technique};
+use crate::{AlgSet, BuildContext, Cube3x3, Method, PieceSet, Step, Technique};
 
 /// The ZZ method for the 3x3 Rubik's Cube: EO line, first two layers, then last layer.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
@@ -80,9 +81,11 @@ impl Default for LL {
 }
 
 impl Method<Cube3x3> for ZZ {
-    fn to_technique(&self) -> Technique<Cube3x3> {
+    fn to_technique_in(&self, context: &BuildContext) -> Technique<Cube3x3> {
         let eoline_tech = match self.eoline {
-            EoLine => chain_steps!(moves: &EO_LINE_MOVES, goal: &F2L_MOVES, "EO Line"),
+            EoLine => {
+                chain_steps!(context: context, moves: &EO_LINE_MOVES, goal: &F2L_MOVES, "EO Line")
+            }
         };
 
         let f2l_tech = match self.f2l {

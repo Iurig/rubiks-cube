@@ -3,7 +3,10 @@ mod prune_table;
 pub use prune_table::PruneTable;
 use rayon::prelude::*;
 
-use crate::{AlgSet, Algorithm, Labeled, Marker, Puzzle, Solution, Step, StepError};
+use crate::{
+    AlgSet, Algorithm, Labeled, Marker, Puzzle, PuzzleCondition, Solution, Step, StepBuilder,
+    StepError,
+};
 
 use std::{
     borrow::Cow,
@@ -21,6 +24,55 @@ pub struct PrunedCombine<P: Puzzle> {
     /// `may_follow[a][b]`: whether the search tries sequence `b` of the moveset right after
     /// sequence `a`. See [`may_follow`].
     may_follow: Vec<Vec<bool>>,
+}
+
+/// Builder for [`PrunedCombine`].
+pub struct PrunedCombineBuilder<P: Puzzle> {
+    name: Cow<'static, str>,
+    steps: Vec<Box<dyn DistanceStep<P>>>,
+    ready_to_solve: Option<Box<dyn Fn(&P) -> bool + Send + Sync>>,
+    moveset: AlgSet<P>,
+    may_follow: Vec<Vec<bool>>,
+}
+
+impl<P: Puzzle> StepBuilder<P> for PrunedCombineBuilder<P> {
+    fn name(&self) -> Cow<'_, str> {
+        self.name.clone()
+    }
+
+    fn get_prereq(&self) -> Option<crate::PuzzleCondition<P>> {
+        self.ready_to_solve
+            .is_some()
+            .then_some(PuzzleCondition::opaque())
+    }
+
+    fn get_goal(&self) -> Option<PuzzleCondition<P>> {
+        todo!()
+    }
+
+    fn allowed_sequences(&self) -> Option<AlgSet<P>> {
+        Some(self.moveset.clone())
+    }
+
+    fn build_wired(
+        &self,
+        prereq: Option<PuzzleCondition<P>>,
+        goal: Option<PuzzleCondition<P>>,
+        context: &crate::BuildContext,
+    ) -> Result<std::sync::Arc<dyn Step<P>>, crate::BuildStepError> {
+        todo!()
+    }
+}
+
+impl<P: Puzzle> Debug for PrunedCombineBuilder<P> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("PrunedCombineBuilder")
+            .field("name", &self.name)
+            .field("steps", &self.steps)
+            .field("moveset", &self.moveset)
+            .field("may_follow", &self.may_follow)
+            .finish_non_exhaustive()
+    }
 }
 
 impl<P: Puzzle> Debug for PrunedCombine<P> {
