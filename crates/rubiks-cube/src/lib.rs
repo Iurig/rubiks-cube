@@ -97,6 +97,7 @@ pub use methods::{
     },
 };
 pub use ops::{Inv, Pow};
+pub use owo_colors::AnsiColors;
 pub use piece::{Piece, PieceConfiguration};
 pub use puzzles::cube3x3::{
     Cube3x3,
