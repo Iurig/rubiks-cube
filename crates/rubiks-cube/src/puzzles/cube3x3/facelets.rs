@@ -348,7 +348,7 @@ impl Display for Cube3x3 {
 /// A colored representation of a [`Cube3x3`].
 ///
 /// Should be created by invoking [`colored`](Cube3x3::colored) or
-/// [`with_colorscheme`](Cube3x3::with_colorscheme).
+/// [`with_colorscheme`](Cube3x3::with_color_scheme).
 ///
 /// # Example
 ///
