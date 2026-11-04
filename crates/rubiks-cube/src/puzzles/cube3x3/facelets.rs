@@ -353,19 +353,13 @@ impl Display for Cube3x3 {
 /// # Example
 ///
 /// ```
-/// use rubiks_cube::{AnsiColors, ColorScheme3x3, Cube3x3};
-///
-/// let japanese_scheme = ColorScheme3x3 {
-///     u: AnsiColors::White,
-///     f: AnsiColors::Green,
-///     r: AnsiColors::Red,
-///     l: AnsiColors::Yellow,
-///     b: AnsiColors::BrightYellow,
-///     d: AnsiColors::Blue,
-/// };
+/// use rubiks_cube::{ColorScheme3x3, Cube3x3};
 ///
 /// println!("{}", Cube3x3::default().colored());
-/// println!("{}", Cube3x3::default().with_color_scheme(japanese_scheme));
+/// println!(
+///     "{}",
+///     Cube3x3::default().with_color_scheme(ColorScheme3x3::JAPANESE)
+/// );
 /// ```
 #[derive(Debug, Clone, Copy)]
 pub struct Colored3x3 {
@@ -390,14 +384,27 @@ pub struct ColorScheme3x3 {
     pub d: AnsiColors,
 }
 
-const STANDARD_3X3: ColorScheme3x3 = ColorScheme3x3 {
-    u: AnsiColors::White,
-    f: AnsiColors::Green,
-    r: AnsiColors::Red,
-    l: AnsiColors::Yellow,
-    b: AnsiColors::Blue,
-    d: AnsiColors::BrightYellow,
-};
+impl ColorScheme3x3 {
+    /// The standard [`Cube3x3`] color scheme, held in WCA scrambling orientation.
+    pub const STANDARD: Self = Self {
+        u: AnsiColors::White,
+        f: AnsiColors::Green,
+        r: AnsiColors::Red,
+        l: AnsiColors::Yellow,
+        b: AnsiColors::Blue,
+        d: AnsiColors::BrightYellow,
+    };
+
+    /// The Japanese [`Cube3x3`] color scheme, held in WCA scrambling orientation.
+    pub const JAPANESE: Self = Self {
+        u: AnsiColors::White,
+        f: AnsiColors::Green,
+        r: AnsiColors::Red,
+        l: AnsiColors::Yellow,
+        b: AnsiColors::BrightYellow,
+        d: AnsiColors::Blue,
+    };
+}
 
 impl Cube3x3 {
     /// Returns a colored representation of the given [`Cube3x3`].
@@ -408,7 +415,7 @@ impl Cube3x3 {
     pub const fn colored(&self) -> Colored3x3 {
         Colored3x3 {
             cube: *self,
-            scheme: STANDARD_3X3,
+            scheme: ColorScheme3x3::STANDARD,
         }
     }
 
@@ -780,14 +787,6 @@ mod tests {
     #[test]
     fn with_color_scheme_paints_r_in_the_japanese_scheme() -> anyhow::Result<()> {
         let r = Cube3x3::from_moves("R")?;
-        let japanese = ColorScheme3x3 {
-            u: AnsiColors::White,
-            f: AnsiColors::Green,
-            r: AnsiColors::Red,
-            l: AnsiColors::Yellow,
-            b: AnsiColors::BrightYellow,
-            d: AnsiColors::Blue,
-        };
         let japanese_codes = [
             ('U', 47),
             ('F', 42),
@@ -797,7 +796,7 @@ mod tests {
             ('D', 44),
         ];
         assert_eq!(
-            r.with_color_scheme(japanese).to_string(),
+            r.with_color_scheme(ColorScheme3x3::JAPANESE).to_string(),
             paint(&r.to_string(), japanese_codes)
         );
         Ok(())
