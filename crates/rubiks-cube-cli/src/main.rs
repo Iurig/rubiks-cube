@@ -45,8 +45,6 @@ fn walkthrough_recon(recon: &str, terminal: &mut Frame) {
 
 #[derive(Debug, Error)]
 enum StopIteration {
-    #[error("the solve was skipped")]
-    NextSolve,
     #[error("the iteration was stopped")]
     ExitProgram,
 }
@@ -60,31 +58,35 @@ fn main() -> anyhow::Result<()> {
     };
 
     if args.iterative {
-        recon.into_iter().enumerate().try_for_each(|(i, solve)| {
-            let _ = ratatui::run(|terminal| -> anyhow::Result<()> {
-                loop {
-                    terminal.draw(|frame| walkthrough_recon(&solve, frame))?;
-                    if let Some(KeyEvent {
-                        code: pressed_key,
-                        modifiers: KeyModifiers::NONE,
-                        kind: _,
-                        state: _,
-                    }) = event::read()?.as_key_press_event()
-                    {
-                        match pressed_key {
-                            KeyCode::Esc => {
-                                break Err(anyhow::Error::new(StopIteration::ExitProgram));
-                            }
-                            KeyCode::Right => {
-                                break Err(anyhow::Error::new(StopIteration::NextSolve));
-                            }
-                            _ => continue,
+        let mut index = 0;
+        ratatui::run(|terminal| -> anyhow::Result<()> {
+            loop {
+                terminal.draw(|frame| walkthrough_recon(&recon[index], frame))?;
+                if let Some(KeyEvent {
+                    code: pressed_key,
+                    modifiers: KeyModifiers::NONE,
+                    kind: _,
+                    state: _,
+                }) = event::read()?.as_key_press_event()
+                {
+                    match pressed_key {
+                        KeyCode::Esc => {
+                            break Err(anyhow::Error::new(StopIteration::ExitProgram));
                         }
+                        KeyCode::Left => {
+                            index -= 1;
+                            index = std::cmp::max(index, 0);
+                        }
+                        KeyCode::Right => {
+                            index += 1;
+                            index = std::cmp::min(index, recon.len() - 1);
+                        }
+                        _ => continue,
                     }
                 }
-            });
-            Ok(())
-        })
+            }
+        })?;
+        Ok(())
     } else {
         for (i, solve) in recon.into_iter().enumerate() {
             println!("{}. {solve}", i + 1);
