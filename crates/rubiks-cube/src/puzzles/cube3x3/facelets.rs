@@ -10,6 +10,7 @@
 use std::fmt::{self, Display};
 
 use itertools::izip;
+use owo_colors::{AnsiColors, OwoColorize};
 
 use super::{
     Cube3x3,
@@ -344,6 +345,61 @@ impl Display for Cube3x3 {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct Colored3x3 {
+    cube: Cube3x3,
+    scheme: ColorScheme3x3,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ColorScheme3x3 {
+    u: AnsiColors,
+    f: AnsiColors,
+    r: AnsiColors,
+    l: AnsiColors,
+    b: AnsiColors,
+    d: AnsiColors,
+}
+
+const STANDARD_3X3: ColorScheme3x3 = ColorScheme3x3 {
+    u: AnsiColors::White,
+    f: AnsiColors::Green,
+    r: AnsiColors::Yellow,
+    l: AnsiColors::Red,
+    b: AnsiColors::Blue,
+    d: AnsiColors::BrightYellow,
+};
+
+impl Cube3x3 {
+    pub fn colored(&self) -> Colored3x3 {
+        Colored3x3 {
+            cube: *self,
+            scheme: STANDARD_3X3,
+        }
+    }
+}
+
+impl Display for Colored3x3 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let _ = self
+            .cube
+            .to_string()
+            .chars()
+            .map(|c| match c {
+                'U' => write!(f, "{}", 'U'.on_color(self.scheme.u)),
+                'F' => write!(f, "{}", 'F'.on_color(self.scheme.f)),
+                'R' => write!(f, "{}", 'R'.on_color(self.scheme.r)),
+                'L' => write!(f, "{}", 'L'.on_color(self.scheme.l)),
+                'B' => write!(f, "{}", 'B'.on_color(self.scheme.b)),
+                'D' => write!(f, "{}", 'D'.on_color(self.scheme.d)),
+
+                c => write!(f, "{}", c),
+            })
+            .collect::<fmt::Result>();
+        Ok(())
+    }
+}
+
 /// The net of what the mask asks for, one character per facelet:
 ///
 /// - A face letter where the mask names both the piece and its orientation (and facelets of a named
@@ -443,6 +499,8 @@ const _: () = {
     reason = "tests should panic if failed, and return result for `?` convenience"
 )]
 mod tests {
+
+    use anyhow::Result;
 
     use super::*;
     use crate::{Piece, Puzzle};
