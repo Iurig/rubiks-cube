@@ -10,6 +10,7 @@
 use std::fmt::{self, Display};
 
 use itertools::izip;
+use owo_colors::{AnsiColors, OwoColorize};
 
 use super::{
     Cube3x3,
@@ -344,6 +345,98 @@ impl Display for Cube3x3 {
     }
 }
 
+/// A colored representation of a [`Cube3x3`].
+///
+/// Should be created by invoking [`colored`](Cube3x3::colored) or
+/// [`with_colorscheme`](Cube3x3::with_color_scheme).
+///
+/// # Example
+///
+/// ```
+/// use rubiks_cube::{AnsiColors, ColorScheme3x3, Cube3x3};
+///
+/// let japanese_scheme = ColorScheme3x3 {
+///     u: AnsiColors::White,
+///     f: AnsiColors::Green,
+///     r: AnsiColors::Red,
+///     l: AnsiColors::Yellow,
+///     b: AnsiColors::BrightYellow,
+///     d: AnsiColors::Blue,
+/// };
+///
+/// println!("{}", Cube3x3::default().colored());
+/// println!("{}", Cube3x3::default().with_color_scheme(japanese_scheme));
+/// ```
+#[derive(Debug, Clone, Copy)]
+pub struct Colored3x3 {
+    cube: Cube3x3,
+    scheme: ColorScheme3x3,
+}
+
+/// A representation of a [`Cube3x3`]s color scheme.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ColorScheme3x3 {
+    /// The color of the U face.
+    pub u: AnsiColors,
+    /// The color of the F face.
+    pub f: AnsiColors,
+    /// The color of the R face.
+    pub r: AnsiColors,
+    /// The color of the L face.
+    pub l: AnsiColors,
+    /// The color of the B face.
+    pub b: AnsiColors,
+    /// The color of the D face.
+    pub d: AnsiColors,
+}
+
+const STANDARD_3X3: ColorScheme3x3 = ColorScheme3x3 {
+    u: AnsiColors::White,
+    f: AnsiColors::Green,
+    r: AnsiColors::Red,
+    l: AnsiColors::Yellow,
+    b: AnsiColors::Blue,
+    d: AnsiColors::BrightYellow,
+};
+
+impl Cube3x3 {
+    /// Returns a colored representation of the given [`Cube3x3`].
+    ///
+    /// The representation is colored by the standard color scheme held in the standard WCA
+    /// scrambling orientation.
+    #[must_use]
+    pub const fn colored(&self) -> Colored3x3 {
+        Colored3x3 {
+            cube: *self,
+            scheme: STANDARD_3X3,
+        }
+    }
+
+    /// Returns a colored representation of a given [`Cube3x3`] under a provided [`ColorScheme3x3`].
+    #[must_use]
+    pub const fn with_color_scheme(&self, scheme: ColorScheme3x3) -> Colored3x3 {
+        Colored3x3 {
+            cube: *self,
+            scheme,
+        }
+    }
+}
+
+impl Display for Colored3x3 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.cube.to_string().chars().try_for_each(|c| match c {
+            'U' => write!(f, "{}", 'U'.on_color(self.scheme.u)),
+            'F' => write!(f, "{}", 'F'.on_color(self.scheme.f)),
+            'R' => write!(f, "{}", 'R'.on_color(self.scheme.r)),
+            'L' => write!(f, "{}", 'L'.on_color(self.scheme.l)),
+            'B' => write!(f, "{}", 'B'.on_color(self.scheme.b)),
+            'D' => write!(f, "{}", 'D'.on_color(self.scheme.d)),
+
+            c => write!(f, "{c}"),
+        })
+    }
+}
+
 /// The net of what the mask asks for, one character per facelet:
 ///
 /// - a face letter where the mask names both the piece and its orientation, so the sticker is known
@@ -652,6 +745,61 @@ mod tests {
             let there_and_back = Cube3x3::from_moves(&format!("{m} {m}'"))?;
             assert_eq!(there_and_back.to_string(), solved, "{m}");
         }
+        Ok(())
+    }
+
+    /// Wraps each face letter of a plain net in the ANSI background code `bg` gives its face, and
+    /// the code that resets the background after it.
+    fn paint(plain: &str, bg: [(char, u8); 6]) -> String {
+        plain
+            .chars()
+            .map(|c| match bg.iter().find(|&&(face, _)| face == c) {
+                Some((_, code)) => format!("\x1b[{code}m{c}\x1b[49m"),
+                None => c.to_string(),
+            })
+            .collect()
+    }
+
+    // ANSI background codes: 41 red, 42 green, 43 yellow (our orange), 44 blue, 47 white,
+    // 103 bright yellow.
+    #[test]
+    fn colored_paints_r_in_the_standard_scheme() -> anyhow::Result<()> {
+        let r = Cube3x3::from_moves("R")?;
+        let standard = [
+            ('U', 47),
+            ('F', 42),
+            ('R', 41),
+            ('L', 43),
+            ('B', 44),
+            ('D', 103),
+        ];
+        assert_eq!(r.colored().to_string(), paint(&r.to_string(), standard));
+        Ok(())
+    }
+
+    #[test]
+    fn with_color_scheme_paints_r_in_the_japanese_scheme() -> anyhow::Result<()> {
+        let r = Cube3x3::from_moves("R")?;
+        let japanese = ColorScheme3x3 {
+            u: AnsiColors::White,
+            f: AnsiColors::Green,
+            r: AnsiColors::Red,
+            l: AnsiColors::Yellow,
+            b: AnsiColors::BrightYellow,
+            d: AnsiColors::Blue,
+        };
+        let japanese_codes = [
+            ('U', 47),
+            ('F', 42),
+            ('R', 41),
+            ('L', 43),
+            ('B', 103),
+            ('D', 44),
+        ];
+        assert_eq!(
+            r.with_color_scheme(japanese).to_string(),
+            paint(&r.to_string(), japanese_codes)
+        );
         Ok(())
     }
 }

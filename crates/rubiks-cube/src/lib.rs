@@ -97,10 +97,11 @@ pub use methods::{
     },
 };
 pub use ops::{Inv, Pow};
+pub use owo_colors::AnsiColors;
 pub use piece::{Piece, PieceConfiguration};
 pub use puzzles::cube3x3::{
     Cube3x3,
-    facelets::Facelets,
+    facelets::{ColorScheme3x3, Colored3x3, Facelets},
     pieces::{Center, Corner, Edge, Orientation3x3, Piece3x3},
 };
 pub use puzzles::{
