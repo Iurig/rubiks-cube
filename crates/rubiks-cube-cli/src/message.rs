@@ -9,6 +9,8 @@ pub enum Message {
 pub enum InspectMessage {
     PreviousMove,
     NextMove,
+    PreviousStep,
+    NextStep,
     Exit,
 }
 

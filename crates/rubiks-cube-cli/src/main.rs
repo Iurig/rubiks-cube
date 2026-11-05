@@ -62,8 +62,7 @@ fn main() -> anyhow::Result<()> {
         let mut app = App {
             solve_index: 0,
             all_recons: recons,
-            mode: Mode::default(),
-            mode_info: app::ModeInfo::BrowseSolves,
+            mode: app::Mode::BrowseSolves,
         };
         ratatui::run(|terminal| -> anyhow::Result<()> {
             while app.mode != Mode::Exited {
@@ -94,16 +93,25 @@ fn main() -> anyhow::Result<()> {
                             _ => (),
                         },
 
-                        Mode::Inspect => match pressed_key {
+                        Mode::Inspect {
+                            step: _,
+                            move_in_step: _,
+                        } => match pressed_key {
                             KeyCode::Esc => app.update(Message::Inspect(InspectMessage::Exit)),
 
-                            KeyCode::Char('p') | KeyCode::Char('P') => {
+                            KeyCode::Left => {
                                 app.update(Message::Inspect(InspectMessage::PreviousMove))
                             }
 
-                            KeyCode::Char('n') | KeyCode::Char('N') => {
+                            KeyCode::Right => {
                                 app.update(Message::Inspect(InspectMessage::NextMove))
                             }
+
+                            KeyCode::Up => {
+                                app.update(Message::Inspect(InspectMessage::PreviousStep))
+                            }
+
+                            KeyCode::Down => app.update(Message::Inspect(InspectMessage::NextStep)),
 
                             _ => (),
                         },
