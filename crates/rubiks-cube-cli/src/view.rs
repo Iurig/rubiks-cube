@@ -7,7 +7,9 @@ use ratatui::{
 };
 use rubiks_cube::Cube3x3;
 
-use crate::app::{App, Mode, total_moves_in_cur_step};
+#[cfg(feature = "debug")]
+use crate::app::total_moves_in_cur_step;
+use crate::app::{App, Mode};
 
 const CUBE_HEIGHT: u16 = 11;
 const CUBE_LENGTH: u16 = 13; // ignores back
@@ -90,12 +92,17 @@ fn view_browse(app: &App, frame: &mut Frame, cube: Cube3x3) {
 }
 
 fn view_inspect(app: &App, frame: &mut Frame, mut cube: Cube3x3) {
+    #[cfg(feature = "debug")]
     let [solve_space, help_space, dbg_area] = Layout::vertical([
         Constraint::Fill(1),
         Constraint::Length(2),
         Constraint::Length(4),
     ])
     .areas(frame.area());
+
+    #[cfg(not(feature = "debug"))]
+    let [solve_space, help_space] =
+        Layout::vertical([Constraint::Fill(1), Constraint::Length(2)]).areas(frame.area());
 
     let help_widgets = [
         Line::from("Step navigation: ↑/↓").centered(),
@@ -111,14 +118,19 @@ fn view_inspect(app: &App, frame: &mut Frame, mut cube: Cube3x3) {
             .areas(recon_space);
 
     let cursor_position_in_recon = Offset::new(
-        app.step_text()
-            .char_indices()
-            .filter(|&(_, c)| c == ' ')
-            .nth(app.mode.cur_move())
-            .map(|(index, _)| index)
-            .expect("move out of range") as i32
-            + 1,
-        app.mode.cur_step() as i32 + 1,
+        i32::try_from(
+            app.step_text()
+                .char_indices()
+                .filter(|&(_, c)| c == ' ')
+                .nth(app.mode.cur_move())
+                .map(|(index, _)| index)
+                .expect("move out of range"),
+        )
+        .expect("overflowed")
+        .strict_add(1),
+        i32::try_from(app.mode.cur_step())
+            .expect("overflowed")
+            .strict_add(1),
     );
 
     for (step, line) in app.solution().enumerate() {
@@ -149,18 +161,21 @@ fn view_inspect(app: &App, frame: &mut Frame, mut cube: Cube3x3) {
         frame.render_widget(widget, *area);
     }
 
-    let mut dbg_rows = dbg_area.rows();
+    #[cfg(feature = "debug")]
+    {
+        let mut dbg_rows = dbg_area.rows();
 
-    frame.render_widget(
-        Line::from(format!("Step: {}", app.mode.cur_step())),
-        dbg_rows.next().unwrap(),
-    );
-    frame.render_widget(
-        Line::from(format!("Move: {}", app.mode.cur_move())),
-        dbg_rows.next().unwrap(),
-    );
-    frame.render_widget(
-        Line::from(format!("Total moves: {}", total_moves_in_cur_step(app))),
-        dbg_rows.next().unwrap(),
-    );
+        frame.render_widget(
+            Line::from(format!("Step: {}", app.mode.cur_step())),
+            dbg_rows.next().unwrap(),
+        );
+        frame.render_widget(
+            Line::from(format!("Move: {}", app.mode.cur_move())),
+            dbg_rows.next().unwrap(),
+        );
+        frame.render_widget(
+            Line::from(format!("Total moves: {}", total_moves_in_cur_step(app))),
+            dbg_rows.next().unwrap(),
+        );
+    }
 }

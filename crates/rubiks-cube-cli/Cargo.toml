@@ -17,6 +17,9 @@ crossterm = "0.29.0"
 ratatui = "0.30.2"
 rubiks-cube = { path = "../rubiks-cube" }
 
+[features]
+debug = []
+
 [lints.clippy]
 allow_attributes_without_reason = "warn"
 assertions_on_result_states = "warn"
