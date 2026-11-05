@@ -53,11 +53,11 @@ fn walkthrough_recon(index: usize, recon: &str, frame: &mut Frame) {
         .next()
         .expect("reconstruction should have 1 scramble line");
 
-    let solve_text = recon_iter.map(|l| Line::from(l)).collect::<Vec<_>>();
+    let solve_text = recon_iter.map(Line::from).collect::<Vec<_>>();
 
     let cube_widget = Paragraph::new(
         Cube3x3::from_moves(scramble_text)
-            .expect(&format!("scramble {scramble_text} doesn't parse"))
+            .unwrap_or_else(|_| panic!("scramble {scramble_text} doesn't parse"))
             .colored()
             .to_string()
             .as_bytes()
@@ -70,7 +70,7 @@ fn walkthrough_recon(index: usize, recon: &str, frame: &mut Frame) {
 
     let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title("Solve"));
 
-    let help_widgets = vec![
+    let help_widgets = [
         Line::from("Inspect solve: Enter").centered(),
         Line::from("Next solve: N").centered(),
         Line::from("Previous solve: P").centered(),
@@ -116,7 +116,10 @@ fn walkthrough_recon(index: usize, recon: &str, frame: &mut Frame) {
 }
 
 fn inspect_solve(index: usize, recon: &str, terminal: &mut Terminal<CrosstermBackend<Stdout>>) {
-    todo!()
+    todo!(
+        "inspect solve {index}, represented by {recon}, using {:?}",
+        terminal
+    )
 }
 
 fn main() -> anyhow::Result<()> {
@@ -132,7 +135,19 @@ fn main() -> anyhow::Result<()> {
         let mut index = 0;
         ratatui::run(|terminal| -> anyhow::Result<()> {
             loop {
-                terminal.draw(|frame| walkthrough_recon(index, &recon[index], frame))?;
+                terminal.draw(|frame| {
+                    walkthrough_recon(
+                        index,
+                        recon.get(index).unwrap_or_else(|| {
+                            panic!(
+                                "index should be between 0 and {}, but is {}",
+                                recon.len() - 1,
+                                index
+                            )
+                        }),
+                        frame,
+                    );
+                })?;
                 if let Some(KeyEvent {
                     code: pressed_key,
                     modifiers: KeyModifiers::NONE,
@@ -150,17 +165,26 @@ fn main() -> anyhow::Result<()> {
                             index += 1;
                             index = std::cmp::min(index, recon.len() - 1);
                         }
-                        KeyCode::Enter => inspect_solve(index, &recon[index], terminal),
-                        _ => continue,
+                        KeyCode::Enter => inspect_solve(
+                            index,
+                            recon.get(index).unwrap_or_else(|| {
+                                panic!(
+                                    "index should be between 0 and {}, but is {}",
+                                    recon.len() - 1,
+                                    index
+                                )
+                            }),
+                            terminal,
+                        ),
+                        _ => (),
                     }
                 }
             }
         })?;
-        Ok(())
     } else {
         for (i, solve) in recon.into_iter().enumerate() {
             println!("{}. {solve}", i + 1);
         }
-        Ok(())
     }
+    Ok(())
 }
