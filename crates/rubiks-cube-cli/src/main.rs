@@ -1,9 +1,12 @@
+use std::io::Stdout;
+
 use ansi_to_tui::IntoText;
 use anyhow::ensure;
 use clap::Parser;
 use crossterm::event::{self, KeyCode, KeyEvent, KeyModifiers};
 use ratatui::{
-    Frame,
+    Frame, Terminal,
+    backend::CrosstermBackend,
     layout::{Constraint, Layout},
     text::Line,
     widgets::{Block, Paragraph},
@@ -68,9 +71,10 @@ fn walkthrough_recon(index: usize, recon: &str, frame: &mut Frame) {
     let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title("Solve"));
 
     let help_widgets = vec![
-        Line::from("Exit: Esc").centered(),
+        Line::from("Inspect solve: Enter").centered(),
         Line::from("Next solve: N").centered(),
         Line::from("Previous solve: P").centered(),
+        Line::from("Exit: Esc").centered(),
     ];
 
     const CUBE_HEIGHT: u16 = 11;
@@ -111,6 +115,10 @@ fn walkthrough_recon(index: usize, recon: &str, frame: &mut Frame) {
     }
 }
 
+fn inspect_solve(index: usize, recon: &str, terminal: &mut Terminal<CrosstermBackend<Stdout>>) {
+    todo!()
+}
+
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
@@ -142,6 +150,7 @@ fn main() -> anyhow::Result<()> {
                             index += 1;
                             index = std::cmp::min(index, recon.len() - 1);
                         }
+                        KeyCode::Enter => inspect_solve(index, &recon[index], terminal),
                         _ => continue,
                     }
                 }
