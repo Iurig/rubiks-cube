@@ -78,16 +78,16 @@ fn main() -> anyhow::Result<()> {
                         Mode::BrowseSolves => match pressed_key {
                             KeyCode::Esc => app.update(Message::ExitProgram),
 
-                            KeyCode::Char('p') | KeyCode::Char('P') => {
+                            KeyCode::Char('p' | 'P') => {
                                 app.update(Message::BrowseSolves(BrowseMessage::PreviousSolve));
                             }
 
-                            KeyCode::Char('n') | KeyCode::Char('N') => {
-                                app.update(Message::BrowseSolves(BrowseMessage::NextSolve))
+                            KeyCode::Char('n' | 'N') => {
+                                app.update(Message::BrowseSolves(BrowseMessage::NextSolve));
                             }
 
                             KeyCode::Enter => {
-                                app.update(Message::BrowseSolves(BrowseMessage::EnterInspect))
+                                app.update(Message::BrowseSolves(BrowseMessage::EnterInspect));
                             }
 
                             _ => (),
@@ -100,15 +100,15 @@ fn main() -> anyhow::Result<()> {
                             KeyCode::Esc => app.update(Message::Inspect(InspectMessage::Exit)),
 
                             KeyCode::Left => {
-                                app.update(Message::Inspect(InspectMessage::PreviousMove))
+                                app.update(Message::Inspect(InspectMessage::PreviousMove));
                             }
 
                             KeyCode::Right => {
-                                app.update(Message::Inspect(InspectMessage::NextMove))
+                                app.update(Message::Inspect(InspectMessage::NextMove));
                             }
 
                             KeyCode::Up => {
-                                app.update(Message::Inspect(InspectMessage::PreviousStep))
+                                app.update(Message::Inspect(InspectMessage::PreviousStep));
                             }
 
                             KeyCode::Down => app.update(Message::Inspect(InspectMessage::NextStep)),

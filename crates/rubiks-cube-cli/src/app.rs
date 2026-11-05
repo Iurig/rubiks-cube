@@ -19,10 +19,10 @@ pub enum Mode {
 }
 
 impl Mode {
-    pub fn is_inspect(&self) -> bool {
+    pub const fn is_inspect(&self) -> bool {
         matches!(
             self,
-            Mode::Inspect {
+            Self::Inspect {
                 step: _,
                 move_in_step: _
             }
@@ -66,12 +66,12 @@ impl App {
         match message {
             Message::BrowseSolves(message) => match message {
                 BrowseMessage::PreviousSolve => {
-                    self.solve_index = self.solve_index.saturating_sub(1)
+                    self.solve_index = self.solve_index.saturating_sub(1);
                 }
 
                 BrowseMessage::NextSolve => {
                     self.solve_index =
-                        std::cmp::min(self.solve_index + 1, self.all_recons.len() - 1)
+                        std::cmp::min(self.solve_index + 1, self.all_recons.len() - 1);
                 }
                 BrowseMessage::EnterInspect => {
                     self.mode = Mode::Inspect {
@@ -153,7 +153,7 @@ pub fn total_moves_in_cur_step(app: &App) -> usize {
 
 impl Mode {
     pub fn mut_move(&mut self) -> &mut usize {
-        if let Mode::Inspect {
+        if let Self::Inspect {
             step: _,
             move_in_step,
         } = self
@@ -165,7 +165,7 @@ impl Mode {
     }
 
     pub fn mut_step(&mut self) -> &mut usize {
-        if let Mode::Inspect {
+        if let Self::Inspect {
             step,
             move_in_step: _,
         } = self
@@ -177,7 +177,7 @@ impl Mode {
     }
 
     pub fn cur_move(&self) -> usize {
-        if let Mode::Inspect {
+        if let Self::Inspect {
             step: _,
             move_in_step,
         } = self
@@ -189,7 +189,7 @@ impl Mode {
     }
 
     pub fn cur_step(&self) -> usize {
-        if let Mode::Inspect {
+        if let Self::Inspect {
             step,
             move_in_step: _,
         } = self
