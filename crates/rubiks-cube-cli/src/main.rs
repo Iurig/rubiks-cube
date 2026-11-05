@@ -67,10 +67,21 @@ fn walkthrough_recon(index: usize, recon: &str, frame: &mut Frame) {
 
     let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title("Solve"));
 
+    let help_widgets = vec![
+        Line::from("Exit: Esc").centered(),
+        Line::from("Next solve: N").centered(),
+        Line::from("Previous solve: P").centered(),
+    ];
+
     const CUBE_HEIGHT: u16 = 11;
     const CUBE_LENGTH: u16 = 13; // ignores back
-    let layout = Layout::vertical([Constraint::Length(CUBE_HEIGHT), Constraint::Fill(1)]);
-    let [cube_space, recon_space] = layout.areas(frame.area());
+    let layout = Layout::vertical([
+        Constraint::Length(CUBE_HEIGHT),
+        Constraint::Fill(1),
+        Constraint::Length(2),
+    ]);
+
+    let [cube_space, recon_space, help_space] = layout.areas(frame.area());
 
     let [_, cube_area, _] = Layout::horizontal([
         Constraint::Fill(1),
@@ -82,9 +93,22 @@ fn walkthrough_recon(index: usize, recon: &str, frame: &mut Frame) {
     let [scramble_area, solve_area] =
         Layout::vertical([Constraint::Length(3), Constraint::Fill(1)]).areas(recon_space);
 
+    let help_areas = Layout::horizontal((0..help_widgets.len()).fold(
+        Vec::new(),
+        |mut constraints, _| {
+            constraints.push(Constraint::Fill(1));
+            constraints
+        },
+    ))
+    .split(help_space);
+
     frame.render_widget(cube_widget, cube_area);
     frame.render_widget(scramble_widget, scramble_area);
     frame.render_widget(solve_widget, solve_area);
+
+    for i in 0..help_widgets.len() {
+        frame.render_widget(help_widgets[i].clone(), help_areas[i]);
+    }
 }
 
 fn main() -> anyhow::Result<()> {

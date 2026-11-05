@@ -1672,7 +1672,6 @@ dependencies = [
  "crossterm",
  "ratatui",
  "rubiks-cube",
- "thiserror 2.0.21",
 ]
 
 [[package]]
