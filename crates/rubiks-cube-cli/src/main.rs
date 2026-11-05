@@ -5,11 +5,10 @@ use crossterm::event::{self, KeyCode, KeyEvent, KeyModifiers};
 use ratatui::{
     Frame,
     layout::{Constraint, Layout},
-    text::{Line, Text},
+    text::Line,
     widgets::{Block, Paragraph},
 };
 use rubiks_cube::{Cube3x3, Method, Puzzle, Roux, ZZ};
-use thiserror::Error;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -44,7 +43,7 @@ fn reconstruct_n<P: Puzzle, T: Method<P>>(n: u32, technique: &T) -> anyhow::Resu
     Ok(recons)
 }
 
-fn walkthrough_recon(recon: &str, frame: &mut Frame) {
+fn walkthrough_recon(index: usize, recon: &str, frame: &mut Frame) {
     let mut recon_iter = recon.lines();
 
     let scramble_text = recon_iter
@@ -54,14 +53,15 @@ fn walkthrough_recon(recon: &str, frame: &mut Frame) {
     let solve_text = recon_iter.map(|l| Line::from(l)).collect::<Vec<_>>();
 
     let cube_widget = Paragraph::new(
-        Cube3x3::default()
+        Cube3x3::from_moves(scramble_text)
+            .expect(&format!("scramble {scramble_text} doesn't parse"))
             .colored()
             .to_string()
             .as_bytes()
             .into_text()
             .unwrap(),
     )
-    .block(Block::bordered());
+    .block(Block::bordered().title(format!("Solve {}", index + 1)));
 
     let scramble_widget = Paragraph::new(scramble_text).block(Block::bordered().title("Scramble"));
 
@@ -87,12 +87,6 @@ fn walkthrough_recon(recon: &str, frame: &mut Frame) {
     frame.render_widget(solve_widget, solve_area);
 }
 
-#[derive(Debug, Error)]
-enum StopIteration {
-    #[error("the iteration was stopped")]
-    ExitProgram,
-}
-
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
@@ -106,7 +100,7 @@ fn main() -> anyhow::Result<()> {
         let mut index = 0;
         ratatui::run(|terminal| -> anyhow::Result<()> {
             loop {
-                terminal.draw(|frame| walkthrough_recon(&recon[index], frame))?;
+                terminal.draw(|frame| walkthrough_recon(index, &recon[index], frame))?;
                 if let Some(KeyEvent {
                     code: pressed_key,
                     modifiers: KeyModifiers::NONE,
@@ -115,9 +109,7 @@ fn main() -> anyhow::Result<()> {
                 }) = event::read()?.as_key_press_event()
                 {
                     match pressed_key {
-                        KeyCode::Esc => {
-                            break Err(anyhow::Error::new(StopIteration::ExitProgram));
-                        }
+                        KeyCode::Esc => break Ok(()),
                         KeyCode::Char('p') => {
                             index -= 1;
                             index = std::cmp::max(index, 0);
