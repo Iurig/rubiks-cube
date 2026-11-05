@@ -1,10 +1,14 @@
-use std::{any, ops::ControlFlow};
-
+use ansi_to_tui::IntoText;
 use anyhow::ensure;
 use clap::Parser;
 use crossterm::event::{self, KeyCode, KeyEvent, KeyModifiers};
-use ratatui::Frame;
-use rubiks_cube::{Method, Puzzle, Roux, ZZ};
+use ratatui::{
+    Frame,
+    layout::{Constraint, Layout},
+    text::{Line, Text},
+    widgets::{Block, Paragraph},
+};
+use rubiks_cube::{Cube3x3, Method, Puzzle, Roux, ZZ};
 use thiserror::Error;
 
 #[derive(Debug, Parser)]
@@ -24,6 +28,7 @@ fn reconstruct_n<P: Puzzle, T: Method<P>>(n: u32, technique: &T) -> anyhow::Resu
     let mut recons = Vec::new();
     for _ in 0..n {
         let scramble = P::scramble()?;
+        let scramble_text = scramble.to_string().replace("2'", "2");
 
         let mut puzzle = P::default().apply(&scramble);
 
@@ -31,16 +36,55 @@ fn reconstruct_n<P: Puzzle, T: Method<P>>(n: u32, technique: &T) -> anyhow::Resu
 
         ensure!(
             puzzle.is_solved(),
-            "scramble:\n {scramble} \n and solve:\n {solution} \n did not solve the cube"
+            "scramble:\n {scramble_text} \n and solve:\n {solution} \n did not solve the cube"
         );
 
-        recons.push(format!("{scramble} {solution}"));
+        recons.push(format!("{scramble_text}\n{solution}"));
     }
     Ok(recons)
 }
 
-fn walkthrough_recon(recon: &str, terminal: &mut Frame) {
-    terminal.render_widget("Testing.", terminal.area());
+fn walkthrough_recon(recon: &str, frame: &mut Frame) {
+    let mut recon_iter = recon.lines();
+
+    let scramble_text = recon_iter
+        .next()
+        .expect("reconstruction should have 1 scramble line");
+
+    let solve_text = recon_iter.map(|l| Line::from(l)).collect::<Vec<_>>();
+
+    let cube_widget = Paragraph::new(
+        Cube3x3::default()
+            .colored()
+            .to_string()
+            .as_bytes()
+            .into_text()
+            .unwrap(),
+    )
+    .block(Block::bordered());
+
+    let scramble_widget = Paragraph::new(scramble_text).block(Block::bordered().title("Scramble"));
+
+    let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title("Solve"));
+
+    const CUBE_HEIGHT: u16 = 11;
+    const CUBE_LENGTH: u16 = 13; // ignores back
+    let layout = Layout::vertical([Constraint::Length(CUBE_HEIGHT), Constraint::Fill(1)]);
+    let [cube_space, recon_space] = layout.areas(frame.area());
+
+    let [_, cube_area, _] = Layout::horizontal([
+        Constraint::Fill(1),
+        Constraint::Length(CUBE_LENGTH),
+        Constraint::Fill(1),
+    ])
+    .areas(cube_space);
+
+    let [scramble_area, solve_area] =
+        Layout::vertical([Constraint::Length(3), Constraint::Fill(1)]).areas(recon_space);
+
+    frame.render_widget(cube_widget, cube_area);
+    frame.render_widget(scramble_widget, scramble_area);
+    frame.render_widget(solve_widget, solve_area);
 }
 
 #[derive(Debug, Error)]
@@ -51,6 +95,7 @@ enum StopIteration {
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
+
     let recon = match args.method.as_str() {
         "roux" => reconstruct_n(args.number, &Roux::default())?,
         "zz" => reconstruct_n(args.number, &ZZ::default())?,
@@ -73,11 +118,11 @@ fn main() -> anyhow::Result<()> {
                         KeyCode::Esc => {
                             break Err(anyhow::Error::new(StopIteration::ExitProgram));
                         }
-                        KeyCode::Left => {
+                        KeyCode::Char('p') => {
                             index -= 1;
                             index = std::cmp::max(index, 0);
                         }
-                        KeyCode::Right => {
+                        KeyCode::Char('n') => {
                             index += 1;
                             index = std::cmp::min(index, recon.len() - 1);
                         }

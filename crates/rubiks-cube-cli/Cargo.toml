@@ -10,6 +10,7 @@ repository.workspace = true
 description = "A command line interface for scrambling and solving a rubiks cube using human methods"
 
 [dependencies]
+ansi-to-tui = "8.0.1"
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
 crossterm = "0.29.0"
