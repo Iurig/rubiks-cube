@@ -12,8 +12,8 @@ use crate::{
     cube_widget::{draw_cli_widget, draw_lib_native_widget},
 };
 
-const CUBE_HEIGHT: u16 = 30;
-const CUBE_LENGTH: u16 = 50; // ignores back
+const CUBE_HEIGHT: u16 = 23;
+const CUBE_LENGTH: u16 = 43; // ignores back
 const SCRAMBLE_HEIGHT: u16 = 3;
 
 pub fn view(app: &App, frame: &mut Frame) {

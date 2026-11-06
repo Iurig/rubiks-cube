@@ -1670,7 +1670,6 @@ dependencies = [
  "anyhow",
  "clap",
  "crossterm",
- "itertools 0.15.0",
  "owo-colors",
  "ratatui",
  "rubiks-cube",

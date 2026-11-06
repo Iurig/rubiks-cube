@@ -13,10 +13,10 @@ use itertools::izip;
 use owo_colors::{AnsiColors, OwoColorize};
 
 use super::{
-    Cube3x3,
     pieces::{Center, Corner, Edge, Orientation3x3, Piece3x3},
+    Cube3x3,
 };
-use crate::{Face, Mask, Piece, Puzzle, piece::index};
+use crate::{piece::index, Face, Mask, Piece, Puzzle};
 
 /// The colour on each facelet of a [`Cube3x3`], one `[Center; 9]` per face
 /// in [`Center::ALL`] order, each read row by row as in [`Display`].

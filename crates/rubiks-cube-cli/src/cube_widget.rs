@@ -1,14 +1,13 @@
 use ansi_to_tui::IntoText;
-use itertools::Itertools;
 use owo_colors::AnsiColors;
 use ratatui::{
     Frame,
+    buffer::{Buffer, Cell},
     layout::{Constraint, Layout, Rect},
-    style::{Color, Style},
-    text::Text,
-    widgets::{Block, Padding, Paragraph},
+    style::Color,
+    widgets::{Block, Paragraph, Widget},
 };
-use rubiks_cube::{ColorScheme3x3, Cube3x3, Face};
+use rubiks_cube::{ColorScheme3x3, Cube3x3, Face, Facelets};
 
 pub fn draw_lib_native_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &mut Frame) {
     let widget = Paragraph::new(
@@ -25,6 +24,100 @@ pub fn draw_lib_native_widget(solve_number: usize, cube: &Cube3x3, area: Rect, f
     frame.render_widget(widget, area);
 }
 
+fn set_color(cell: &mut Cell, color: Color) -> &mut Cell {
+    cell.set_bg(color).set_fg(color)
+}
+
+#[derive(Debug)]
+struct ColoredCube {
+    facelets: Facelets,
+    color_scheme: ColorScheme3x3,
+    background: Color,
+}
+
+struct ColoredFace {
+    face: [Face; 9],
+    color_scheme: ColorScheme3x3,
+    background: Color,
+}
+
+impl Widget for ColoredFace {
+    fn render(self, area: Rect, buf: &mut Buffer)
+    where
+        Self: Sized,
+    {
+        const FACE_SIZE: u16 = 7;
+        const FACELET_LENGTH: u16 = 4;
+
+        for dx in 0..(3 * FACELET_LENGTH + 1) {
+            let x = area.left() + dx;
+            buf[(x, area.top() + FACE_SIZE - 1)]
+                .set_fg(self.background)
+                .set_symbol("▀");
+        }
+
+        for dy in (0..FACE_SIZE - 1).step_by(2) {
+            for dx in 0..(3 * FACELET_LENGTH + 1) {
+                let x = area.left() + dx;
+                let y = area.top() + dy;
+
+                if dx % FACELET_LENGTH == 0 {
+                    set_color(&mut buf[(x, y)], self.background).set_symbol("█");
+                    set_color(&mut buf[(x, y + 1)], self.background).set_symbol("█");
+                } else {
+                    buf[(x, y)]
+                        .set_fg(owo_ansi_to_ratatui(self.color_scheme.face_color(
+                            self.face[(3 * (dy / 2) + dx / FACELET_LENGTH) as usize],
+                        )))
+                        .set_symbol("▄")
+                        .set_bg(self.background);
+                    set_color(
+                        &mut buf[(x, y + 1)],
+                        owo_ansi_to_ratatui(
+                            self.color_scheme.face_color(
+                                self.face[(3 * (dy / 2) + dx / FACELET_LENGTH) as usize],
+                            ),
+                        ),
+                    )
+                    .set_symbol("█");
+                }
+            }
+        }
+    }
+}
+
+impl Widget for ColoredCube {
+    fn render(self, area: Rect, buf: &mut Buffer)
+    where
+        Self: Sized,
+    {
+        let areas = area
+            .layout::<3>(&Layout::horizontal([
+                Constraint::Length(14),
+                Constraint::Length(14),
+                Constraint::Length(13),
+            ]))
+            .map(|vert| vert.layout::<3>(&Layout::vertical([Constraint::Fill(1); 3])));
+
+        macro_rules! render_face {
+            ($face:ident, ($x:literal, $y:literal)) => {
+                ColoredFace {
+                    face: *self.facelets.face(Face::$face),
+                    color_scheme: self.color_scheme,
+                    background: self.background,
+                }
+                .render(areas[$x][$y], buf);
+            };
+        }
+
+        render_face!(U, (1, 0));
+        render_face!(F, (1, 1));
+        render_face!(R, (2, 1));
+        render_face!(L, (0, 1));
+        render_face!(D, (1, 2));
+    }
+}
+
 pub fn draw_cli_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &mut Frame) {
     let border = Block::bordered().title(format!("Solve {}", solve_number + 1));
 
@@ -32,54 +125,13 @@ pub fn draw_cli_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &
 
     let inner_area = border.inner(area);
 
-    #[rustfmt::skip]
-    let faces_grid = [
-        [None,           Some(Face::U),           None,],
-        [Some(Face::L),  Some(Face::F),  Some(Face::R),],
-        [None,           Some(Face::D),           None,],
-    ];
+    let colored = ColoredCube {
+        facelets: cube.facelets(),
+        color_scheme: ColorScheme3x3::STANDARD,
+        background: Color::Black,
+    };
 
-    let facelet_layout = inner_area
-        .centered_horizontally(Constraint::Length(4 * 9))
-        .layout::<9>(&Layout::horizontal([Constraint::Length(4); 9]))
-        .iter()
-        .map(|rec| {
-            rec.centered_vertically(Constraint::Length(2 * 9))
-                .layout::<9>(&Layout::vertical([Constraint::Length(2); 9]))
-        })
-        .collect::<Vec<_>>();
-
-    (0..9)
-        .cartesian_product(0..9)
-        .map(|(line, column)| {
-            frame.render_widget(
-                if let Some(_) = faces_grid[line / 3][column / 3] {
-                    Paragraph::new(Text::styled(
-                        "██",
-                        Style::new()
-                            .bg(owo_ansi_to_ratatui(
-                                ColorScheme3x3::STANDARD.face_color(
-                                    cube.facelets()
-                                        .sticker((line, column))
-                                        .expect(&format!("pos = ({line}, {column})")),
-                                ),
-                            ))
-                            .fg(owo_ansi_to_ratatui(
-                                ColorScheme3x3::STANDARD.face_color(
-                                    cube.facelets()
-                                        .sticker((line, column))
-                                        .expect(&format!("pos = ({line}, {column})")),
-                                ),
-                            )),
-                    ))
-                    .centered()
-                } else {
-                    Paragraph::new(Text::raw("  ")).block(Block::new())
-                },
-                facelet_layout[column][line],
-            );
-        })
-        .for_each(drop);
+    frame.render_widget(colored, inner_area);
 }
 
 fn owo_ansi_to_ratatui(color: AnsiColors) -> Color {
