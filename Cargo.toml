@@ -1,9 +1,10 @@
 [workspace]
 members = [
-  "crates/rubiks-cube",
-  "crates/rubiks-cube-cli", "crates/timer",
-  "crates/twisty-puzzles-py",
-  "tools/cargo-bin",
+    "crates/rubiks-cube",
+    "crates/rubiks-cube-cli",
+    "crates/cube-timer",
+    "crates/twisty-puzzles-py",
+    "tools/cargo-bin",
 ]
 resolver = "3"
 
