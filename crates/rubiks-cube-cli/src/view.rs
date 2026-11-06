@@ -1,20 +1,34 @@
+use std::io::stdout;
+
 use ratatui::{
     Frame,
     layout::{Constraint, Layout, Offset, Rect},
     text::Line,
     widgets::{Block, Paragraph},
 };
-use rubiks_cube::Cube3x3;
+use rubiks_cube::{ColorScheme3x3, Cube3x3};
+use termprofile::{DetectorSettings, TermProfile};
 
-use crate::{
-    ARGS,
-    app::{App, Mode},
-    cube_widget::{draw_cli_widget, draw_lib_native_widget},
-};
+use crate::app::{App, Mode};
 
 const CUBE_HEIGHT: u16 = 23;
 const CUBE_LENGTH: u16 = 43; // ignores back
 const SCRAMBLE_HEIGHT: u16 = 3;
+
+pub fn draw_cli_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &mut Frame) {
+    let border = Block::bordered().title(format!("Solve {}", solve_number + 1));
+
+    frame.render_widget(border.clone(), area);
+
+    let inner_area = border.inner(area);
+
+    let colored = cube.widget().with_colorscheme(
+        ColorScheme3x3::STANDARD
+            .on_terminal(TermProfile::detect(&stdout(), DetectorSettings::default())),
+    );
+
+    frame.render_widget(colored, inner_area);
+}
 
 pub fn view(app: &App, frame: &mut Frame) {
     let scramble_text = app.scramble();
@@ -64,11 +78,7 @@ fn draw_base(app: &App, frame: &mut Frame, solve_space: Rect, cube: Cube3x3) {
     .nth(1)
     .expect("layout should have 3 rectangles, but has no 1 indexed rectangle");
 
-    if ARGS.clone().lib_widget {
-        draw_lib_native_widget(app.solve_index, &cube, cube_area, frame);
-    } else {
-        draw_cli_widget(app.solve_index, &cube, cube_area, frame);
-    }
+    draw_cli_widget(app.solve_index, &cube, cube_area, frame);
 
     let [scramble_area, solve_area] =
         Layout::vertical([Constraint::Length(SCRAMBLE_HEIGHT), Constraint::Fill(1)])
@@ -175,18 +185,24 @@ fn view_inspect(app: &App, frame: &mut Frame, mut cube: Cube3x3) {
 
         frame.render_widget(
             Line::from(format!("Step: {}", app.mode.cur_step())),
-            dbg_rows.next().unwrap(),
+            dbg_rows
+                .next()
+                .expect("dbg_rows should have at least 3 rows"),
         );
         frame.render_widget(
             Line::from(format!("Move: {}", app.mode.cur_move())),
-            dbg_rows.next().unwrap(),
+            dbg_rows
+                .next()
+                .expect("dbg_rows should have at least 3 rows"),
         );
         frame.render_widget(
             Line::from(format!(
                 "Total moves: {}",
                 crate::app::total_moves_in_cur_step(app)
             )),
-            dbg_rows.next().unwrap(),
+            dbg_rows
+                .next()
+                .expect("dbg_rows should have at least 3 rows"),
         );
     }
 }

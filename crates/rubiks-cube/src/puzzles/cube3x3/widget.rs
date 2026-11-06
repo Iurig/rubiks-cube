@@ -1,44 +1,61 @@
-use std::io::stdout;
-
-use ansi_to_tui::IntoText;
+use crate::{ColorScheme3x3, Cube3x3, Face};
 use ratatui::{
-    Frame,
     buffer::{Buffer, Cell},
     layout::{Constraint, Layout, Rect},
     style::Color,
     text::Text,
-    widgets::{Block, Paragraph, Widget},
+    widgets::Widget,
 };
-use rubiks_cube::{ColorScheme3x3, Cube3x3, Face, Facelets};
-use termprofile::{DetectorSettings, TermProfile};
-
-pub fn draw_lib_native_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &mut Frame) {
-    let widget = Paragraph::new(
-        cube.colored()
-            .to_string()
-            .as_bytes()
-            .into_text()
-            .unwrap_or_else(|e| {
-                panic!("original string should've been possible to parse to ratatui::Text: {e}")
-            }),
-    )
-    .block(Block::bordered().title(format!("Solve {}", solve_number + 1)));
-
-    frame.render_widget(widget, area);
-}
 
 const fn set_color(cell: &mut Cell, color: Color) -> &mut Cell {
     cell.set_bg(color).set_fg(color)
 }
 
-#[derive(Debug)]
-struct ColoredCube {
-    facelets: Facelets,
+/// A [`ratatui`] [`Widget`] for displaying a [`Cube3x3`].
+#[derive(Debug, Clone, Copy)]
+pub struct WidgetCube3x3 {
+    cube: Cube3x3,
     color_scheme: ColorScheme3x3,
     background: Color,
 }
 
-struct ColoredFace {
+impl WidgetCube3x3 {
+    /// Applies the given [`ColorScheme3x3`] to the widget.
+    #[must_use]
+    pub const fn with_colorscheme(&self, color_scheme: ColorScheme3x3) -> Self {
+        Self {
+            cube: self.cube,
+            color_scheme,
+            background: self.background,
+        }
+    }
+
+    /// The [`Cube3x3`] the widget displays.
+    #[must_use]
+    pub const fn cube(&self) -> Cube3x3 {
+        self.cube
+    }
+
+    /// A mutable reference for the [`Cube3x3`] the widged displays.
+    pub const fn mut_cube(&mut self) -> &mut Cube3x3 {
+        &mut self.cube
+    }
+}
+
+impl Cube3x3 {
+    /// A [`ratatui`] [`Widget`] displaying the given [`Cube3x3`].
+    #[must_use]
+    pub const fn widget(self) -> WidgetCube3x3 {
+        WidgetCube3x3 {
+            cube: self,
+            color_scheme: ColorScheme3x3::STANDARD,
+            background: Color::Rgb(0, 0, 0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct WidgetFace3x3 {
     face: [Face; 9],
     color_scheme: ColorScheme3x3,
     background: Color,
@@ -47,7 +64,7 @@ struct ColoredFace {
 const FACE_SIZE: u16 = 7;
 const FACELET_LENGTH: u16 = 4;
 
-impl Widget for ColoredFace {
+impl Widget for WidgetFace3x3 {
     fn render(self, area: Rect, buf: &mut Buffer)
     where
         Self: Sized,
@@ -99,7 +116,7 @@ impl Widget for ColoredFace {
     }
 }
 
-impl Widget for ColoredCube {
+impl Widget for WidgetCube3x3 {
     fn render(self, area: Rect, buf: &mut Buffer)
     where
         Self: Sized,
@@ -121,8 +138,8 @@ impl Widget for ColoredCube {
 
         macro_rules! render_face {
             ($face:ident, ($x:literal, $y:literal)) => {
-                ColoredFace {
-                    face: *self.facelets.face(Face::$face),
+                WidgetFace3x3 {
+                    face: *self.cube.facelets().face(Face::$face),
                     color_scheme: self.color_scheme,
                     background: self.background,
                 }
@@ -136,21 +153,4 @@ impl Widget for ColoredCube {
         render_face!(L, (0, 1));
         render_face!(D, (1, 2));
     }
-}
-
-pub fn draw_cli_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &mut Frame) {
-    let border = Block::bordered().title(format!("Solve {}", solve_number + 1));
-
-    frame.render_widget(border.clone(), area);
-
-    let inner_area = border.inner(area);
-
-    let colored = ColoredCube {
-        facelets: cube.facelets(),
-        color_scheme: ColorScheme3x3::STANDARD
-            .on_terminal(TermProfile::detect(&stdout(), DetectorSettings::default())),
-        background: Color::Rgb(0, 0, 0),
-    };
-
-    frame.render_widget(colored, inner_area);
 }

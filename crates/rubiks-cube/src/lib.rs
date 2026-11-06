@@ -113,6 +113,9 @@ pub use puzzles::{
     label::{ByIdentity, ByMembership, Labeled, Marker, Mask, PieceSet},
 };
 
+#[cfg(feature = "ratatui")]
+pub use puzzles::cube3x3::widget::WidgetCube3x3;
+
 pub mod cube3x3_method_helpers {
     //! Tools for defining your own 3x3 method.
     pub use crate::methods::cube3x3::helpers::chain_steps;

@@ -1,5 +1,4 @@
 mod app;
-mod cube_widget;
 mod message;
 mod view;
 
