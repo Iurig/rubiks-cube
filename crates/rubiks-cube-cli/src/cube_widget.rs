@@ -1,5 +1,4 @@
 use ansi_to_tui::IntoText;
-use owo_colors::AnsiColors;
 use ratatui::{
     Frame,
     buffer::{Buffer, Cell},
@@ -66,26 +65,28 @@ impl Widget for ColoredFace {
                     set_color(&mut buf[(x, y + 1)], self.background).set_symbol("█");
                 } else {
                     buf[(x, y)]
-                        .set_fg(owo_ansi_to_ratatui(
-                            self.color_scheme.face_color(
-                                *self
-                                    .face
-                                    .get((3 * (dy / 2) + dx / FACELET_LENGTH) as usize)
-                                    .expect("broken index invariants"),
-                            ),
-                        ))
+                        .set_fg(
+                            self.color_scheme
+                                .face_color(
+                                    *self
+                                        .face
+                                        .get((3 * (dy / 2) + dx / FACELET_LENGTH) as usize)
+                                        .expect("broken index invariants"),
+                                )
+                                .into(),
+                        )
                         .set_symbol("▄")
                         .set_bg(self.background);
                     set_color(
                         &mut buf[(x, y + 1)],
-                        owo_ansi_to_ratatui(
-                            self.color_scheme.face_color(
+                        self.color_scheme
+                            .face_color(
                                 *self
                                     .face
                                     .get((3 * (dy / 2) + dx / FACELET_LENGTH) as usize)
                                     .expect("broken index invariants"),
-                            ),
-                        ),
+                            )
+                            .into(),
                     )
                     .set_symbol("█");
                 }
@@ -140,26 +141,4 @@ pub fn draw_cli_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &
     };
 
     frame.render_widget(colored, inner_area);
-}
-
-const fn owo_ansi_to_ratatui(color: AnsiColors) -> Color {
-    match color {
-        AnsiColors::Black => Color::Black,
-        AnsiColors::Red => Color::Red,
-        AnsiColors::Green => Color::Green,
-        AnsiColors::Yellow => Color::Yellow,
-        AnsiColors::Blue => Color::Blue,
-        AnsiColors::Magenta => Color::Magenta,
-        AnsiColors::Cyan => Color::Cyan,
-        AnsiColors::White => Color::Gray,
-        AnsiColors::BrightBlack => Color::DarkGray,
-        AnsiColors::BrightRed => Color::LightRed,
-        AnsiColors::BrightGreen => Color::LightGreen,
-        AnsiColors::BrightYellow => Color::LightYellow,
-        AnsiColors::BrightBlue => Color::LightBlue,
-        AnsiColors::BrightMagenta => Color::LightMagenta,
-        AnsiColors::BrightCyan => Color::LightCyan,
-        AnsiColors::BrightWhite => Color::White,
-        AnsiColors::Default => Color::Reset,
-    }
 }

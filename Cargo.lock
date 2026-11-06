@@ -1150,12 +1150,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "owo-colors"
-version = "4.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13c45bb4a6ae1280ec0803b1ef9d3455eb50f01efbbe1447ab020f1d54fba9d8"
-
-[[package]]
 name = "palette"
 version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1495,6 +1489,7 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cbb175c433c8e28a809d1f5773a2ae96e68c0ce40db865cbab1020bf33ae479c"
 dependencies = [
+ "anstyle",
  "bitflags 2.13.2",
  "compact_str",
  "critical-section",
@@ -1648,6 +1643,7 @@ checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
 name = "rubiks-cube"
 version = "0.1.0"
 dependencies = [
+ "anstyle",
  "anyhow",
  "divan",
  "dyn-clone",
@@ -1655,7 +1651,6 @@ dependencies = [
  "fastrand",
  "itertools 0.15.0",
  "log",
- "owo-colors",
  "papaya",
  "rayon",
  "statrs",
@@ -1670,8 +1665,8 @@ dependencies = [
  "anyhow",
  "clap",
  "crossterm",
- "owo-colors",
  "ratatui",
+ "ratatui-core",
  "rubiks-cube",
 ]
 

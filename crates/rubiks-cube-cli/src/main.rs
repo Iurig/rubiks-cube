@@ -8,6 +8,7 @@ use std::sync::LazyLock;
 use anyhow::ensure;
 use clap::{Parser, ValueEnum};
 use crossterm::event::{self, KeyCode, KeyEvent, KeyModifiers};
+use ratatui_core as _;
 use rubiks_cube::{Method, Puzzle, Roux, ZZ};
 
 use crate::app::{App, Mode};

@@ -88,6 +88,7 @@ pub use error::{
 pub use indexed::Indexed;
 // Methods with options are re-exported as modules too (`roux::Cmll`), so the options need no method
 // prefix. `kociemba` has no options.
+pub use anstyle::Color;
 pub use methods::{
     Method, Segment, Solution, Technique, TechniqueBuilder,
     context::BuildContext,
@@ -99,7 +100,6 @@ pub use methods::{
     },
 };
 pub use ops::{Inv, Pow};
-pub use owo_colors::AnsiColors;
 pub use piece::{Piece, PieceConfiguration};
 pub use puzzles::cube3x3::{
     Cube3x3,
