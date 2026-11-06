@@ -40,16 +40,29 @@ fn draw_base(app: &App, frame: &mut Frame, solve_space: Rect, cube: Cube3x3) {
 
     let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title("Solve"));
 
-    let layout = Layout::vertical([Constraint::Length(CUBE_HEIGHT), Constraint::Fill(1)]);
+    let layout = if (solve_space.height as usize)
+        < CUBE_HEIGHT as usize
+            + 4
+            + scramble_text.lines().count()
+            + solve_widget.line_count(solve_space.width - 2)
+    {
+        Layout::horizontal([Constraint::Length(CUBE_LENGTH), Constraint::Fill(1)])
+    } else {
+        Layout::vertical([Constraint::Length(CUBE_HEIGHT), Constraint::Fill(1)])
+    };
 
     let [cube_space, recon_space] = layout.areas(solve_space);
 
-    let [_, cube_area, _] = Layout::horizontal([
+    let cube_area = Layout::horizontal([
         Constraint::Fill(1),
         Constraint::Length(CUBE_LENGTH),
         Constraint::Fill(1),
     ])
-    .areas(cube_space);
+    .areas::<3>(cube_space)
+    .iter()
+    .map(|rec| rec.centered_vertically(Constraint::Length(CUBE_HEIGHT)))
+    .nth(1)
+    .expect("layout should have 3 rectangles, but has no 1 indexed rectangle");
 
     if ARGS.clone().lib_widget {
         draw_lib_native_widget(app.solve_index, &cube, cube_area, frame);

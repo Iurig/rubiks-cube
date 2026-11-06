@@ -6,6 +6,7 @@ use ratatui::{
     buffer::{Buffer, Cell},
     layout::{Constraint, Layout, Rect},
     style::Color,
+    text::Text,
     widgets::{Block, Paragraph, Widget},
 };
 use rubiks_cube::{ColorScheme3x3, Cube3x3, Face, Facelets};
@@ -43,14 +44,14 @@ struct ColoredFace {
     background: Color,
 }
 
+const FACE_SIZE: u16 = 7;
+const FACELET_LENGTH: u16 = 4;
+
 impl Widget for ColoredFace {
     fn render(self, area: Rect, buf: &mut Buffer)
     where
         Self: Sized,
     {
-        const FACE_SIZE: u16 = 7;
-        const FACELET_LENGTH: u16 = 4;
-
         for dx in 0..=(3 * FACELET_LENGTH) {
             let x = area.left() + dx;
             buf[(x, area.top() + FACE_SIZE - 1)]
@@ -103,6 +104,13 @@ impl Widget for ColoredCube {
     where
         Self: Sized,
     {
+        if area.width < 3 * FACELET_LENGTH + 1 || area.height < 3 * FACE_SIZE {
+            Text::from("Terminal too small")
+                .centered()
+                .render(area.centered_vertically(Constraint::Length(1)), buf);
+            return;
+        }
+
         let areas = area
             .layout::<3>(&Layout::horizontal([
                 Constraint::Length(14),
