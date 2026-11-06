@@ -16,7 +16,7 @@ use super::{
     Cube3x3,
     pieces::{Center, Corner, Edge, Orientation3x3, Piece3x3},
 };
-use crate::{Mask, Piece, Puzzle, piece::index};
+use crate::{Face, Mask, Piece, Puzzle, piece::index};
 
 /// The colour on each facelet of a [`Cube3x3`], one `[Center; 9]` per face
 /// in [`Center::ALL`] order, each read row by row as in [`Display`].
@@ -246,15 +246,15 @@ fn mask_char(mask: &Mask<Cube3x3>, slot: Piece3x3, facelet: Center) -> char {
     match (condition.label, condition.orient) {
         (Some(piece), Some(orientation)) => stickers(piece, orientation)
             .and_then(|stickers| stickers.get(position).copied())
-            .map_or('?', letter),
-        (Some(Piece3x3::Center(c)), None) => letter(c),
+            .map_or('?', face_to_letter),
+        (Some(Piece3x3::Center(c)), None) => face_to_letter(c),
         (Some(_), None) => '?',
         (None, Some(orientation)) if orientation_position(orientation) == Some(position) => 'o',
         (None, _) => '.',
     }
 }
 
-const fn letter(face: Center) -> char {
+const fn face_to_letter(face: Center) -> char {
     match face {
         Center::U => 'U',
         Center::F => 'F',
@@ -265,11 +265,33 @@ const fn letter(face: Center) -> char {
     }
 }
 
+const fn letter_to_face(letter: char) -> Option<Face> {
+    match letter {
+        'U' => Some(Center::U),
+        'F' => Some(Center::F),
+        'R' => Some(Center::R),
+        'B' => Some(Center::B),
+        'L' => Some(Center::L),
+        'D' => Some(Center::D),
+        _ => None,
+    }
+}
+
 impl Facelets {
     /// The nine facelets of `face`, read row by row as in [`Display`].
     #[must_use]
-    pub const fn face(&self, face: Center) -> &[Center; 9] {
+    pub const fn face(&self, face: Face) -> &[Face; 9] {
         &self.faces[index(face)]
+    }
+
+    /// Which sticker is in a position of a face, measured from the top left.
+    #[must_use]
+    pub fn sticker(&self, pos: (usize, usize)) -> Option<Face> {
+        self.to_string()
+            .lines()
+            .nth(pos.0)
+            .map(|line| letter_to_face(line.chars().nth(pos.1 + pos.1 / 3)?))
+            .flatten()
     }
 }
 
@@ -334,7 +356,7 @@ fn write_net(f: &mut fmt::Formatter<'_>, faces: &[[char; 9]; 6]) -> fmt::Result 
 
 impl Display for Facelets {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_net(f, &self.faces.map(|face| face.map(letter)))
+        write_net(f, &self.faces.map(|face| face.map(face_to_letter)))
     }
 }
 
@@ -387,23 +409,35 @@ pub struct ColorScheme3x3 {
 impl ColorScheme3x3 {
     /// The standard [`Cube3x3`] color scheme, held in WCA scrambling orientation.
     pub const STANDARD: Self = Self {
-        u: AnsiColors::White,
+        u: AnsiColors::BrightWhite,
         f: AnsiColors::Green,
         r: AnsiColors::Red,
-        l: AnsiColors::Yellow,
+        l: AnsiColors::BrightYellow,
         b: AnsiColors::Blue,
-        d: AnsiColors::BrightYellow,
+        d: AnsiColors::Yellow,
     };
 
     /// The Japanese [`Cube3x3`] color scheme, held in WCA scrambling orientation.
     pub const JAPANESE: Self = Self {
-        u: AnsiColors::White,
+        u: AnsiColors::BrightWhite,
         f: AnsiColors::Green,
         r: AnsiColors::Red,
         l: AnsiColors::Yellow,
         b: AnsiColors::BrightYellow,
         d: AnsiColors::Blue,
     };
+
+    /// The [`AnsiColors`] of a given [`Face`] under the [`ColorScheme3x3`].
+    pub fn face_color(&self, face: Face) -> AnsiColors {
+        match face {
+            Face::U => self.u,
+            Face::F => self.f,
+            Face::R => self.r,
+            Face::L => self.l,
+            Face::D => self.d,
+            Face::B => self.b,
+        }
+    }
 }
 
 impl Cube3x3 {

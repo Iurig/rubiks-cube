@@ -8,7 +8,9 @@
 //! use rubiks_cube::{Cube3x3, Inv, Pow, Puzzle};
 //!
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
-//! let scramble = Cube3x3::from_moves("R' U' F D2 L2 F R2 U2 R2 B D2 L B2 D' B2 L' R' B D2 B U2 L U2 R' U' F")?;
+//! let scramble = Cube3x3::from_moves(
+//!     "R' U' F D2 L2 F R2 U2 R2 B D2 L B2 D' B2 L' R' B D2 B U2 L U2 R' U' F",
+//! )?;
 //! let solution = Cube3x3::from_moves("D2 F' D2 U2 F' L2 D R2 D B2 F L2 R' F' D U'")?;
 //! assert!((scramble * solution).is_solved());
 //!
@@ -102,7 +104,7 @@ pub use piece::{Piece, PieceConfiguration};
 pub use puzzles::cube3x3::{
     Cube3x3,
     facelets::{ColorScheme3x3, Colored3x3, Facelets},
-    pieces::{Center, Corner, Edge, Orientation3x3, Piece3x3},
+    pieces::{Center, Corner, Edge, Face, Orientation3x3, Piece3x3},
 };
 pub use puzzles::{
     Puzzle,

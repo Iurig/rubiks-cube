@@ -6,8 +6,43 @@
     missing_docs
 )]
 
+use std::error::Error;
+
 use rubiks_cube::*;
 
-fn main() {
-    println!("{}", Cube3x3::default().colored());
+fn main() -> Result<(), Box<dyn Error>> {
+    let eolr = SearchStep::builder("EOLR", AlgSet::from_static_parts("M U"))
+        .goal(PieceSet::from_algset(&AlgSet::<Cube3x3>::from_static(
+            "M' U2 M U2\n M U2 M' U2",
+        )))
+        .clone();
+
+    let advanced_roux = Technique::<Cube3x3>::start_with(SearchStep::builder(
+        "FB",
+        AlgSet::from_static_parts("R U F B D M r"),
+    ))
+    .then(SearchStep::builder(
+        "SB",
+        AlgSet::from_static_parts("R U r M"),
+    ))
+    .then(
+        SearchStep::builder(
+            "CMLL",
+            AlgSet::from_static(include_str!(
+                "../src/methods/cube3x3/algsets/cmll/one_look.txt"
+            )),
+        )
+        .free_algs(AlgSet::from_static_parts("U M"))
+        .goal(PieceSet::from_algset(&AlgSet::from_static("U M' U' \n M")))
+        .clone(),
+    )
+    .then(eolr)
+    .finish(SearchStep::builder("LSE", AlgSet::from_static_parts("M U")))?;
+
+    let mut cube = Cube3x3::scrambled_with_seed(3);
+
+    advanced_roux.solve(&mut cube)?;
+
+    assert!(cube.is_solved());
+    Ok(())
 }

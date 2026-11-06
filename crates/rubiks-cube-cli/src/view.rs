@@ -1,4 +1,3 @@
-use ansi_to_tui::IntoText;
 use ratatui::{
     Frame,
     layout::{Constraint, Layout, Offset, Rect},
@@ -7,12 +6,14 @@ use ratatui::{
 };
 use rubiks_cube::Cube3x3;
 
-#[cfg(feature = "debug")]
-use crate::app::total_moves_in_cur_step;
-use crate::app::{App, Mode};
+use crate::{
+    ARGS,
+    app::{App, Mode},
+    cube_widget::{draw_cli_widget, draw_lib_native_widget},
+};
 
-const CUBE_HEIGHT: u16 = 11;
-const CUBE_LENGTH: u16 = 13; // ignores back
+const CUBE_HEIGHT: u16 = 30;
+const CUBE_LENGTH: u16 = 50; // ignores back
 const SCRAMBLE_HEIGHT: u16 = 3;
 
 pub fn view(app: &App, frame: &mut Frame) {
@@ -35,17 +36,6 @@ fn draw_base(app: &App, frame: &mut Frame, solve_space: Rect, cube: Cube3x3) {
 
     let solve_text = app.solution().collect::<Vec<_>>().join("\n");
 
-    let cube_widget = Paragraph::new(
-        cube.colored()
-            .to_string()
-            .as_bytes()
-            .into_text()
-            .unwrap_or_else(|e| {
-                panic!("original string should've been possible to parse to ratatui::Text: {e}")
-            }),
-    )
-    .block(Block::bordered().title(format!("Solve {}", app.solve_index + 1)));
-
     let scramble_widget = Paragraph::new(scramble_text).block(Block::bordered().title("Scramble"));
 
     let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title("Solve"));
@@ -61,11 +51,16 @@ fn draw_base(app: &App, frame: &mut Frame, solve_space: Rect, cube: Cube3x3) {
     ])
     .areas(cube_space);
 
+    if ARGS.clone().lib_widget {
+        draw_lib_native_widget(app.solve_index, &cube, cube_area, frame);
+    } else {
+        draw_cli_widget(app.solve_index, &cube, cube_area, frame);
+    }
+
     let [scramble_area, solve_area] =
         Layout::vertical([Constraint::Length(SCRAMBLE_HEIGHT), Constraint::Fill(1)])
             .areas(recon_space);
 
-    frame.render_widget(cube_widget, cube_area);
     frame.render_widget(scramble_widget, scramble_area);
     frame.render_widget(solve_widget, solve_area);
 }
@@ -174,7 +169,10 @@ fn view_inspect(app: &App, frame: &mut Frame, mut cube: Cube3x3) {
             dbg_rows.next().unwrap(),
         );
         frame.render_widget(
-            Line::from(format!("Total moves: {}", total_moves_in_cur_step(app))),
+            Line::from(format!(
+                "Total moves: {}",
+                crate::app::total_moves_in_cur_step(app)
+            )),
             dbg_rows.next().unwrap(),
         );
     }

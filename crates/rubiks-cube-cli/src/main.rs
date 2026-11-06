@@ -1,6 +1,9 @@
 mod app;
+mod cube_widget;
 mod message;
 mod view;
+
+use std::sync::LazyLock;
 
 use anyhow::ensure;
 use clap::{Parser, ValueEnum};
@@ -11,7 +14,7 @@ use crate::app::{App, Mode};
 use crate::message::{BrowseMessage, InspectMessage, Message};
 use crate::view::view;
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Parser, Clone)]
 #[command(version, about, long_about = None)]
 struct Args {
     #[arg(value_enum)]
@@ -21,7 +24,10 @@ struct Args {
     number: u32,
 
     #[arg(long)]
-    iterative: bool,
+    interactive: bool,
+
+    #[arg(long)]
+    lib_widget: bool,
 }
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -50,15 +56,17 @@ fn reconstruct_n<P: Puzzle, T: Method<P>>(n: u32, technique: &T) -> anyhow::Resu
     Ok(recons)
 }
 
+static ARGS: LazyLock<Args> = LazyLock::new(|| Args::parse());
+
 fn main() -> anyhow::Result<()> {
-    let args = Args::parse();
+    let args = ARGS.clone();
 
     let recons = match args.method {
         Methods::Roux => reconstruct_n(args.number, &Roux::default())?,
         Methods::Zz => reconstruct_n(args.number, &ZZ::default())?,
     };
 
-    if args.iterative {
+    if args.interactive {
         let mut app = App {
             solve_index: 0,
             all_recons: recons,

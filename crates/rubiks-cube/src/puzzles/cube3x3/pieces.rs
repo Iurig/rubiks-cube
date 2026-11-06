@@ -85,6 +85,9 @@ new_piece!(
 pub type CenterConfiguration = PieceConfiguration<Center, CENTERS_COUNT, CENTER_ORIENTATION_COUNT>;
 pub type CornerConfiguration = PieceConfiguration<Corner, CORNERS_COUNT, CO_COUNT>;
 pub type EdgeConfiguration = PieceConfiguration<Edge, EDGES_COUNT, EO_COUNT>;
+/// A [`Cube3x3`](crate::Cube3x3) face.
+///
+/// An alias for [`Center`].
 pub type Face = Center;
 
 /// Any piece of the 3×3 cube: the cube's [`Puzzle::Piece`](crate::Puzzle::Piece) type. Masks and
