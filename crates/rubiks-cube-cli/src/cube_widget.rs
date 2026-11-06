@@ -1,3 +1,5 @@
+use std::io::stdout;
+
 use ansi_to_tui::IntoText;
 use ratatui::{
     Frame,
@@ -7,6 +9,7 @@ use ratatui::{
     widgets::{Block, Paragraph, Widget},
 };
 use rubiks_cube::{ColorScheme3x3, Cube3x3, Face, Facelets};
+use termprofile::{DetectorSettings, TermProfile};
 
 pub fn draw_lib_native_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &mut Frame) {
     let widget = Paragraph::new(
@@ -136,8 +139,9 @@ pub fn draw_cli_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &
 
     let colored = ColoredCube {
         facelets: cube.facelets(),
-        color_scheme: ColorScheme3x3::STANDARD,
-        background: Color::Black,
+        color_scheme: ColorScheme3x3::STANDARD
+            .on_terminal(TermProfile::detect(&stdout(), DetectorSettings::default())),
+        background: Color::Rgb(0, 0, 0),
     };
 
     frame.render_widget(colored, inner_area);

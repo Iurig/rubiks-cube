@@ -1654,6 +1654,7 @@ dependencies = [
  "papaya",
  "rayon",
  "statrs",
+ "termprofile",
  "thiserror 2.0.21",
 ]
 
@@ -1668,6 +1669,7 @@ dependencies = [
  "ratatui",
  "ratatui-core",
  "rubiks-cube",
+ "termprofile",
 ]
 
 [[package]]
@@ -2002,6 +2004,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "411c5bf740737c7918b8b1fe232dca4dc9f8e754b8ad5e20966814001ed0ac6b"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "termprofile"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9755588fbabdf9695138d2e234ff7bcae6b514fa8f25af71c5bda99a7817128"
+dependencies = [
+ "anstyle",
+ "palette",
 ]
 
 [[package]]

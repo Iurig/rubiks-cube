@@ -17,6 +17,7 @@ crossterm = "0.29.0"
 ratatui = "0.30.2"
 ratatui-core = { version = "0.1.2", features = ["anstyle"] }
 rubiks-cube = { path = "../rubiks-cube" }
+termprofile = "0.2.5"
 
 [features]
 debug = []

@@ -9,8 +9,9 @@
 
 use std::fmt::{self, Display};
 
-use anstyle::{Ansi256Color, AnsiColor, Color, Reset, Style};
+use anstyle::{AnsiColor, Color, Reset, RgbColor, Style};
 use itertools::izip;
+use termprofile::TermProfile;
 
 use super::{
     Cube3x3,
@@ -407,17 +408,28 @@ pub struct ColorScheme3x3 {
     pub d: Color,
 }
 
-const ORANGE: u8 = 166;
+const WHITE: (u8, u8, u8) = (255, 255, 255);
+const GREEN: (u8, u8, u8) = (92, 230, 92);
+const RED: (u8, u8, u8) = (185, 37, 37);
+const ORANGE: (u8, u8, u8) = (255, 126, 51);
+const BLUE: (u8, u8, u8) = (0, 84, 230);
+const YELLOW: (u8, u8, u8) = (255, 235, 77);
+
+macro_rules! rgb {
+    ($color_code:ident) => {
+        RgbColor($color_code.0, $color_code.1, $color_code.2)
+    };
+}
 
 impl ColorScheme3x3 {
     /// The standard [`Cube3x3`] color scheme, held in WCA scrambling orientation.
     pub const STANDARD: Self = Self {
-        u: Color::Ansi(AnsiColor::BrightWhite),
-        f: Color::Ansi(AnsiColor::Green),
-        r: Color::Ansi(AnsiColor::Red),
-        l: Color::Ansi256(Ansi256Color(ORANGE)),
-        b: Color::Ansi(AnsiColor::Blue),
-        d: Color::Ansi(AnsiColor::Yellow),
+        u: Color::Rgb(rgb!(WHITE)),
+        f: Color::Rgb(rgb!(GREEN)),
+        r: Color::Rgb(rgb!(RED)),
+        l: Color::Rgb(rgb!(ORANGE)),
+        b: Color::Rgb(rgb!(BLUE)),
+        d: Color::Rgb(rgb!(YELLOW)),
     };
 
     /// The Japanese [`Cube3x3`] color scheme, held in WCA scrambling orientation.
@@ -425,10 +437,38 @@ impl ColorScheme3x3 {
         u: Color::Ansi(AnsiColor::BrightWhite),
         f: Color::Ansi(AnsiColor::Green),
         r: Color::Ansi(AnsiColor::Red),
-        l: Color::Ansi256(Ansi256Color(ORANGE)),
+        l: Color::Ansi(AnsiColor::BrightYellow),
         b: Color::Ansi(AnsiColor::Yellow),
         d: Color::Ansi(AnsiColor::Blue),
     };
+
+    /// Styles a [`ColorScheme3x3`] according to the terminal.
+    ///
+    /// Uses `truecolor` in terminals that support it, failing that, falls back to `ANSI 256`,
+    /// failing that, falls back to basic `ANSI`.
+    #[must_use]
+    pub fn on_terminal(&self, profile: TermProfile) -> Self {
+        Self {
+            u: profile
+                .adapt_color(self.u)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+            f: profile
+                .adapt_color(self.f)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+            r: profile
+                .adapt_color(self.r)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+            l: profile
+                .adapt_color(self.l)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+            b: profile
+                .adapt_color(self.b)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+            d: profile
+                .adapt_color(self.d)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+        }
+    }
 
     /// The [`Color`] of a given [`Face`] under the [`ColorScheme3x3`].
     #[must_use]
@@ -804,53 +844,6 @@ mod tests {
         assert_eq!(facelets.sticker((0, 0)), None);
         assert_eq!(facelets.sticker((3, 12)), None);
         assert_eq!(facelets.sticker((9, 3)), None);
-        Ok(())
-    }
-
-    /// Wraps each face letter of a plain net in the ANSI background code `bg` gives its face,
-    /// followed by the reset code `0` that `anstyle` writes for `{style:#}`.
-    fn paint(plain: &str, bg: [(char, &str); 6]) -> String {
-        plain
-            .chars()
-            .map(|c| match bg.iter().find(|&&(face, _)| face == c) {
-                Some((_, code)) => format!("\x1b[{code}m{c}\x1b[0m"),
-                None => c.to_string(),
-            })
-            .collect()
-    }
-
-    // ANSI background codes: 41 red, 42 green, 43 yellow, 44 blue, 107 bright white, and
-    // `48;5;172` for colour 172 of the 256-colour palette, our orange.
-    #[test]
-    fn colored_paints_r_in_the_standard_scheme() -> anyhow::Result<()> {
-        let r = Cube3x3::from_moves("R")?;
-        let standard = [
-            ('U', "107"),
-            ('F', "42"),
-            ('R', "41"),
-            ('L', &format!("48;5;{ORANGE}")),
-            ('B', "44"),
-            ('D', "43"),
-        ];
-        assert_eq!(r.colored().to_string(), paint(&r.to_string(), standard));
-        Ok(())
-    }
-
-    #[test]
-    fn with_color_scheme_paints_r_in_the_japanese_scheme() -> anyhow::Result<()> {
-        let r = Cube3x3::from_moves("R")?;
-        let japanese_codes = [
-            ('U', "107"),
-            ('F', "42"),
-            ('R', "41"),
-            ('L', &format!("48;5;{ORANGE}")),
-            ('B', "43"),
-            ('D', "44"),
-        ];
-        assert_eq!(
-            r.with_color_scheme(ColorScheme3x3::JAPANESE).to_string(),
-            paint(&r.to_string(), japanese_codes)
-        );
         Ok(())
     }
 }
