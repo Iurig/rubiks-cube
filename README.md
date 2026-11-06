@@ -10,7 +10,7 @@ are planned.
 A cube state is a value of type `Cube3x3`. Moves are cube states too, and applying a move is just
 group multiplication. Everything is `Copy`, and the move table is built on first use.
 
-> **Status: early work in progress.** The core group structure and every move in standard notation
+> **Status: unreleased** The core group structure and every move in standard notation
 > (faces, slices, rotations, wide moves) work and are tested against real reconstructions. The Roux,
 > ZZ, and Kociemba solvers work, and their public APIs are still changing. See
 > [Current state](#current-state).
@@ -249,7 +249,7 @@ crates/
           kociemba.rs         Kociemba's two-phase method
           helpers.rs          helpers for defining methods and steps
           algsets/            algorithm lists shared between methods
-            cmll/             CMLL 
+            cmll/             CMLL
             oll/              OLL
             pll/              PLL
             zbll/             ZBLL
@@ -267,13 +267,13 @@ crates/
       main.rs                 solves one scramble with two option sets and prints the solutions
       sketch.rs               a design sketch
       DESIGN.md               a document for writing things down while writing to sketch.rs
-    docs/                     
+    docs/
       design/                 settled designs
         step-builders.md      the "Technique builds from StepBuilders" design
   rubiks-cube-cli/            the command-line tool
     src/
       main.rs
-  twisty-puzzles-py/          exported python library 
+  twisty-puzzles-py/          exported python library
     src/
       lib.rs
     python/
@@ -297,6 +297,10 @@ cargo bench --bench solves
 RUST_LOG=rubiks_cube=debug cargo run --example main
 cargo run -p rubiks-cube-cli -- --method roux --number 3
 ```
+
+## Contributing
+
+You can find more information about contributing in [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Current state
 
