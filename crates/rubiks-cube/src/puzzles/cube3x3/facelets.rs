@@ -421,8 +421,8 @@ impl ColorScheme3x3 {
         u: AnsiColors::BrightWhite,
         f: AnsiColors::Green,
         r: AnsiColors::Red,
-        l: AnsiColors::Yellow,
-        b: AnsiColors::BrightYellow,
+        l: AnsiColors::BrightYellow,
+        b: AnsiColors::Yellow,
         d: AnsiColors::Blue,
     };
 
@@ -807,12 +807,12 @@ mod tests {
     fn colored_paints_r_in_the_standard_scheme() -> anyhow::Result<()> {
         let r = Cube3x3::from_moves("R")?;
         let standard = [
-            ('U', 47),
+            ('U', 107),
             ('F', 42),
             ('R', 41),
-            ('L', 43),
+            ('L', 103),
             ('B', 44),
-            ('D', 103),
+            ('D', 43),
         ];
         assert_eq!(r.colored().to_string(), paint(&r.to_string(), standard));
         Ok(())
@@ -822,11 +822,11 @@ mod tests {
     fn with_color_scheme_paints_r_in_the_japanese_scheme() -> anyhow::Result<()> {
         let r = Cube3x3::from_moves("R")?;
         let japanese_codes = [
-            ('U', 47),
+            ('U', 107),
             ('F', 42),
             ('R', 41),
-            ('L', 43),
-            ('B', 103),
+            ('L', 103),
+            ('B', 43),
             ('D', 44),
         ];
         assert_eq!(
