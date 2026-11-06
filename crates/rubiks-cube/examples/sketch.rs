@@ -6,9 +6,11 @@
     missing_docs
 )]
 
+use std::error::Error;
+
 use rubiks_cube::*;
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let eolr = SearchStep::builder("EOLR", AlgSet::from_static_parts("M U"))
         .goal(PieceSet::from_algset(&AlgSet::<Cube3x3>::from_static(
             "M' U2 M U2\n M U2 M' U2",
@@ -35,12 +37,12 @@ fn main() {
         .clone(),
     )
     .then(eolr)
-    .finish(SearchStep::builder("LSE", AlgSet::from_static_parts("M U")))
-    .unwrap();
+    .finish(SearchStep::builder("LSE", AlgSet::from_static_parts("M U")))?;
 
     let mut cube = Cube3x3::scrambled_with_seed(3);
 
-    advanced_roux.solve(&mut cube).unwrap();
+    advanced_roux.solve(&mut cube)?;
 
     assert!(cube.is_solved());
+    Ok(())
 }
