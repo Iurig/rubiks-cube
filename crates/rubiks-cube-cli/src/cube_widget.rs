@@ -24,7 +24,7 @@ pub fn draw_lib_native_widget(solve_number: usize, cube: &Cube3x3, area: Rect, f
     frame.render_widget(widget, area);
 }
 
-fn set_color(cell: &mut Cell, color: Color) -> &mut Cell {
+const fn set_color(cell: &mut Cell, color: Color) -> &mut Cell {
     cell.set_bg(color).set_fg(color)
 }
 
@@ -49,7 +49,7 @@ impl Widget for ColoredFace {
         const FACE_SIZE: u16 = 7;
         const FACELET_LENGTH: u16 = 4;
 
-        for dx in 0..(3 * FACELET_LENGTH + 1) {
+        for dx in 0..=(3 * FACELET_LENGTH) {
             let x = area.left() + dx;
             buf[(x, area.top() + FACE_SIZE - 1)]
                 .set_fg(self.background)
@@ -57,7 +57,7 @@ impl Widget for ColoredFace {
         }
 
         for dy in (0..FACE_SIZE - 1).step_by(2) {
-            for dx in 0..(3 * FACELET_LENGTH + 1) {
+            for dx in 0..=(3 * FACELET_LENGTH) {
                 let x = area.left() + dx;
                 let y = area.top() + dy;
 
@@ -66,16 +66,24 @@ impl Widget for ColoredFace {
                     set_color(&mut buf[(x, y + 1)], self.background).set_symbol("█");
                 } else {
                     buf[(x, y)]
-                        .set_fg(owo_ansi_to_ratatui(self.color_scheme.face_color(
-                            self.face[(3 * (dy / 2) + dx / FACELET_LENGTH) as usize],
-                        )))
+                        .set_fg(owo_ansi_to_ratatui(
+                            self.color_scheme.face_color(
+                                *self
+                                    .face
+                                    .get((3 * (dy / 2) + dx / FACELET_LENGTH) as usize)
+                                    .expect("broken index invariants"),
+                            ),
+                        ))
                         .set_symbol("▄")
                         .set_bg(self.background);
                     set_color(
                         &mut buf[(x, y + 1)],
                         owo_ansi_to_ratatui(
                             self.color_scheme.face_color(
-                                self.face[(3 * (dy / 2) + dx / FACELET_LENGTH) as usize],
+                                *self
+                                    .face
+                                    .get((3 * (dy / 2) + dx / FACELET_LENGTH) as usize)
+                                    .expect("broken index invariants"),
                             ),
                         ),
                     )
@@ -134,7 +142,7 @@ pub fn draw_cli_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &
     frame.render_widget(colored, inner_area);
 }
 
-fn owo_ansi_to_ratatui(color: AnsiColors) -> Color {
+const fn owo_ansi_to_ratatui(color: AnsiColors) -> Color {
     match color {
         AnsiColors::Black => Color::Black,
         AnsiColors::Red => Color::Red,

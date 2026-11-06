@@ -56,7 +56,7 @@ fn reconstruct_n<P: Puzzle, T: Method<P>>(n: u32, technique: &T) -> anyhow::Resu
     Ok(recons)
 }
 
-static ARGS: LazyLock<Args> = LazyLock::new(|| Args::parse());
+static ARGS: LazyLock<Args> = LazyLock::new(Args::parse);
 
 fn main() -> anyhow::Result<()> {
     let args = ARGS.clone();

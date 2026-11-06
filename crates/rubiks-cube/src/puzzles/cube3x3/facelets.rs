@@ -13,10 +13,10 @@ use itertools::izip;
 use owo_colors::{AnsiColors, OwoColorize};
 
 use super::{
-    pieces::{Center, Corner, Edge, Orientation3x3, Piece3x3},
     Cube3x3,
+    pieces::{Center, Corner, Edge, Orientation3x3, Piece3x3},
 };
-use crate::{piece::index, Face, Mask, Piece, Puzzle};
+use crate::{Face, Mask, Piece, Puzzle, piece::index};
 
 /// The colour on each facelet of a [`Cube3x3`], one `[Center; 9]` per face
 /// in [`Center::ALL`] order, each read row by row as in [`Display`].
@@ -290,8 +290,7 @@ impl Facelets {
         self.to_string()
             .lines()
             .nth(pos.0)
-            .map(|line| letter_to_face(line.chars().nth(pos.1 + pos.1 / 3)?))
-            .flatten()
+            .and_then(|line| letter_to_face(line.chars().nth(pos.1 + pos.1 / 3)?))
     }
 }
 
@@ -428,7 +427,8 @@ impl ColorScheme3x3 {
     };
 
     /// The [`AnsiColors`] of a given [`Face`] under the [`ColorScheme3x3`].
-    pub fn face_color(&self, face: Face) -> AnsiColors {
+    #[must_use]
+    pub const fn face_color(self, face: Face) -> AnsiColors {
         match face {
             Face::U => self.u,
             Face::F => self.f,
