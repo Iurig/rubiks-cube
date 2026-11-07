@@ -10,7 +10,6 @@ repository.workspace = true
 description = "A twisty puzzle library that supports human solving methods"
 
 [dependencies]
-ansi-to-tui = { version = "8.0.1", optional = true }
 anstyle = "1.0.14"
 dyn-clone = "1.0.20"
 fastrand = "2.5.0"
@@ -18,13 +17,14 @@ itertools = "0.15.0"
 log = "0.4.34"
 papaya = "0.2.5"
 ratatui = { version = "0.30.2", optional = true }
+ratatui-core = { version = "0.1.2", features = ["anstyle"], optional = true }
 rayon = "1.12.0"
 termprofile = { version = "0.2.5", features = ["convert"] }
 thiserror = "2.0.21"
 
 [features]
 sketch = []
-ratatui = ["dep:ratatui", "dep:ansi-to-tui"]
+ratatui = ["dep:ratatui", "dep:ratatui-core"]
 
 [[example]]
 name = "sketch"

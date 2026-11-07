@@ -25,9 +25,6 @@ struct Args {
 
     #[arg(long)]
     interactive: bool,
-
-    #[arg(long)]
-    lib_widget: bool,
 }
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -72,6 +69,7 @@ fn main() -> anyhow::Result<()> {
             all_recons: recons,
             mode: app::Mode::BrowseSolves,
         };
+
         ratatui::run(|terminal| -> anyhow::Result<()> {
             while app.mode != Mode::Exited {
                 terminal.draw(|frame| view(&app, frame))?;
