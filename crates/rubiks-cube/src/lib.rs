@@ -104,6 +104,7 @@ pub use piece::{Piece, PieceConfiguration};
 pub use puzzles::cube3x3::{
     Cube3x3,
     facelets::{ColorScheme3x3, Colored3x3, Facelets},
+    moves::{MovablePart, Move3x3, MoveModifier},
     pieces::{Center, Corner, Edge, Face, Orientation3x3, Piece3x3},
 };
 pub use puzzles::{

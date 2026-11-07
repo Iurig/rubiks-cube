@@ -1,13 +1,14 @@
 [package]
 name = "rubiks-cube"
 version = "0.1.0"
+
 categories = ["games", "simulation"]
+description = "A twisty puzzle library that supports human solving methods"
 edition.workspace = true
 keywords = ["CFOP", "Roux", "cube", "rubiks", "twisty-puzzle"]
 license.workspace = true
 readme.workspace = true
 repository.workspace = true
-description = "A twisty puzzle library that supports human solving methods"
 
 [dependencies]
 anstyle = "1.0.14"
@@ -23,8 +24,8 @@ termprofile = { version = "0.2.5", features = ["convert"] }
 thiserror = "2.0.21"
 
 [features]
-sketch = []
 ratatui = ["dep:ratatui", "dep:ratatui-core"]
+sketch = []
 
 [[example]]
 name = "sketch"

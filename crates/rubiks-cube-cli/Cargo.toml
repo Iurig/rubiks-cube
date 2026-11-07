@@ -1,13 +1,14 @@
 [package]
 name = "rubiks-cube-cli"
 version = "0.1.0"
+
 categories = ["command-line-utilities", "games"]
+description = "A command line interface for scrambling and solving a rubiks cube using human methods"
 edition.workspace = true
 keywords = ["rubiks", "cube", "twisty-puzzle", "Roux", "CFOP"]
 license.workspace = true
 readme.workspace = true
 repository.workspace = true
-description = "A command line interface for scrambling and solving a rubiks cube using human methods"
 
 [dependencies]
 anyhow = "1.0.104"

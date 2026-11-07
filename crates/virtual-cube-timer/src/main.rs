@@ -1,12 +1,16 @@
 mod app;
+mod keybinds;
+mod message;
 mod view;
 
 use clap::{Parser, ValueEnum};
-use crossterm::event::{self, KeyEvent};
+use crossterm::event::{self, KeyCode, KeyEvent};
+use ratatui_core as _;
 use rubiks_cube::Cube3x3;
 
 use crate::{
     app::{App, Mode},
+    message::Message,
     view::render_view,
 };
 
@@ -17,7 +21,7 @@ struct Args {
     method: Methods,
 
     #[arg(long, short)]
-    untimed: bool,
+    timed: bool,
 }
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -29,7 +33,7 @@ enum Methods {
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    if args.untimed {
+    if !args.timed {
         let mut app = App {
             mode: Mode::Untimed,
             cube: Cube3x3::default(),
@@ -38,16 +42,19 @@ fn main() -> anyhow::Result<()> {
         ratatui::run(|terminal| -> anyhow::Result<()> {
             while app.mode != Mode::Exited {
                 terminal.draw(|frame| render_view(&app, frame))?;
-            }
 
-            if let Some(KeyEvent {
-                code: _,
-                modifiers: _,
-                kind: _,
-                state: _,
-            }) = event::read()?.as_key_press_event()
-            {
-                todo!()
+                if let Some(KeyEvent {
+                    code: key,
+                    modifiers: _,
+                    kind: _,
+                    state: _,
+                }) = event::read()?.as_key_press_event()
+                {
+                    match key {
+                        KeyCode::Esc => app.update(Message::ExitProgram),
+                        _ => (),
+                    }
+                }
             }
 
             Ok(())

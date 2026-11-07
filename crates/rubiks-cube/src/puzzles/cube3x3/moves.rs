@@ -14,36 +14,35 @@ use crate::{
 
 use table::cube_state;
 
-#[expect(
-    unnameable_types,
-    reason = "reachable through `Move3x3::part`; not exported until ticket 01 derives the parts' \
-              `Display` and `FromStr` from one list and ticket 04 settles the face role"
-)]
+/// A part of a [`Cube3x3`] that can be moved (e.g. F, M, y).
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum MovablePart {
+    /// A 3x3 face.
     Face(Face),
+    /// A 3x3 slice.
     Slice(Slice),
+    /// A 3x3 rotation axis.
     Rotation(Rotation),
+    /// A 3x3 wide move type.
     Wide(Face),
 }
 
-#[expect(
-    unnameable_types,
-    reason = "reachable through `Move3x3::modifier`; exported together with `Move3x3`"
-)]
+/// Types of qualifiers that moves can have (e.g. `2` or `'`).
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum MoveModifier {
+    /// The qualifier of moves without written qualifiers, usually associated with clockwise
+    /// movement.
     Clockwise,
+    /// The qualifier of moves qualified by `'`, usually associated with counterclockwise movement.
     Prime,
+    /// A double move, when executed without a specified direction, or in the direction defined by
+    /// [`Clockwise`](MoveModifier::Clockwise).
     Double,
+    /// A double move executed in the [`Prime`](MoveModifier::Prime) direction.
     DoublePrime,
 }
 
-#[expect(
-    unnameable_types,
-    reason = "reachable as `<Cube3x3 as Puzzle>::Move`, and callers build moves from notation; \
-              not exported until `MovablePart` is, since `new` and `part` take and return one"
-)]
+/// A move on [`Cube3x3`].
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Move3x3 {
     part: MovablePart,
@@ -51,6 +50,7 @@ pub struct Move3x3 {
 }
 
 impl Move3x3 {
+    /// The Constructor for [`Move3x3`].
     #[must_use]
     pub const fn new(part: MovablePart, modifier: MoveModifier) -> Self {
         Self { part, modifier }
@@ -112,6 +112,7 @@ impl MoveModifier {
         Self::DoublePrime,
     ];
 
+    /// The inverse of a move direction.
     #[must_use]
     pub const fn inverse(self) -> Self {
         match self {

@@ -6,6 +6,7 @@ use ratatui::{
     text::Text,
     widgets::Widget,
 };
+use termprofile::TermProfile;
 
 const fn set_color(cell: &mut Cell, color: Color) -> &mut Cell {
     cell.set_bg(color).set_fg(color)
@@ -39,6 +40,13 @@ impl WidgetCube3x3 {
     /// A mutable reference for the [`Cube3x3`] the widged displays.
     pub const fn mut_cube(&mut self) -> &mut Cube3x3 {
         &mut self.cube
+    }
+
+    /// Adapts the widget's colors to the highest color resolution supported by the terminal profile
+    /// passed.
+    pub fn on_terminal(&mut self, profile: TermProfile) -> &mut Self {
+        self.color_scheme = self.color_scheme.on_terminal(profile);
+        self
     }
 }
 
@@ -129,12 +137,22 @@ impl Widget for WidgetCube3x3 {
         }
 
         let areas = area
-            .layout::<3>(&Layout::horizontal([
+            .layout::<5>(&Layout::horizontal([
+                Constraint::Fill(1),
                 Constraint::Length(14),
                 Constraint::Length(14),
                 Constraint::Length(13),
+                Constraint::Fill(1),
             ]))
-            .map(|vert| vert.layout::<3>(&Layout::vertical([Constraint::Fill(1); 3])));
+            .map(|vert| {
+                vert.layout::<5>(&Layout::vertical([
+                    Constraint::Fill(1),
+                    Constraint::Length(FACE_SIZE),
+                    Constraint::Length(FACE_SIZE),
+                    Constraint::Length(FACE_SIZE),
+                    Constraint::Fill(1),
+                ]))
+            });
 
         macro_rules! render_face {
             ($face:ident, ($x:literal, $y:literal)) => {
@@ -143,7 +161,7 @@ impl Widget for WidgetCube3x3 {
                     color_scheme: self.color_scheme,
                     background: self.background,
                 }
-                .render(areas[$x][$y], buf);
+                .render(areas[$x + 1][$y + 1], buf);
             };
         }
 
