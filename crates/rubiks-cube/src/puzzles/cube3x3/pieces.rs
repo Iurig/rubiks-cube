@@ -18,6 +18,7 @@ macro_rules! new_piece {
     ($(#[$attr:meta])* $type_name:ident, $amount:ident, [$($p:ident),+]) => {
         $(#[$attr])*
         #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         #[repr(u8)]
         pub enum $type_name {
             $(
@@ -128,6 +129,7 @@ pub enum Orientation3x3 {
     reason = "reachable through `MovablePart::Slice`; exported together with `MovablePart`"
 )]
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum Slice {
     M,
     S,
@@ -137,6 +139,7 @@ impl Slice {
     pub const ALL: [Self; 3] = [Self::M, Self::S, Self::E];
 }
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[expect(
     unnameable_types,
     reason = "reachable through `MovablePart::Rotation`; exported together with `MovablePart`"

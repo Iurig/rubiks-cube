@@ -16,8 +16,9 @@ pub enum Mode {
 }
 
 impl App {
-    pub fn update(&mut self, message: Message) {
+    pub fn update(&mut self, message: &Message) {
         match message {
+            Message::ApplyMove(m) => self.cube *= *m,
             Message::ExitProgram => self.mode = Mode::Exited,
         }
     }

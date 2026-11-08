@@ -16,6 +16,7 @@ use table::cube_state;
 
 /// A part of a [`Cube3x3`] that can be moved (e.g. F, M, y).
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MovablePart {
     /// A 3x3 face.
     Face(Face),
@@ -29,6 +30,7 @@ pub enum MovablePart {
 
 /// Types of qualifiers that moves can have (e.g. `2` or `'`).
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MoveModifier {
     /// The qualifier of moves without written qualifiers, usually associated with clockwise
     /// movement.
@@ -44,6 +46,7 @@ pub enum MoveModifier {
 
 /// A move on [`Cube3x3`].
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Move3x3 {
     part: MovablePart,
     modifier: MoveModifier,

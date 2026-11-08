@@ -10,6 +10,7 @@ use rubiks_cube::Cube3x3;
 
 use crate::{
     app::{App, Mode},
+    keybinds::{KeyPress, Keybinds},
     message::Message,
     view::render_view,
 };
@@ -33,7 +34,14 @@ enum Methods {
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    if !args.timed {
+    let keybinds = Keybinds::from_config()?;
+
+    if args.timed {
+        let _app = App {
+            mode: Mode::Timed,
+            cube: Cube3x3::default(),
+        };
+    } else {
         let mut app = App {
             mode: Mode::Untimed,
             cube: Cube3x3::default(),
@@ -45,13 +53,18 @@ fn main() -> anyhow::Result<()> {
 
                 if let Some(KeyEvent {
                     code: key,
-                    modifiers: _,
+                    modifiers: modif,
                     kind: _,
                     state: _,
                 }) = event::read()?.as_key_press_event()
                 {
-                    match key {
-                        KeyCode::Esc => app.update(Message::ExitProgram),
+                    match (key, modif) {
+                        (KeyCode::Esc, _) => app.update(&Message::ExitProgram),
+                        _ if let Some(m) =
+                            keybinds.as_move(&KeyPress::with_modifiers(key, modif)) =>
+                        {
+                            app.update(&Message::ApplyMove(m));
+                        }
                         _ => (),
                     }
                 }

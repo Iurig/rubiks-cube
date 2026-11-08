@@ -20,6 +20,7 @@ papaya = "0.2.5"
 ratatui = { version = "0.30.2", optional = true }
 ratatui-core = { version = "0.1.2", features = ["anstyle"], optional = true }
 rayon = "1.12.0"
+serde = { version = "1.0.229", features = ["derive"], optional = true }
 termprofile = { version = "0.2.5", features = ["convert"] }
 thiserror = "2.0.21"
 
