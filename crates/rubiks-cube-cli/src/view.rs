@@ -1,10 +1,10 @@
 use std::io::stdout;
 
 use ratatui::{
-    Frame,
     layout::{Constraint, Layout, Offset, Rect},
     text::Line,
     widgets::{Block, Paragraph},
+    Frame,
 };
 use rubiks_cube::{ColorScheme3x3, Cube3x3};
 use termprofile::{DetectorSettings, TermProfile};

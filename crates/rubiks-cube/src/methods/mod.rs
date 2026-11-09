@@ -292,9 +292,14 @@ fn run_steps<P: Puzzle>(
 /// parameters, collapses to a different [`Technique`]. Implementation of [`Method`] usually starts
 /// by defining a type to hold such parameters, then how to get a sequence of steps from such
 /// parameters.
-pub trait Method<P: Puzzle>: Debug {
+pub trait Method<P: Puzzle>: Debug + Default {
     /// Converts a parametrized [`Method`] to a specific [`Technique`]
     fn to_technique(&self) -> Technique<P>;
+
+    /// Constructs a default [`Method`].
+    fn new() -> Self {
+        Self::default()
+    }
 
     /// Runs every step in order and joins their solutions: [`solve_steps`](Self::solve_steps),
     /// collected.
