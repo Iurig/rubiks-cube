@@ -52,6 +52,10 @@ pub struct Move3x3 {
     modifier: MoveModifier,
 }
 
+/// The axis moves and parts can have one for each cartesian axis.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Axis3x3(Slice);
+
 impl Move3x3 {
     /// The Constructor for [`Move3x3`].
     #[must_use]
@@ -69,6 +73,12 @@ impl Move3x3 {
     #[must_use]
     pub const fn modifier(self) -> MoveModifier {
         self.modifier
+    }
+
+    /// The axis of a move, so parallel moves can be differentiated.
+    #[must_use]
+    pub fn axis(&self) -> Axis3x3 {
+        self.part().axis()
     }
 }
 
@@ -105,6 +115,22 @@ impl MovablePart {
         assert!(next == all.len());
         all
     };
+
+    /// The axis of a part, so parallel parts can be differentiated.
+    #[must_use]
+    pub fn axis(&self) -> Axis3x3 {
+        
+        match self {
+            Self::Slice(s) => Axis3x3(*s),
+            Self::Wide(w) => Self::Face(*w).axis(),
+            Self::Rotation(Rotation::X) => Axis3x3(Slice::M),
+            Self::Rotation(Rotation::Y) => Axis3x3(Slice::E),
+            Self::Rotation(Rotation::Z) => Axis3x3(Slice::S),
+            Self::Face(Face::R | Face::L) => Axis3x3(Slice::M),
+            Self::Face(Face::U | Face::D) => Axis3x3(Slice::E),
+            Self::Face(Face::F | Face::B) => Axis3x3(Slice::S),
+        }
+    }
 }
 
 impl MoveModifier {
@@ -123,6 +149,36 @@ impl MoveModifier {
             Self::Prime => Self::Clockwise,
             Self::Double => Self::DoublePrime,
             Self::DoublePrime => Self::Double,
+        }
+    }
+
+    /// Converts a modifier to a number.
+    ///
+    /// Here positive numbers mean it is equivalent to that number of clockwise moves, negatives
+    /// mean the same for counterclockwise.
+    #[must_use]
+    pub const fn as_number(self) -> i32 {
+        match self {
+            Self::Clockwise => 1,
+            Self::Double => 2,
+            Self::DoublePrime => -2,
+            Self::Prime => -1,
+        }
+    }
+
+    /// Converts a number to a modifier.
+    ///
+    /// Here, the simplest form that has an equivalent effect on the cube is returned, so double
+    /// counterclockwise moves are never returned over double moves. Follows the same convention as
+    /// [`as_number`](MoveModifier::as_number).
+    #[must_use]
+    pub fn from_number(n: i32) -> Option<Self> {
+        match n.rem_euclid(4) {
+            0 => None,
+            1 => Some(Self::Clockwise),
+            2 => Some(Self::Double),
+            3 => Some(Self::Prime),
+            _ => unreachable!(),
         }
     }
 }

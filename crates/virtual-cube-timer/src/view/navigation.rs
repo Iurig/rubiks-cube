@@ -1,4 +1,7 @@
-use crate::app::navigation::{NavigationApp, NavigationMode};
+use crate::{
+    app::navigation::{NavigationApp, NavigationMode},
+    view::{CUBE_HEIGHT, CUBE_LENGTH, SCRAMBLE_HEIGHT, help::HelpWidget},
+};
 
 use std::io::stdout;
 
@@ -11,12 +14,8 @@ use ratatui::{
 use rubiks_cube::{ColorScheme3x3, Cube3x3};
 use termprofile::{DetectorSettings, TermProfile};
 
-const CUBE_HEIGHT: u16 = 23;
-const CUBE_LENGTH: u16 = 43; // ignores back
-const SCRAMBLE_HEIGHT: u16 = 3;
-
 pub fn render_navigation(app: &NavigationApp, frame: &mut Frame) {
-    if let Some(_) = app.demo {
+    if app.demo.is_some() {
         let scramble_text = app.scramble();
 
         let cube = Cube3x3::from_moves(scramble_text).expect("scramble should parse");
@@ -25,7 +24,6 @@ pub fn render_navigation(app: &NavigationApp, frame: &mut Frame) {
             NavigationMode::Solves => view_browse(app, frame, cube),
             NavigationMode::Inspect(_) => view_inspect(app, frame, cube),
         }
-    } else {
     }
 }
 
@@ -44,7 +42,13 @@ pub fn draw_cli_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &
     frame.render_widget(colored, inner_area);
 }
 
-fn draw_base(app: &NavigationApp, frame: &mut Frame, solve_space: Rect, cube: Cube3x3) {
+/// Draws the cube and the reconstruction, returning (`cube_area`, `scramble_area`, `recon_area`)
+fn draw_base(
+    app: &NavigationApp,
+    frame: &mut Frame,
+    solve_space: Rect,
+    cube: Cube3x3,
+) -> (Rect, Rect, Rect) {
     let scramble_text = app.scramble();
 
     let solve_text = app.solve_iter().collect::<Vec<_>>().join("\n");
@@ -85,27 +89,24 @@ fn draw_base(app: &NavigationApp, frame: &mut Frame, solve_space: Rect, cube: Cu
 
     frame.render_widget(scramble_widget, scramble_area);
     frame.render_widget(solve_widget, solve_area);
+
+    (cube_area, scramble_area, solve_area)
 }
 
 fn view_browse(app: &NavigationApp, frame: &mut Frame, cube: Cube3x3) {
-    let [solve_space, help_space] =
+    let [app_space, help_space] =
         Layout::vertical([Constraint::Fill(1), Constraint::Length(2)]).areas(frame.area());
 
-    draw_base(app, frame, solve_space, cube);
+    draw_base(app, frame, app_space, cube);
 
-    let help_widgets = [
-        Line::from("Inspect solve: Enter").centered(),
-        Line::from("Next solve: N").centered(),
-        Line::from("Previous solve: P").centered(),
-        Line::from("Exit: Esc").centered(),
-    ];
+    let help = HelpWidget::new([
+        "Inspect solve: Enter",
+        "Next solve: N",
+        "Previous solve: P",
+        "Exit: Esc",
+    ]);
 
-    let help_areas =
-        Layout::horizontal(help_widgets.iter().map(|_| Constraint::Fill(1))).split(help_space);
-
-    for (widget, area) in help_widgets.iter().zip(help_areas.iter()) {
-        frame.render_widget(widget, *area);
-    }
+    frame.render_widget(help, help_space);
 }
 
 fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
@@ -113,7 +114,7 @@ fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
     let [solve_space, help_space, dbg_area] = Layout::vertical([
         Constraint::Fill(1),
         Constraint::Length(2),
-        Constraint::Length(4),
+        Constraint::Length(2),
     ])
     .areas(frame.area());
 
@@ -126,13 +127,6 @@ fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
         Line::from("Move navigation: ←/→").centered(),
         Line::from("Back to browsing: Esc").centered(),
     ];
-
-    let [_, recon_space] =
-        Layout::vertical([Constraint::Length(CUBE_HEIGHT), Constraint::Fill(1)]).areas(solve_space);
-
-    let [_, solve_area] =
-        Layout::vertical([Constraint::Length(SCRAMBLE_HEIGHT), Constraint::Fill(1)])
-            .areas(recon_space);
 
     let cursor_position_in_recon = Offset::new(
         i32::try_from(
@@ -169,7 +163,7 @@ fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
         )
         .expect("should parse");
 
-    draw_base(app, frame, solve_space, cube);
+    let (_cube_area, _, solve_area) = draw_base(app, frame, solve_space, cube);
 
     frame.set_cursor_position(solve_area.as_position() + cursor_position_in_recon);
 
@@ -182,28 +176,26 @@ fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
 
     #[cfg(feature = "debug")]
     {
-        let mut dbg_rows = dbg_area.rows();
+        let print_info = [
+            format!("Step: {}", app.step().unwrap()),
+            format!("Step: {}", app.step().unwrap()),
+            format!("Total moves: {}", app.cur_step_move_count().unwrap()),
+        ];
 
-        frame.render_widget(
-            Line::from(format!("Step: {}", app.mode.cur_step())),
-            dbg_rows
-                .next()
-                .expect("dbg_rows should have at least 3 rows"),
-        );
-        frame.render_widget(
-            Line::from(format!("Move: {}", app.mode.cur_move())),
-            dbg_rows
-                .next()
-                .expect("dbg_rows should have at least 3 rows"),
-        );
-        frame.render_widget(
-            Line::from(format!(
-                "Total moves: {}",
-                crate::app::total_moves_in_cur_step(app)
-            )),
-            dbg_rows
-                .next()
-                .expect("dbg_rows should have at least 3 rows"),
-        );
+        let mut dbg_rows = dbg_area
+            .layout_vec(&Layout::new(
+                ratatui::layout::Direction::Horizontal,
+                (0..print_info.len()).map(|_| Constraint::Fill(1)),
+            ))
+            .into_iter();
+
+        print_info.into_iter().for_each(|info| {
+            frame.render_widget(
+                Line::from(info),
+                dbg_rows
+                    .next()
+                    .expect("dbg_rows should have at least 3 rows"),
+            )
+        });
     }
 }

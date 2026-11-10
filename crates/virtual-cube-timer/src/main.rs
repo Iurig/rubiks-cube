@@ -1,11 +1,13 @@
 mod app;
+mod event;
 mod keybinds;
 mod message;
 mod view;
 
+use std::time::{Duration, Instant};
+
 use anyhow::{Ok, ensure};
 use clap::{Parser, ValueEnum};
-use crossterm::event::{self, KeyCode, KeyEvent, KeyModifiers};
 use ratatui_core as _;
 use rubiks_cube::{
     Cube3x3, Puzzle,
@@ -15,13 +17,14 @@ use rubiks_cube::{
 use crate::{
     app::{
         App, Mode,
-        navigation::{DemoOptions, InspectOptions, NavigationApp, NavigationMode},
+        navigation::{DemoOptions, NavigationApp, NavigationMode},
         timing::TimingApp,
         untimed::UntimedApp,
     },
-    keybinds::{KeyPress, Keybinds},
-    message::{CubeMessage, Message, NavigationMessage},
-    view::{navigation::render_navigation, untimed::render_untimed},
+    event::EventHandler,
+    keybinds::Keybinds,
+    message::Message,
+    view::{navigation::render_navigation, timing::render_timing, untimed::render_untimed},
 };
 
 #[derive(Debug, Parser, Clone)]
@@ -65,6 +68,9 @@ fn main() -> anyhow::Result<()> {
             ModeArg::Normal => Mode::Timing(TimingApp {
                 cube: Cube3x3::default(),
                 method: args.method,
+                starting_time: Instant::now(),
+                timer_number: Duration::ZERO,
+                timer_running: false,
             }),
 
             mode => Mode::Navigation(NavigationApp {
@@ -78,7 +84,7 @@ fn main() -> anyhow::Result<()> {
                 },
                 all_recons: match args.method {
                     Method::Roux => reconstruct_n(
-                        args.number.expect("demo mode must have a number parameter"),
+                        args.number.unwrap_or(30),
                         &<rubiks_cube::Roux as rubiks_cube::Method<Cube3x3>>::new()
                             .first_block(FirstBlock::SquarePair)
                             .second_block(SecondBlock::EdgePairPair),
@@ -94,107 +100,39 @@ fn main() -> anyhow::Result<()> {
         },
     };
 
-    while app.is_running() {
-        let mut cloned_app = app.clone();
-        match cloned_app.mode {
-            Mode::Timing(ref method) => {
-                todo!("timing mode with {method:?}")
-            }
+    ratatui::run(|terminal| -> anyhow::Result<()> {
+        let event_handler = EventHandler::new(Duration::from_millis(5));
+        loop {
+            let message = match app.mode {
+                Mode::Timing(ref mut timing_app) => {
+                    terminal.draw(|frame| render_timing(timing_app, frame))?;
 
-            Mode::Untimed(ref untimed_app_ref) => ratatui::run(|terminal| -> anyhow::Result<()> {
-                let mut untimed_app = untimed_app_ref.clone();
-                while app.is_running() {
-                    terminal.draw(|frame| render_untimed(&untimed_app, frame))?;
-
-                    if let Some(KeyEvent {
-                        code: key,
-                        modifiers: modif,
-                        kind: _,
-                        state: _,
-                    }) = event::read()?.as_key_press_event()
-                    {
-                        match (key, modif) {
-                            (KeyCode::Esc, _) => app.update(&Message::ExitProgram),
-                            _ if let Some(m) =
-                                keybinds.as_move(&KeyPress::with_modifiers(key, modif)) =>
-                            {
-                                untimed_app.update(&CubeMessage::Apply(m));
-                            }
-                            _ => (),
-                        }
-                    }
+                    timing_app.update_with_message(event_handler.next()?, &keybinds)
                 }
-                Ok(())
-            })?,
 
-            Mode::Navigation(ref mut navigation_app) => {
-                ratatui::run(|terminal| -> anyhow::Result<()> {
-                    while app.is_running() {
-                        terminal.draw(|frame| render_navigation(&navigation_app, frame))?;
-                        if let Some(KeyEvent {
-                            code: pressed_key,
-                            modifiers: KeyModifiers::NONE | KeyModifiers::SHIFT,
-                            kind: _,
-                            state: _,
-                        }) = event::read()?.as_key_press_event()
-                        {
-                            match navigation_app.nav_mode {
-                                NavigationMode::Solves => match pressed_key {
-                                    KeyCode::Esc => app.update(&Message::ExitProgram),
+                Mode::Untimed(ref mut untimed_app) => {
+                    terminal.draw(|frame| render_untimed(untimed_app, frame))?;
 
-                                    KeyCode::Char('p' | 'P') => {
-                                        navigation_app.navigate(&NavigationMessage::PreviousSolve);
-                                    }
+                    crossterm::event::read()?
+                        .as_key_press_event()
+                        .map_or_default(|event| untimed_app.update_with_message(event, &keybinds))
+                }
 
-                                    KeyCode::Char('n' | 'N') => {
-                                        navigation_app.navigate(&NavigationMessage::NextSolve);
-                                    }
+                Mode::Navigation(ref mut navigation_app) => {
+                    terminal.draw(|frame| render_navigation(navigation_app, frame))?;
 
-                                    KeyCode::Enter => {
-                                        navigation_app.navigate(&NavigationMessage::EnterInspect);
-                                    }
-
-                                    _ => (),
-                                },
-
-                                NavigationMode::Inspect(InspectOptions {
-                                    move_index: _,
-                                    step_index: _,
-                                }) => match pressed_key {
-                                    KeyCode::Esc => {
-                                        navigation_app.navigate(&NavigationMessage::EnterSolves)
-                                    }
-
-                                    KeyCode::Left => {
-                                        navigation_app.navigate(&NavigationMessage::PreviousMove);
-                                    }
-
-                                    KeyCode::Right => {
-                                        navigation_app.navigate(&NavigationMessage::NextMove);
-                                    }
-
-                                    KeyCode::Up => {
-                                        navigation_app.navigate(&NavigationMessage::PreviousStep);
-                                    }
-
-                                    KeyCode::Down => {
-                                        navigation_app.navigate(&NavigationMessage::NextStep)
-                                    }
-
-                                    _ => (),
-                                },
-                            }
-                        }
-                    }
-                    Ok(())
-                })?
-            }
-
-            Mode::Exited => {
-                panic!("Error, should never enter the loop in exited mode")
+                    crossterm::event::read()?
+                        .as_key_press_event()
+                        .map_or_default(|event| navigation_app.update_with_message(event))
+                }
+            };
+            match message {
+                Some(Message::ExitProgram) => break,
+                None => (),
             }
         }
-    }
+        Ok(())
+    })?;
     Ok(())
 }
 
@@ -205,7 +143,7 @@ fn reconstruct_n<P: Puzzle, T: rubiks_cube::Method<P>>(
     let mut recons = Vec::new();
     for _ in 0..n {
         let scramble = P::scramble()?;
-        let scramble_text = scramble.to_string().replace("2'", "2");
+        let scramble_text = scramble.to_string();
 
         let mut puzzle = P::default().apply(&scramble);
 

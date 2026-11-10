@@ -91,7 +91,8 @@ impl Puzzle for Cube3x3 {
             .iter()
             .flat_map(|s| s.moves().iter().copied())
             .collect::<Algorithm<Self>>()
-            .inv())
+            .inv()
+            .simplify_single_moves())
     }
 }
 
@@ -208,16 +209,19 @@ impl Cube3x3 {
         ]
         .contains(&Face::F)
         {
-            rotated_self *= Move3x3::new(MovablePart::Rotation(Rotation::Y), MoveModifier::Clockwise);
+            rotated_self *=
+                Move3x3::new(MovablePart::Rotation(Rotation::Y), MoveModifier::Clockwise);
         }
         for _ in 0..4 {
             if rotated_self.centers().piece_at(Face::F) != Face::F {
-                rotated_self *= Move3x3::new(MovablePart::Rotation(Rotation::X), MoveModifier::Clockwise);
+                rotated_self *=
+                    Move3x3::new(MovablePart::Rotation(Rotation::X), MoveModifier::Clockwise);
             }
         }
         for _ in 0..4 {
             if rotated_self.centers().piece_at(Face::U) != Face::U {
-                rotated_self *= Move3x3::new(MovablePart::Rotation(Rotation::Z), MoveModifier::Clockwise);
+                rotated_self *=
+                    Move3x3::new(MovablePart::Rotation(Rotation::Z), MoveModifier::Clockwise);
             }
         }
 

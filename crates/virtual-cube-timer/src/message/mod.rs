@@ -18,3 +18,10 @@ pub enum NavigationMessage {
 pub enum CubeMessage {
     Apply(Move3x3),
 }
+
+pub enum TimingMessage {
+    Start,
+    Stop,
+    Toggle,
+    Cube(CubeMessage),
+}

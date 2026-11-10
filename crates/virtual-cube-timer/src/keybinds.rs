@@ -12,12 +12,12 @@ use rubiks_cube::Move3x3;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Keybinds {
     moves: BiHashMap<KeyPress, Move3x3>,
 }
 
-#[derive(Debug, SerializeDisplay, DeserializeFromStr, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, SerializeDisplay, DeserializeFromStr, PartialEq, Eq, Hash)]
 pub struct KeyPress(KeyCode, KeyModifiers);
 
 impl KeyPress {
@@ -32,7 +32,11 @@ impl KeyPress {
 
 impl Display for KeyPress {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{}", self.0, self.1)?;
+        if self.1 == KeyModifiers::empty() {
+            write!(f, "{}", self.0)?;
+        } else {
+            write!(f, "{}+{}", self.1, self.0)?;
+        }
         Ok(())
     }
 }
@@ -57,7 +61,7 @@ impl FromStr for KeyPress {
             .iter()
             .map(|&modif| match modif {
                 "Shift" => Ok(KeyModifiers::SHIFT),
-                "Ctrl" => Ok(KeyModifiers::CONTROL),
+                "Ctrl" | "Control" => Ok(KeyModifiers::CONTROL),
                 "Alt" => Ok(KeyModifiers::ALT),
                 m => Result::Err(format!("invalid modifier {m}")),
             })
@@ -119,10 +123,77 @@ impl Keybinds {
         match std::fs::read_to_string(&keybinds_path) {
             Ok(text) => serde_json::from_str::<Self>(&text).map_err(anyhow::Error::from),
             Err(e) if e.kind() == ErrorKind::NotFound => {
-                fs::write(keybinds_path, serde_json::to_string(&Self::default())?)?;
+                fs::write(
+                    keybinds_path,
+                    serde_json::to_string_pretty(&Self::default())?,
+                )?;
                 Ok(Self::default())
             }
             Err(e) => Err(e.into()),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn default_survives_round_trip() {
+        let keybinds = Keybinds::default();
+        assert_eq!(
+            keybinds,
+            serde_json::from_str(&serde_json::to_string_pretty(&keybinds).unwrap()).unwrap()
+        );
+    }
+
+    #[test]
+    fn default_with_ctrl_alt_or_shift_survives_round_trip() {
+        let default = Keybinds::default();
+
+        let modif_fn = |index: usize| Keybinds {
+            moves: [
+                KeyModifiers::CONTROL,
+                KeyModifiers::ALT,
+                KeyModifiers::SHIFT,
+                KeyModifiers::CONTROL
+                    .union(KeyModifiers::ALT)
+                    .union(KeyModifiers::SHIFT),
+            ]
+            .iter()
+            .map(|modif| {
+                default
+                    .moves
+                    .iter()
+                    .map(|(key, m)| (KeyPress(key.0, *modif), *m))
+                    .collect::<BiHashMap<_, _>>()
+            })
+            .nth(index)
+            .unwrap(),
+        };
+
+        let [ctrl, alt, shift, all] = [modif_fn(0), modif_fn(1), modif_fn(2), modif_fn(3)];
+
+        let round_trip = |bind: Keybinds| -> Keybinds {
+            serde_json::from_str(
+                &serde_json::to_string_pretty(&bind)
+                    .map(|s| {
+                        println!("{s}");
+                        s
+                    })
+                    .unwrap_or_else(|e| panic!("{e}")),
+            )
+            .map(|s| {
+                dbg!(&s);
+                s
+            })
+            .unwrap_or_else(|e| panic!("{e}"))
+        };
+
+        assert_eq!(ctrl.clone(), round_trip(ctrl));
+        assert_eq!(alt.clone(), round_trip(alt));
+        assert_eq!(shift.clone(), round_trip(shift));
+        assert_eq!(all.clone(), round_trip(all));
     }
 }

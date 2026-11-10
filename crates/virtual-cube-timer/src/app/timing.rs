@@ -1,7 +1,80 @@
-use rubiks_cube::Cube3x3;
+use std::time::{Duration, Instant};
+
+use crossterm::event::{KeyCode, KeyEvent};
+use rubiks_cube::{Cube3x3, Puzzle};
+
+use crate::{
+    event::Event,
+    keybinds::{KeyPress, Keybinds},
+    message::{CubeMessage, Message, TimingMessage},
+};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TimingApp {
     pub cube: Cube3x3,
     pub method: crate::Method,
+    pub starting_time: Instant,
+    pub timer_number: Duration,
+    pub timer_running: bool,
+}
+
+impl TimingApp {
+    pub fn update(&mut self, message: &TimingMessage) {
+        match message {
+            TimingMessage::Cube(CubeMessage::Apply(m)) => self.cube *= *m,
+            TimingMessage::Start => {
+                self.timer_running = true;
+                self.starting_time = Instant::now();
+            }
+            TimingMessage::Stop => {
+                self.timer_running = false;
+                self.timer_number = self.starting_time.elapsed();
+            }
+            TimingMessage::Toggle => {
+                if self.timer_running {
+                    self.update(&TimingMessage::Stop);
+                } else {
+                    self.update(&TimingMessage::Start);
+                }
+            }
+        }
+    }
+
+    pub fn update_with_message(&mut self, event: Event, keybinds: &Keybinds) -> Option<Message> {
+        match event {
+            Event::Key(event) => {
+                let KeyEvent {
+                    code,
+                    modifiers,
+                    kind: _,
+                    state: _,
+                } = event;
+
+                match (code, modifiers) {
+                    (KeyCode::Esc, _) => return Some(Message::ExitProgram),
+                    (KeyCode::Char(' '), _) => {
+                        self.update(&TimingMessage::Toggle);
+                    }
+                    _ if let Some(m) =
+                        keybinds.as_move(&KeyPress::with_modifiers(code, modifiers)) =>
+                    {
+                        self.update(&TimingMessage::Cube(CubeMessage::Apply(m)));
+                        if !self.timer_running {
+                            self.update(&TimingMessage::Start);
+                        }
+                        if self.cube.is_solved() {
+                            self.update(&TimingMessage::Stop);
+                        }
+                    }
+                    _ => (),
+                }
+            }
+            Event::Tick => {
+                if self.timer_running {
+                    self.timer_number = self.starting_time.elapsed();
+                }
+            }
+        }
+        None
+    }
 }

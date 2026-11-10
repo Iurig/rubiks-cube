@@ -1,10 +1,13 @@
 use std::{
     fmt::{self, Display},
+    iter::successors,
     ops::Index,
     str::FromStr,
 };
 
-use crate::{Inv, ParseSequenceError, Puzzle};
+use itertools::Itertools;
+
+use crate::{Cube3x3, Inv, Move3x3, MoveModifier, ParseSequenceError, Puzzle};
 
 /// A sequence of moves applied in order, such as an algorithm or a step's solution.
 ///
@@ -21,7 +24,10 @@ use crate::{Inv, ParseSequenceError, Puzzle};
 /// let solution: Solution<Cube3x3> = Kociemba.solve(&mut cube)?;
 /// let moves: Algorithm<Cube3x3> = solution.iter().flat_map(|s| s.moves()).copied().collect();
 /// // The inverse of a solution is a scramble that gives back the state it solved.
-/// assert_eq!(Cube3x3::from_moves(&moves.inv().to_string())?, Cube3x3::from_moves("R U R' F2")?);
+/// assert_eq!(
+///     Cube3x3::from_moves(&moves.inv().to_string())?,
+///     Cube3x3::from_moves("R U R' F2")?
+/// );
 /// # Ok(())
 /// # }
 /// ```
@@ -174,6 +180,57 @@ impl<P: Puzzle> Algorithm<P> {
     }
 }
 
+impl Algorithm<Cube3x3> {
+    /// Simplifies an algorithm not to include double prime moves.
+    #[must_use]
+    pub fn simplify_single_moves(self) -> Self {
+        self.into_iter()
+            .map(|m| {
+                if m.modifier() == MoveModifier::DoublePrime {
+                    Move3x3::new(m.part(), MoveModifier::Double)
+                } else {
+                    m
+                }
+            })
+            .collect()
+    }
+
+    /// Simplifies an algorithm by canceling moves where possible.
+    #[must_use]
+    pub fn simplify_cancelations(self) -> Self {
+        let cancel_once = |alg: Self| -> Self {
+            alg.into_iter()
+                .map(Some)
+                .coalesce(|mov1, mov2| {
+                    if let (Some(inner1), Some(inner2)) = (mov1, mov2) {
+                        if inner1.part() == inner2.part() {
+                            if let Some(modif) = MoveModifier::from_number(
+                                inner1.modifier().as_number() + inner2.modifier().as_number(),
+                            ) {
+                                Ok(Some(Move3x3::new(inner1.part(), modif)))
+                            } else {
+                                Ok(None)
+                            }
+                        } else {
+                            Err((mov1, mov2))
+                        }
+                    } else {
+                        Err((mov1, mov2))
+                    }
+                })
+                .flatten()
+                .collect()
+        };
+
+        successors(Some(self), |alg| {
+            let next = cancel_once(alg.clone());
+            (next != *alg).then_some(next)
+        })
+        .last()
+        .expect("empy iterator")
+    }
+}
+
 #[cfg(test)]
 #[expect(clippy::panic_in_result_fn, reason = "Standardized across tests")]
 mod test {
@@ -214,6 +271,19 @@ mod test {
             );
         }
         Ok(())
+    }
+
+    fn cancels_to_equal(alg1: &str, alg2: &str) {
+        let alg: Algorithm<Cube3x3> = alg1.parse().unwrap();
+        let expected: Algorithm<Cube3x3> = alg2.parse().unwrap();
+        assert_eq!(expected, alg.simplify_cancelations());
+    }
+
+    #[test]
+    fn simplify_same_part_cancelations() {
+        cancels_to_equal("R R", "R2");
+        cancels_to_equal("R R'", "");
+        cancels_to_equal("R R R R U U' R", "R");
     }
 
     #[test]

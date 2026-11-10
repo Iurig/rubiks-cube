@@ -297,6 +297,7 @@ pub trait Method<P: Puzzle>: Debug + Default {
     fn to_technique(&self) -> Technique<P>;
 
     /// Constructs a default [`Method`].
+    #[must_use]
     fn new() -> Self {
         Self::default()
     }
