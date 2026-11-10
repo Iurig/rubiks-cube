@@ -172,7 +172,7 @@ impl Method<Cube3x3> for Roux {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     #![expect(
         clippy::panic_in_result_fn,
         reason = "`?` reports setup failures; `assert!` reports the property under test failing"

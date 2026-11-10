@@ -35,9 +35,9 @@ macro_rules! new_piece {
         }
         impl Indexed for $type_name {
             const COUNT: usize = $amount;
-            fn index(self) -> usize {
+            fn index(&self) -> usize {
                 const { assert!(std::mem::size_of::<Self>() == 1) }
-                self as usize
+                *self as usize
             }
             fn from_index(index: usize) -> Self {
                 *Self::ALL.get(index).expect("index in 0..COUNT")

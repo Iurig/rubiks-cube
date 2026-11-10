@@ -77,7 +77,7 @@ impl Move3x3 {
 
     /// The axis of a move, so parallel moves can be differentiated.
     #[must_use]
-    pub fn axis(&self) -> Axis3x3 {
+    pub fn axis(self) -> Axis3x3 {
         self.part().axis()
     }
 }
@@ -119,7 +119,6 @@ impl MovablePart {
     /// The axis of a part, so parallel parts can be differentiated.
     #[must_use]
     pub fn axis(&self) -> Axis3x3 {
-        
         match self {
             Self::Slice(s) => Axis3x3(*s),
             Self::Wide(w) => Self::Face(*w).axis(),
@@ -185,12 +184,12 @@ impl MoveModifier {
 
 impl Indexed for MovablePart {
     const COUNT: usize = Self::ALL.len();
-    fn index(self) -> usize {
+    fn index(&self) -> usize {
         match self {
-            Self::Face(f) => f as usize,
-            Self::Slice(s) => Face::ALL.len() + s as usize,
-            Self::Rotation(r) => Face::ALL.len() + Slice::ALL.len() + r as usize,
-            Self::Wide(f) => Face::ALL.len() + Slice::ALL.len() + Rotation::ALL.len() + f as usize,
+            Self::Face(f) => *f as usize,
+            Self::Slice(s) => Face::ALL.len() + *s as usize,
+            Self::Rotation(r) => Face::ALL.len() + Slice::ALL.len() + *r as usize,
+            Self::Wide(f) => Face::ALL.len() + Slice::ALL.len() + Rotation::ALL.len() + *f as usize,
         }
     }
     fn from_index(index: usize) -> Self {
@@ -200,8 +199,8 @@ impl Indexed for MovablePart {
 
 impl Indexed for MoveModifier {
     const COUNT: usize = Self::ALL.len();
-    fn index(self) -> usize {
-        self as usize
+    fn index(&self) -> usize {
+        *self as usize
     }
     fn from_index(index: usize) -> Self {
         *Self::ALL.get(index).expect("index in 0..COUNT")
@@ -210,7 +209,7 @@ impl Indexed for MoveModifier {
 
 impl Indexed for Move3x3 {
     const COUNT: usize = <(MovablePart, MoveModifier)>::COUNT;
-    fn index(self) -> usize {
+    fn index(&self) -> usize {
         (self.part, self.modifier).index()
     }
     fn from_index(index: usize) -> Self {

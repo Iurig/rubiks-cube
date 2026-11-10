@@ -2,6 +2,7 @@ mod app;
 mod event;
 mod keybinds;
 mod message;
+mod solves;
 mod view;
 
 use std::time::{Duration, Instant};
@@ -17,13 +18,14 @@ use rubiks_cube::{
 use crate::{
     app::{
         App, Mode,
-        navigation::{DemoOptions, NavigationApp, NavigationMode},
+        navigation::{NavigationApp, NavigationMode},
         timing::TimingApp,
         untimed::UntimedApp,
     },
     event::EventHandler,
     keybinds::Keybinds,
     message::Message,
+    solves::{SolveList, SolveMoves},
     view::{navigation::render_navigation, timing::render_timing, untimed::render_untimed},
 };
 
@@ -68,20 +70,14 @@ fn main() -> anyhow::Result<()> {
             ModeArg::Normal => Mode::Timing(TimingApp {
                 cube: Cube3x3::default(),
                 method: args.method,
+                solves: SolveList::from_solves_file()?,
                 starting_time: Instant::now(),
                 timer_number: Duration::ZERO,
-                timer_running: false,
+                timer_state: app::timing::TimerState::Solved,
             }),
 
-            mode => Mode::Navigation(NavigationApp {
+            _mode => Mode::Navigation(NavigationApp {
                 solve_index: 0,
-                demo: match mode {
-                    ModeArg::Browse => None,
-                    ModeArg::Demo => Some(DemoOptions {
-                        method: args.method.clone(),
-                    }),
-                    _ => unreachable!(),
-                },
                 all_recons: match args.method {
                     Method::Roux => reconstruct_n(
                         args.number.unwrap_or(30),
@@ -136,25 +132,23 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn reconstruct_n<P: Puzzle, T: rubiks_cube::Method<P>>(
+fn reconstruct_n<T: rubiks_cube::Method<Cube3x3>>(
     n: u32,
     technique: &T,
-) -> anyhow::Result<Vec<String>> {
+) -> anyhow::Result<Vec<SolveMoves>> {
     let mut recons = Vec::new();
     for _ in 0..n {
-        let scramble = P::scramble()?;
-        let scramble_text = scramble.to_string();
+        let scramble = Cube3x3::scramble()?;
 
-        let mut puzzle = P::default().apply(&scramble);
+        let mut puzzle = Cube3x3::default().apply(&scramble);
 
         let solution = technique.solve(&mut puzzle)?;
 
         ensure!(
             puzzle.is_solved(),
-            "scramble:\n {scramble_text} \n and solve:\n {solution} \n did not solve the cube"
+            "scramble:\n {scramble} \n and solve:\n {solution} \n did not solve the cube"
         );
-
-        recons.push(format!("{scramble_text}\n{solution}"));
+        recons.push(SolveMoves::new(scramble, solution));
     }
     Ok(recons)
 }

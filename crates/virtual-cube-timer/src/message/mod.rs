@@ -22,6 +22,6 @@ pub enum CubeMessage {
 pub enum TimingMessage {
     Start,
     Stop,
-    Toggle,
+    Next,
     Cube(CubeMessage),
 }

@@ -12,7 +12,7 @@ pub mod private {
 }
 
 /// One of the `N` pieces of a kind, named by its home slot.
-pub trait Piece<const N: usize>: Indexed + Eq + private::Sealed + Debug {
+pub trait Piece<const N: usize>: Indexed + Copy + Eq + private::Sealed + Debug {
     /// Every piece, in slot order.
     const ALL: [Self; N];
 }

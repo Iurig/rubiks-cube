@@ -98,11 +98,11 @@ impl Puzzle for Cube3x3 {
 
 impl Indexed for Piece3x3 {
     const COUNT: usize = Cube3x3::ALL_PIECES.len();
-    fn index(self) -> usize {
+    fn index(&self) -> usize {
         match self {
-            Self::Center(c) => c as usize,
-            Self::Corner(c) => Center::ALL.len() + c as usize,
-            Self::Edge(e) => Center::ALL.len() + Corner::ALL.len() + e as usize,
+            Self::Center(c) => *c as usize,
+            Self::Corner(c) => Center::ALL.len() + *c as usize,
+            Self::Edge(e) => Center::ALL.len() + Corner::ALL.len() + *e as usize,
         }
     }
     fn from_index(index: usize) -> Self {

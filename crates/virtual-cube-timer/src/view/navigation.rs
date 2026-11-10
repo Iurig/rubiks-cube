@@ -15,15 +15,13 @@ use rubiks_cube::{ColorScheme3x3, Cube3x3};
 use termprofile::{DetectorSettings, TermProfile};
 
 pub fn render_navigation(app: &NavigationApp, frame: &mut Frame) {
-    if app.demo.is_some() {
-        let scramble_text = app.scramble();
+    let scramble = app.scramble().clone();
 
-        let cube = Cube3x3::from_moves(scramble_text).expect("scramble should parse");
+    let cube = Cube3x3::default() * scramble;
 
-        match app.nav_mode {
-            NavigationMode::Solves => view_browse(app, frame, cube),
-            NavigationMode::Inspect(_) => view_inspect(app, frame, cube),
-        }
+    match app.nav_mode {
+        NavigationMode::Solves => view_browse(app, frame, cube),
+        NavigationMode::Inspect(_) => view_inspect(app, frame, cube),
     }
 }
 
@@ -49,11 +47,12 @@ fn draw_base(
     solve_space: Rect,
     cube: Cube3x3,
 ) -> (Rect, Rect, Rect) {
-    let scramble_text = app.scramble();
+    let scramble_text = app.scramble().to_string();
 
-    let solve_text = app.solve_iter().collect::<Vec<_>>().join("\n");
+    let solve_text = app.solution().to_string();
 
-    let scramble_widget = Paragraph::new(scramble_text).block(Block::bordered().title("Scramble"));
+    let scramble_widget =
+        Paragraph::new(scramble_text.clone()).block(Block::bordered().title("Scramble"));
 
     let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title("Solve"));
 
@@ -132,6 +131,7 @@ fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
         i32::try_from(
             app.step()
                 .expect("invalid step")
+                .to_string()
                 .char_indices()
                 .filter(|&(_, c)| c == ' ')
                 .nth(app.unchecked_inspect_options().move_index)
@@ -149,19 +149,16 @@ fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
         if step >= app.unchecked_inspect_options().step_index {
             break;
         }
-        cube = cube.apply_moves(line).expect("should parse");
+        cube = cube * line;
     }
 
-    cube = cube
-        .apply_moves(
-            &app.step()
-                .expect("step not found")
-                .chars()
-                .zip(0..cursor_position_in_recon.x)
-                .map(|(c, _)| c)
-                .collect::<String>(),
-        )
-        .expect("should parse");
+    cube = app
+        .step()
+        .expect("step not found")
+        .clone()
+        .into_iter()
+        .zip(0..cursor_position_in_recon.x)
+        .fold(cube, |c, (m, _)| c * m);
 
     let (_cube_area, _, solve_area) = draw_base(app, frame, solve_space, cube);
 

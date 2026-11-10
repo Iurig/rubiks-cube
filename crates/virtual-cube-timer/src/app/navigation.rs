@@ -1,18 +1,16 @@
 use crossterm::event::{KeyCode, KeyEvent};
+use rubiks_cube::{Algorithm, Cube3x3, Segment, Solution};
 
-use crate::message::{Message, NavigationMessage};
+use crate::{
+    message::{Message, NavigationMessage},
+    solves::SolveMoves,
+};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct NavigationApp {
     pub solve_index: usize,
-    pub demo: Option<DemoOptions>,
-    pub all_recons: Vec<String>,
+    pub all_recons: Vec<SolveMoves>,
     pub nav_mode: NavigationMode,
-}
-
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub struct DemoOptions {
-    pub method: crate::Method,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -175,40 +173,38 @@ impl NavigationApp {
         self.inspect_options().expect("not in inspect mode")
     }
 
-    pub fn recon(&self) -> &str {
+    pub fn solution(&self) -> &Solution<Cube3x3> {
         self.all_recons
             .get(self.solve_index)
             .expect("index doesn't match an existing reconstruction")
+            .solution()
     }
 
-    pub fn scramble(&self) -> &str {
-        self.recon()
-            .lines()
-            .next()
-            .expect("solve should have a scramble line")
+    pub fn scramble(&self) -> &Algorithm<Cube3x3> {
+        self.all_recons
+            .get(self.solve_index)
+            .expect("index doesn't match an existing reconstruction")
+            .scramble()
     }
 
     pub fn step_count(&self) -> usize {
-        self.recon().lines().count() - 1
+        self.solution().iter().count()
     }
 
-    pub fn step(&self) -> Option<&str> {
+    pub fn step(&self) -> Option<&Segment<Cube3x3>> {
         Some(
-            self.recon()
-                .lines()
+            self.solution()
+                .iter()
                 .nth(self.inspect_options()?.step_index + 1)
-                .expect("invalid step_index")
-                .split_once('/')
-                .expect("step didn't have comment")
-                .0,
+                .expect("invalid step_index"),
         )
     }
 
     pub fn cur_step_move_count(&self) -> Option<usize> {
-        Some(self.step()?.chars().filter(|c| *c == ' ').count() - 4)
+        Some(self.step().iter().count())
     }
 
-    pub fn solve_iter(&self) -> impl Iterator<Item = &str> {
-        self.recon().lines().skip(1)
+    pub fn solve_iter(&self) -> impl Iterator<Item = Segment<Cube3x3>> {
+        self.solution().iter().cloned()
     }
 }

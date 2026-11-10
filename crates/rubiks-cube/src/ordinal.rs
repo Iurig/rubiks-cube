@@ -9,7 +9,7 @@ pub fn ordinal(number: usize) -> String {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]

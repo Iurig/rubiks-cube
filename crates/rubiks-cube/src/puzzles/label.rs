@@ -351,7 +351,7 @@ impl<P: Puzzle> PieceSet<P> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use crate::{Corner, Cube3x3, Piece3x3};
 
     use super::*;

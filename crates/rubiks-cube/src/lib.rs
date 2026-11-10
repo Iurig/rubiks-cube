@@ -73,10 +73,11 @@
 //! is what the solver needs from a puzzle, and [`Facelets`] shows a cube as a sticker net.
 mod error;
 mod fast_hash;
-mod indexed;
+pub mod indexed;
 mod methods;
 mod ops;
 mod ordinal;
+pub mod permutation;
 mod piece;
 mod puzzles;
 pub mod zn;

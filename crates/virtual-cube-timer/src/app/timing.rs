@@ -7,15 +7,34 @@ use crate::{
     event::Event,
     keybinds::{KeyPress, Keybinds},
     message::{CubeMessage, Message, TimingMessage},
+    solves::SolveList,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TimingApp {
     pub cube: Cube3x3,
     pub method: crate::Method,
+    pub solves: SolveList,
     pub starting_time: Instant,
     pub timer_number: Duration,
-    pub timer_running: bool,
+    pub timer_state: TimerState,
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum TimerState {
+    Scrambled,
+    Solving,
+    Solved,
+}
+
+impl TimerState {
+    const fn next(&self) -> Self {
+        match self {
+            Self::Scrambled => Self::Solving,
+            Self::Solving => Self::Solved,
+            Self::Solved => Self::Scrambled,
+        }
+    }
 }
 
 impl TimingApp {
@@ -23,20 +42,22 @@ impl TimingApp {
         match message {
             TimingMessage::Cube(CubeMessage::Apply(m)) => self.cube *= *m,
             TimingMessage::Start => {
-                self.timer_running = true;
+                self.timer_state = TimerState::Solving;
                 self.starting_time = Instant::now();
             }
             TimingMessage::Stop => {
-                self.timer_running = false;
+                self.timer_state = TimerState::Solved;
                 self.timer_number = self.starting_time.elapsed();
             }
-            TimingMessage::Toggle => {
-                if self.timer_running {
-                    self.update(&TimingMessage::Stop);
-                } else {
-                    self.update(&TimingMessage::Start);
+            TimingMessage::Next => match self.timer_state {
+                TimerState::Scrambled => self.update(&TimingMessage::Start),
+                TimerState::Solving => self.update(&TimingMessage::Stop),
+                TimerState::Solved => {
+                    self.timer_state = TimerState::Scrambled;
+                    self.cube = Cube3x3::scrambled();
+                    self.timer_number = Duration::ZERO;
                 }
-            }
+            },
         }
     }
 
@@ -53,13 +74,13 @@ impl TimingApp {
                 match (code, modifiers) {
                     (KeyCode::Esc, _) => return Some(Message::ExitProgram),
                     (KeyCode::Char(' '), _) => {
-                        self.update(&TimingMessage::Toggle);
+                        self.update(&TimingMessage::Next);
                     }
                     _ if let Some(m) =
                         keybinds.as_move(&KeyPress::with_modifiers(code, modifiers)) =>
                     {
                         self.update(&TimingMessage::Cube(CubeMessage::Apply(m)));
-                        if !self.timer_running {
+                        if self.timer_state == TimerState::Scrambled {
                             self.update(&TimingMessage::Start);
                         }
                         if self.cube.is_solved() {
@@ -70,7 +91,7 @@ impl TimingApp {
                 }
             }
             Event::Tick => {
-                if self.timer_running {
+                if self.timer_state == TimerState::Solving {
                     self.timer_number = self.starting_time.elapsed();
                 }
             }

@@ -204,13 +204,12 @@ impl Algorithm<Cube3x3> {
                 .coalesce(|mov1, mov2| {
                     if let (Some(inner1), Some(inner2)) = (mov1, mov2) {
                         if inner1.part() == inner2.part() {
-                            if let Some(modif) = MoveModifier::from_number(
+                            MoveModifier::from_number(
                                 inner1.modifier().as_number() + inner2.modifier().as_number(),
-                            ) {
+                            )
+                            .map_or(Ok(None), |modif| {
                                 Ok(Some(Move3x3::new(inner1.part(), modif)))
-                            } else {
-                                Ok(None)
-                            }
+                            })
                         } else {
                             Err((mov1, mov2))
                         }
@@ -233,7 +232,7 @@ impl Algorithm<Cube3x3> {
 
 #[cfg(test)]
 #[expect(clippy::panic_in_result_fn, reason = "Standardized across tests")]
-mod test {
+mod tests {
 
     use crate::Cube3x3;
 

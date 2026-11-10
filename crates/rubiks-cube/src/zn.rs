@@ -5,6 +5,8 @@ use std::{
     ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
+use crate::Indexed;
+
 /// Integers mod `N`, stored as the representative in `0..N`.
 ///
 /// The representative fits a byte: a twist is at most 2 and a flip at most
@@ -66,6 +68,16 @@ impl<const N: usize> Sum for Zn<N> {
 impl<const N: usize> Product for Zn<N> {
     fn product<I: Iterator<Item = Self>>(iter: I) -> Self {
         iter.fold(Self::new(1), |prev, next| prev * next)
+    }
+}
+
+impl<const N: usize> Indexed for Zn<N> {
+    const COUNT: usize = N;
+    fn index(&self) -> usize {
+        self.value()
+    }
+    fn from_index(index: usize) -> Self {
+        Self::new(index)
     }
 }
 
