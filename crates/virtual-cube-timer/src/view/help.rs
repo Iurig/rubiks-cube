@@ -16,7 +16,7 @@ impl Widget for HelpWidget {
         let help_areas =
             Layout::horizontal(self.messages.iter().map(|_| Constraint::Fill(1))).split(area);
 
-        for (message, area) in self.messages.into_iter().zip(help_areas.into_iter()) {
+        for (message, area) in self.messages.into_iter().zip(&*help_areas) {
             Line::from(message.as_str()).centered().render(*area, buf);
         }
     }
@@ -25,7 +25,7 @@ impl Widget for HelpWidget {
 impl HelpWidget {
     pub fn new<'a>(messages: impl IntoIterator<Item = &'a str>) -> Self {
         Self {
-            messages: messages.into_iter().map(|s| s.to_string()).collect(),
+            messages: messages.into_iter().map(std::string::ToString::to_string).collect(),
         }
     }
 }

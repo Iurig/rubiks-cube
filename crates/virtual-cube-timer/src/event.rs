@@ -34,8 +34,7 @@ impl EventHandler {
                     if crossterm::event::poll(remaining_time).expect("event polling failed") {
                         crossterm::event::read()
                             .expect("event couldn't be read")
-                            .as_key_press_event()
-                            .and_then(|event| Some(sender.send(Event::Key(event))));
+                            .as_key_press_event().map(|event| sender.send(Event::Key(event)));
                     } else {
                         sender.send(Event::Tick).expect("failed to send tick event");
                         last_tick = Instant::now();
