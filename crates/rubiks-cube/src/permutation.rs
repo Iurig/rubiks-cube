@@ -1,5 +1,7 @@
 //! The [`Permutation`] type and its tools.
 
+use std::{hash::Hash, ops::Index, vec::IntoIter};
+
 use crate::Indexed;
 
 /// Permutations of a [`Indexed`] type.
@@ -11,6 +13,27 @@ pub struct Permutation<T: Indexed>(Vec<T>);
 impl<T: Indexed> Default for Permutation<T> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl<T: Indexed> Index<usize> for Permutation<T> {
+    type Output = T;
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index]
+    }
+}
+
+impl<T: Indexed> IntoIterator for Permutation<T> {
+    type Item = T;
+    type IntoIter = IntoIter<T>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.to_vec().into_iter()
+    }
+}
+
+impl<T: Indexed> Hash for Permutation<T> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        Indexed::index(self).hash(state);
     }
 }
 
