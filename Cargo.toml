@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "crates/rubiks-cube",
-    "crates/rubiks-cube-cli",
     "crates/virtual-cube-timer",
     "crates/twisty-puzzles-py",
     "tools/cargo-bin",
