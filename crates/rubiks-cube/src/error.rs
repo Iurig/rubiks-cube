@@ -12,8 +12,8 @@ pub enum StepError {
     #[error("goal could not be reached with the given algset")]
     UnreachableGoal,
     /// The puzzle does not meet what the step needs before it starts, such as a
-    /// [`SearchStep`](crate::SearchStep)'s `before` mask. [`Shortest`](crate::Shortest) skips an
-    /// alternative that returns this.
+    /// [`SearchStep`](crate::SearchStep)'s `before` piece set. [`Shortest`](crate::Shortest) skips
+    /// an alternative that returns this.
     #[error("starting state doesn't fit expected properties:\n{state}")]
     InvalidStartingState {
         /// The puzzle the step was given, as its [`Display`] prints it.

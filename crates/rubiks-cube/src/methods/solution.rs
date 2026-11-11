@@ -5,12 +5,12 @@ use crate::{Algorithm, Cube3x3, ParseSequenceError, puzzles::Puzzle};
 /// The moves a method found, as one segment per step, in solving order.
 ///
 /// Each segment is the moves a step applied and the name of the step. `Display` prints one line
-/// per segment: the moves in notation, then a tab, `//`, and the step name. That text is valid
-/// notation, so a scramble followed by its printed solution replays to the solved state:
+/// per segment: the moves in notation, then four spaces, `//`, and the step name. That text is
+/// valid notation, so a scramble followed by its printed solution replays to the solved state:
 ///
 /// ```text
-/// F' Uw2 Rw Fw M' E' F2    //FB
-/// U Rw2 U M' U2 Rw' U Rw2 U R    //SB
+/// F' Uw2 Rw Fw M' E' F2    // FB
+/// U Rw2 U M' U2 Rw' U Rw2 U R    // SB
 /// ```
 ///
 /// Build one with [`single_segment`](Self::single_segment), or collect solutions to join them.
@@ -107,7 +107,7 @@ impl<P: Puzzle> Solution<P> {
     }
 
     /// The number of moves in every segment, each move counting one whatever its part or
-    /// modifier (slice turn metric). `M`, `Rw`, `y`, and `U2` each count one.
+    /// modifier (ESTM). `M`, `Rw`, `y`, and `U2` each count one.
     #[must_use]
     pub fn move_count(&self) -> usize {
         self.step_solutions
@@ -117,7 +117,7 @@ impl<P: Puzzle> Solution<P> {
     }
 }
 
-/// Builds a solution from `(moves, step name)` segments, in order.
+/// Builds a solution from [`Segment`]s, in order.
 impl<P: Puzzle> FromIterator<Segment<P>> for Solution<P> {
     fn from_iter<I: IntoIterator<Item = Segment<P>>>(iter: I) -> Self {
         Self {

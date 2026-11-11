@@ -52,7 +52,7 @@ pub struct Technique<P: Puzzle> {
 /// ```ignore
 /// use rubiks_cube::{AlgSet, SearchStep, Technique, PieceSet, Cube3x3};
 ///
-/// let eolr = *SearchStep::builder("EOLR", AlgSet::from_static_parts("M U"))
+/// let eolr = SearchStep::builder("EOLR", AlgSet::from_static_parts("M U"))
 ///     .goal(PieceSet::from_algset(&AlgSet::from_static("M\n U2")));
 ///
 /// let advanced_roux = Technique::<Cube3x3>::start_with(SearchStep::builder(
@@ -64,9 +64,9 @@ pub struct Technique<P: Puzzle> {
 ///     AlgSet::from_static_parts("R U r M"),
 /// ))
 /// .then(
-///     *SearchStep::builder(
+///     SearchStep::builder(
 ///        "CMLL",
-///         AlgSet::from_static_parts(concat!(include_str!("path/to/algs/"))),
+///         AlgSet::from_static_parts(concat!(include_str!("path/to/algs"))),
 ///     )
 ///     .free_algs(AlgSet::from_static_parts("U"))
 ///     .goal(PieceSet::from_algset(&AlgSet::from_static("U M' U' \n M"))),
@@ -237,7 +237,7 @@ impl<P: Puzzle> Technique<P> {
 
     /// Constructs the [`Technique`] with a given neutrality.
     #[must_use]
-    pub fn with_neutrality(
+    fn with_neutrality(
         steps: impl IntoIterator<Item = Arc<dyn Step<P>>>,
         // neutrality: Neutrality<P>,
     ) -> Self {

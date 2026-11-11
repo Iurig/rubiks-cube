@@ -272,7 +272,7 @@ impl FromStr for Move3x3 {
     /// The part is an uppercase face letter (`R`), a face letter followed by
     /// `w` for the wide move (`Rw`), a lowercase face letter meaning the same
     /// wide move (`r`), a slice (`M E S`), or a rotation (`x y z`). Whatever
-    /// follows the part must be a modifier: nothing, `'`, `2`, or `2'`.
+    /// follows the part must be a modifier: nothing, `'`, `2`, `2'`, or `'2`.
     fn from_str(token: &str) -> Result<Self, Self::Err> {
         let mut chars = token.chars();
         let first = chars.next().ok_or(ParseMoveError::EmptyString)?;

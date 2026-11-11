@@ -36,16 +36,13 @@ type SharedMemo<P> = Arc<Mutex<BfsMemo<P>>>;
 
 /// One shared memo per memo key, so steps that search for the same thing with the same
 /// sequences grow the same memo, even when built at different times by different methods.
-///
-/// Statics cannot be generic, so each puzzle type that has methods keeps its own cache in a
-/// static.
 #[derive(Debug, Default)]
 pub struct SearchCache<P: Puzzle> {
     memos: Mutex<FxMap<MemoKey<P>, SharedMemo<P>>>,
 }
 
 impl<P: Puzzle> SearchCache<P> {
-    /// Builds an empty [`BuildContext`].
+    /// Builds an empty [`SearchCache`].
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -81,10 +78,10 @@ impl<P: Puzzle> SearchCache<P> {
 /// A step that searches for the cheapest way to bring a set of pieces home, using only the
 /// move sequences it was given.
 ///
-/// The goal is the `after` [`Mask`]: the pieces that must end in place, and those that must
-/// also be oriented. Pieces outside the mask may end anywhere. Before it searches, the step
-/// checks its `before` mask and returns [`StepError::InvalidStartingState`] if the puzzle does
-/// not meet it.
+/// The goal is the `after` [`PieceSet`]: the pieces that must end in place, and those that must
+/// also be oriented. Pieces outside the set may end anywhere. Before it searches, the step
+/// checks its `before` [`PieceSet`] and returns [`StepError::InvalidStartingState`] if the puzzle
+/// does not meet it.
 ///
 /// The search meets in the middle. A forward search from the puzzle meets a backward search
 /// from the goal, which the step keeps in a memo. The memo keeps growing across solves, so
@@ -232,7 +229,7 @@ fn keep_cheaper<P: Puzzle>(
 
 impl<P: Puzzle> SearchStep<P> {
     /// Constructor for [`SearchStepBuilder`]. The constructed builder builds a [`SearchStep`] over
-    /// all moves of the given [`Puzzle`].
+    /// the passed moves.
     #[must_use]
     pub fn builder(name: impl Into<Cow<'static, str>>, algs: AlgSet<P>) -> SearchStepBuilder<P> {
         SearchStepBuilder {

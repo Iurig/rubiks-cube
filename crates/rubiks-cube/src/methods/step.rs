@@ -20,9 +20,9 @@ pub mod search_step;
 /// promised, and the solve stops with a [`SolveError`](crate::SolveError) if the step couldn't
 /// start, failed, or its goal is not met.
 ///
-/// The crate has two step types: [`SearchStep`](crate::SearchStep) searches for its goal, and
-/// [`Shortest`](crate::Shortest) runs several steps and keeps the shortest result. Implement this
-/// trait to write another kind, such as a step that follows hand-written rules. A step is
+/// The crate has two public step types: [`SearchStep`](crate::SearchStep) searches for its goal,
+/// and [`Shortest`](crate::Shortest) runs several steps and keeps the shortest result. Implement
+/// this trait to write another kind, such as a step that follows hand-written rules. A step is
 /// `Send + Sync` so that one built step can be shared by many methods through an `Arc`.
 pub trait Step<P: Puzzle>: Send + Sync + Debug {
     /// The step's name, as it appears in errors and in the [`Solution`] it returns.

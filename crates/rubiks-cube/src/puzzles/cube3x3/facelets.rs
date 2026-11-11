@@ -445,7 +445,7 @@ impl ColorScheme3x3 {
     /// Styles a [`ColorScheme3x3`] according to the terminal.
     ///
     /// Uses `truecolor` in terminals that support it, failing that, falls back to `ANSI 256`,
-    /// failing that, falls back to basic `ANSI`.
+    /// failing that, falls back to basic `ANSI`, and ultimately, simply black.
     #[must_use]
     pub fn on_terminal(&self, profile: TermProfile) -> Self {
         Self {

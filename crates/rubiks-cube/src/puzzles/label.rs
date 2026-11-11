@@ -22,8 +22,8 @@ pub struct Labeled<P: Puzzle, L: Marker<P>>(Box<[SlotCondition<P, L>]>);
 /// A partly defined puzzle state, usually read as a condition: which pieces must sit in their
 /// home slots, and which slots must hold an oriented piece.
 ///
-/// [`SearchStep`](crate::SearchStep)s use masks for where they start and what they solve. A mask
-/// ignores every piece it does not name.
+/// [`SearchStep`](crate::SearchStep)s use [`PieceSet`] for where they start and what they solve. It
+/// tells it to ignore every piece not named.
 ///
 /// ```
 /// use rubiks_cube::{Cube3x3, Edge, Mask, Piece3x3};

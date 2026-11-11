@@ -9,13 +9,13 @@ use crate::{
 
 /// A collection of move sequences, each applied as one unit: a single move, or a whole algorithm.
 ///
-/// For the cube, build one from notation text with [`from_parts`](Self::from_parts),
-/// [`from_str`](std::str::FromStr), or [`from_moves`](Self::from_moves), and join
-/// several with [`combined_with`](Self::combined_with).
+/// For the cube, build one with [`from_parts`](Self::from_parts), [`from_str`](std::str::FromStr),
+/// or [`from_moves`](Self::from_moves), and join several with
+/// [`combined_with`](Self::combined_with).
 ///
 /// ```
+/// use rubiks_cube::{AlgSet, Cube3x3};
 /// use std::str::FromStr;
-/// use rubiks_cube::{Cube3x3, AlgSet};
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// // Two algorithms to search with, and the AUF to pass as the free sequences.
@@ -110,14 +110,11 @@ impl<P: Puzzle> FromStr for AlgSet<P> {
 }
 
 impl AlgSet<Cube3x3> {
-    /// Every modifier of each part named in `text`, one move per sequence.
+    /// Every modifier of each part passed.
     ///
     /// The modifier in the text does not matter: `"U R M r"` and `"U' R2 M r'"` both give the
     /// clockwise, counterclockwise, and double turn of `U`, `R`, `M`, and `r`, twelve moves.
     /// A part named twice is listed once, and the order of the parts is not kept.
-    ///
-    /// # Errors
-    /// If `text` contains an invalid move.
     pub fn from_parts(moves: impl IntoIterator<Item = Move3x3>) -> Self {
         moves
             .into_iter()
@@ -134,7 +131,7 @@ impl AlgSet<Cube3x3> {
             .collect()
     }
 
-    /// Creates an [`AlgSet`] from a `\n` separated `&'static str`.
+    /// Creates an [`AlgSet`] from a whitespace separated `&'static str`.
     ///
     /// Same as `from_parts(Algorithm::<Cube3x3>::from_static(parts))`.
     #[must_use]

@@ -10,8 +10,6 @@ use rubiks_cube::{Cube3x3, Method, Puzzle, Roux, roux};
     reason = "the example prints the recons it finds"
 )]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Solver progress is logged; see it with `RUST_LOG=rubiks_cube=trace`.
-    env_logger::init();
     let scr = "D2 F2 R2 U L2 D R2 U' B2 L2 B L2 F' L D2 U R' B D2\n";
     let mut scrambled = Cube3x3::from_moves(scr)?;
 

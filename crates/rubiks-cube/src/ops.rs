@@ -7,7 +7,7 @@ pub trait Inv: Sized {
     /// ```
     /// use rubiks_cube::Inv;
     /// #[derive(Clone, Debug, PartialEq)]
-    /// enum FieldZ2 {
+    /// enum GroupZ2 {
     ///     Zero,
     ///     One,
     /// }

@@ -21,8 +21,8 @@
 //! ```
 //!
 //! Move strings use standard notation: the face turns `R L U D F B`, the slices `M E S`, the
-//! rotations `x y z`, and the wide moves `Rw` or `r`, each with no modifier, `'`, `2`, or `2'`.
-//! Whitespace separates moves, and `//` starts a comment that runs to the end of the line. A
+//! rotations `x y z`, and the wide moves `Rw` or `r`, each with no modifier, `'`, `2`, `2`, or
+//! `'2`. Whitespace separates moves, and `//` starts a comment that runs to the end of the line. A
 //! string that is not valid notation returns a [`ParseSequenceError`] naming the line and
 //! position of the bad move.
 //!
@@ -46,16 +46,16 @@
 //! ```
 //!
 //! ```text
-//! U' F' B2 D R2 B D2    //FB
-//! U2 R2    //DR
-//! R2 U' R U R' U R'    //SB Square
-//! U M' U2 Rw2 R U' Rw    //SB Pair
-//! U2 R U R' U' R' F R F' R U R' U R U2 R' U'    //CMLL
-//! U2 M' U M' U2 M U2 M' U' M' U2 M'    //LSE
+//! U' F' B2 D R2 B D2    // FB
+//! U2 R2    // DR
+//! R2 U' R U R' U R'    // SB Square
+//! U M' U2 Rw2 R U' Rw    // SB Pair
+//! U2 R U R' U' R' F R F' R U R' U R U2 R' U'    // CMLL
+//! U2 M' U M' U2 M U2 M' U' M' U2 M'    // LSE
 //! ```
 //!
 //! To build other methods, combine [`SearchStep`]s, which search for a goal given as a
-//! [`Mask`], and [`Shortest`], which keeps the shortest of several alternatives. Any type that
+//! [`PieceSet`], and [`Shortest`], which keeps the shortest of several alternatives. Any type that
 //! implements [`Step`] can join them. [`Method::solve_steps`] runs a method one step per
 //! iteration, for timing or progress reports.
 //!
