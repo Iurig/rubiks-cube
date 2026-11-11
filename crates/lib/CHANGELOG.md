@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Docs and organizational release.
 
+The crate now has its own README, and the changelog is new.
+`anstyle` and `termprofile` are optional dependencies behind the `anstyle` feature..
+
 ### Commit Statistics
 
 <csr-read-only-do-not-edit/>
