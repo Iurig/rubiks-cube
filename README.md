@@ -1,6 +1,8 @@
 # rubiks-cube
 
-![CI](https://github.com/Iurig/rubiks-cube/actions/workflows/ci.yml/badge.svg)
+![Tests](https://github.com/Iurig/rubiks-cube/actions/workflows/tests.yml/badge.svg)
+![Clippy](https://github.com/Iurig/rubiks-cube/actions/workflows/clippy.yml/badge.svg)
+![Docs](https://github.com/Iurig/rubiks-cube/actions/workflows/docs.yml/badge.svg)
 ![License](https://img.shields.io/github/license/Iurig/rubiks-cube)
 
 A Rust library that models the 3×3×3 Rubik's Cube and solves it the way a person would, one named

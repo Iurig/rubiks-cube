@@ -1,4 +1,4 @@
-name: CI
+name: Tests
 
 on:
   push:
@@ -10,19 +10,6 @@ env:
   RUSTDOCFLAGS: -D warnings
 
 jobs:
-  check:
-    name: fmt + clippy
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo fmt --all --check
-      - run: cargo clippy --all-targets -- -D warnings
-
   rust-test:
     name: rust test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -37,7 +24,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --all-targets
       - run: cargo test
-      - run: cargo doc --no-deps
+      - run: cargo build --all-targets --features anstyle
+      - run: cargo test
+      - run: cargo build --all-targets --features ratatui
+      - run: cargo test
+      - run: cargo build --all-targets --features ratatui anstyle
+      - run: cargo test
 
   python-test:
     name: python test (${{ matrix.os }})
