@@ -89,7 +89,6 @@ pub use error::{
 pub use indexed::Indexed;
 // Methods with options are re-exported as modules too (`roux::Cmll`), so the options need no method
 // prefix. `kociemba` has no options.
-pub use anstyle::Color;
 pub use methods::{
     Method, Segment, Solution, Technique, TechniqueBuilder,
     context::BuildContext,
@@ -104,7 +103,6 @@ pub use ops::{Inv, Pow};
 pub use piece::{Piece, PieceConfiguration};
 pub use puzzles::cube3x3::{
     Cube3x3,
-    color_facelets::{ColorScheme3x3, Colored3x3},
     facelets::Facelets,
     moves::{Axis3x3, MovablePart, Move3x3, MoveModifier},
     pieces::{Center, Corner, Edge, Face, Orientation3x3, Piece3x3},
@@ -118,6 +116,11 @@ pub use puzzles::{
 
 #[cfg(feature = "ratatui")]
 pub use puzzles::cube3x3::widget::WidgetCube3x3;
+#[cfg(feature = "anstyle")]
+pub use {
+    anstyle::Color,
+    puzzles::cube3x3::color_facelets::{ColorScheme3x3, Colored3x3},
+};
 
 pub mod cube3x3_method_helpers {
     //! Tools for defining your own 3x3 method.
