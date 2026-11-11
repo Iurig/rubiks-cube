@@ -1,0 +1,58 @@
+name: Library CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTDOCFLAGS: -D warnings
+
+# Every command names the package with `-p`. Run across the whole workspace, Cargo would build the
+# library with the features the timer asks for, and the feature sets below would all be the same.
+jobs:
+  check:
+    name: fmt + clippy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt -p rubiks-cube --check
+      # `ratatui` turns on `anstyle`, so this lints the code behind every feature but `sketch`.
+      - run: cargo clippy -p rubiks-cube --all-targets --features ratatui,serde -- -D warnings
+
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p rubiks-cube --all-targets
+      - run: cargo test -p rubiks-cube
+      - run: cargo build -p rubiks-cube --all-targets --features anstyle
+      - run: cargo test -p rubiks-cube --features anstyle
+      - run: cargo build -p rubiks-cube --all-targets --features ratatui
+      - run: cargo test -p rubiks-cube --features ratatui
+      - run: cargo build -p rubiks-cube --all-targets --features ratatui,anstyle
+      - run: cargo test -p rubiks-cube --features ratatui,anstyle
+
+  docs:
+    name: cargo doc
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo doc -p rubiks-cube --no-deps --features ratatui,serde

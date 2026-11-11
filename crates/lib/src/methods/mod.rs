@@ -295,7 +295,7 @@ fn run_steps<P: Puzzle>(
                         .moves()
                         .clone()
                         .iter()
-                        .map(|m| m.to_string())
+                        .map(ToString::to_string)
                         .collect::<Vec<_>>()
                         .join(" "))
                     .next()

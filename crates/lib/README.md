@@ -1,8 +1,6 @@
 # rubiks-cube
 
-![Tests](https://github.com/Iurig/rubiks-cube/actions/workflows/tests.yml/badge.svg)
-![Clippy](https://github.com/Iurig/rubiks-cube/actions/workflows/clippy.yml/badge.svg)
-![Docs](https://github.com/Iurig/rubiks-cube/actions/workflows/docs.yml/badge.svg)
+![CI](https://github.com/Iurig/rubiks-cube/actions/workflows/lib.yml/badge.svg)
 ![License](https://img.shields.io/github/license/Iurig/rubiks-cube)
 
 A Rust library that models the 3×3×3 Rubik's Cube and solves it the way a person would, one named
@@ -137,9 +135,10 @@ The [API documentation](#api-documentation) describes each type.
 ## Features
 
 - `anstyle` for printing the 3x3 cube with color.
+
 ```rust
 Cube3x3::default().
-``` 
+```
 
 ## How it works
 

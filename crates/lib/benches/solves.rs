@@ -1,5 +1,10 @@
 //! Benchmarking tool.
 
+#![allow(
+    clippy::panic_in_result_fn,
+    reason = "bechmarks follow the same convention as tests"
+)]
+
 use rubiks_cube::{Cube3x3, Kociemba, Method, Puzzle, Roux, ZZ};
 fn main() {
     divan::main();
@@ -24,7 +29,7 @@ fn zz_default_build() -> anyhow::Result<()> {
 #[divan::bench(sample_count = 1)]
 fn kociemba_build() -> anyhow::Result<()> {
     let mut cube = Cube3x3::scrambled();
-    Kociemba::default().solve(&mut cube)?;
+    Kociemba.solve(&mut cube)?;
     assert!(cube.is_solved());
     Ok(())
 }
@@ -47,7 +52,7 @@ fn zz_default_warm() -> anyhow::Result<()> {
 #[divan::bench]
 fn kociemba_warm() -> anyhow::Result<()> {
     let mut cube = Cube3x3::scrambled();
-    Kociemba::default().solve(&mut cube)?;
+    Kociemba.solve(&mut cube)?;
     assert!(cube.is_solved());
     Ok(())
 }

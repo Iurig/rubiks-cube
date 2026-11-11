@@ -148,8 +148,9 @@ impl<P: Puzzle> Algorithm<P> {
     }
 
     /// The moves in a [`Vec`].
-    pub fn to_vec(self) -> Vec<P::Move> {
-        self.0
+    #[must_use]
+    pub fn to_vec(&self) -> Vec<P::Move> {
+        self.0.clone()
     }
 
     /// The number of moves.
