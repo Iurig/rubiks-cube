@@ -1,3 +1,5 @@
+#[cfg(feature = "anstyle")]
+pub mod color_facelets;
 pub mod facelets;
 pub mod moves;
 pub mod pieces;

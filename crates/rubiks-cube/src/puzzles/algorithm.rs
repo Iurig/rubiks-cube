@@ -147,6 +147,11 @@ impl<P: Puzzle> Algorithm<P> {
         self.0.iter()
     }
 
+    /// The moves in a [`Vec`].
+    pub fn to_vec(self) -> Vec<P::Move> {
+        self.0
+    }
+
     /// The number of moves.
     #[must_use]
     pub const fn len(&self) -> usize {

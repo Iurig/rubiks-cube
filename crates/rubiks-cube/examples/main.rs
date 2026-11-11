@@ -1,15 +1,10 @@
 //! Solves one scramble using the Roux method with a few different options.
 use rubiks_cube::{Cube3x3, Method, Puzzle, Roux, roux};
 
-#[expect(
-    clippy::panic_in_result_fn,
-    reason = "`?` reports errors; `assert!` checks the recon solves the scramble"
-)]
-#[expect(
-    clippy::print_stdout,
-    reason = "the example prints the recons it finds"
-)]
+#[expect(clippy::panic_in_result_fn, clippy::print_stdout, reason = "example")]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
+
     let scr = "D2 F2 R2 U L2 D R2 U' B2 L2 B L2 F' L D2 U R' B D2\n";
     let mut scrambled = Cube3x3::from_moves(scr)?;
 

@@ -19,7 +19,7 @@ fn full_solve_and_checking_bfs() -> anyhow::Result<()> {
 #[test]
 fn every_roux_option_solves_on_multiple_seeds() -> anyhow::Result<()> {
     use rubiks_cube::roux::*;
-    let seeds = 2;
+    let seeds = 4;
     let scrambles: Vec<Cube3x3> = (2026..2026 + seeds)
         .map(Cube3x3::scrambled_with_seed)
         .collect();

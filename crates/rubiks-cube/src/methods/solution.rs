@@ -83,6 +83,11 @@ impl<P: Puzzle> Segment<P> {
     pub const fn moves(&self) -> &Algorithm<P> {
         &self.moves
     }
+
+    /// Iterates on the [`Segment`]s moves.
+    pub fn iter(&self) -> impl Iterator<Item = &P::Move> {
+        self.moves().iter()
+    }
 }
 
 impl<P: Puzzle> Solution<P> {

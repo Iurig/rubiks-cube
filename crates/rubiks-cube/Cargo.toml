@@ -11,7 +11,7 @@ readme.workspace = true
 repository.workspace = true
 
 [dependencies]
-anstyle = "1.0.14"
+anstyle = { version = "1.0.14", optional = true }
 dyn-clone = "1.0.20"
 fastrand = "2.5.0"
 itertools = "0.15.0"
@@ -21,11 +21,12 @@ ratatui = { version = "0.30.2", optional = true }
 ratatui-core = { version = "0.1.2", features = ["anstyle"], optional = true }
 rayon = "1.12.0"
 serde = { version = "1.0.229", features = ["derive"], optional = true }
-termprofile = { version = "0.2.5", features = ["convert"] }
+termprofile = { version = "0.2.5", features = ["convert"], optional = true }
 thiserror = "2.0.21"
 
 [features]
-ratatui = ["dep:ratatui", "dep:ratatui-core"]
+anstyle = ["dep:anstyle", "dep:termprofile"]
+ratatui = ["dep:ratatui", "dep:ratatui-core", "anstyle"]
 sketch = []
 
 [[example]]
@@ -35,7 +36,7 @@ required-features = ["sketch"]
 [dev-dependencies]
 anyhow = "1.0.104"
 divan = "0.1.21"
-env_logger = { version = "0.11.11", default-features = false }
+env_logger = { version = "0.11.11" }
 statrs = "0.19.1"
 
 [[bench]]

@@ -11,7 +11,7 @@ resolver = "3"
 edition = "2024"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/Iurig/rubiks"
+repository = "https://github.com/Iurig/rubiks-cube"
 
 [workspace.metadata.bin]
 cargo-binstall = { version = "1.26.1" }

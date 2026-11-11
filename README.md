@@ -1,7 +1,7 @@
 # rubiks-cube
 
-![CI](https://github.com/Iurig/rubiks/actions/workflows/ci.yml/badge.svg)
-![License](https://img.shields.io/github/license/Iurig/rubiks)
+![CI](https://github.com/Iurig/rubiks-cube/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/github/license/Iurig/rubiks-cube)
 
 A Rust library that models the 3×3×3 Rubik's Cube and solves it the way a person would, one named
 step at a time. Its solving methods are Roux, ZZ, and Kociemba. More methods and other cube types
@@ -63,7 +63,7 @@ let solved = rubiks_cube::Cube3x3::from_moves("
 | Rotations   | `x` `y` `z`               | Yes         |
 | Wide moves  | `Rw` … or lowercase `r` … | Yes         |
 
-All these work with the following 4 modifiers: ` `(none), `'`, `2` and `2'`
+All these work with the following 4 modifiers: ` `(none), `'`, `2`, `2'`, and `'2`.
 
 A lowercase face letter (`r`, `l`, `u`, `d`, `f`, `b`) is the wide move of that face, so `r` and
 `Rw` are the same move. Every token goes through the same path, so a lone `r` or a line that is only
@@ -104,17 +104,17 @@ A printed solution has one line per step: the moves, then `//` and the step's na
 [examples/main.rs](crates/rubiks-cube/examples/main.rs) printed this for the scramble above:
 
 ```text
-U' F' B2 D R2 B D2	//FB
-U2 R2	//DR
-R2 U' R U R' U R'	//SB Square
-U M' U2 Rw2 R U' Rw	//SB Pair
-U2 R U R' U' R' F R F' R U R' U R U2 R' U'	//CMLL
-U2 M' U M' U2 M U2 M' U' M' U2 M'	//LSE
+U' F' B2 D R2 B D2    // FB
+U2 R2    // DR
+R2 U' R U R' U R'    // SB Square
+U M' U2 Rw2 R U' Rw    // SB Pair
+U2 R U R' U' R' F R F' R U R' U R U2 R' U'    // CMLL
+U2 M' U M' U2 M U2 M' U' M' U2 M'    // LSE
 ```
 
 `Roux`'s builder methods pick how each stage is split. `first_block` and `second_block` choose
 between one search, a square plus a pair, or an edge, then a square, then a pair, `cmll` chooses
-between one algorithm and two, and lse between one-look and eolr. With a split block the solver
+between one algorithm and two, and lse only has eolr for now. With a split block the solver
 tries both the front and the back square and keeps the shorter:
 
 ```rust
@@ -125,13 +125,12 @@ let roux = Roux::default()
     .cmll(roux::Cmll::TwoLook);
 ```
 
-A `Method` is a builder for a `Technique`, which is a list of steps. The crate has three step types:
+A `Method` is a builder for a `Technique`, which is a list of steps. The crate has two step types:
 `SearchStep`, which searches for a goal within a fixed set of moves or algorithms, and `Shortest`,
 which keeps the shortest of several steps. Any type that implements the `Step` trait can join them.
 The [API documentation](#api-documentation) describes each type.
 
-`cargo bench --bench solves` times two passes of 1000 seeded Roux solves and reports time, moves,
-and heap use per step.
+`cargo bench --bench solves` times the solving time for a solve that fully builds all the heavy tables for each step (dominated by the builds, proxy for building tables time), as well as the time for a solve with a warm table.
 
 ## How it works
 
@@ -187,7 +186,7 @@ The main entry points:
 - **`Method`** is the trait of a solving method, such as **`Roux`** or **`Kociemba`**. It turns the
   method's options into a list of steps, and `solve` or `solve_steps` runs them.
 - **`Step`**, **`SearchStep`**, and **`Shortest`** are the steps a method is built from, and
-  **`Mask`** says what a step needs and what it solves.
+  **`Mask`** is a partial representation of a puzzle - it's what most steps operate on and try to solve. **`PieceSet`** is the immovable "label like" counterpart used to define goals.
 - **`Solution`**, and **`SolveError`** are what a solve returns.
 
 ## Project layout
@@ -206,6 +205,9 @@ crates/
       piece.rs                sealed Piece trait, PieceConfiguration with the piece_at /
                               orientation_at queries and the permutation parity
       fast_hash.rs            FxHasher, the fast hasher behind the search memo
+      indexed.rs              the Indexed trait
+      permutation.rs          the Permutation struct
+      ordinal.rs              simple print helper for ordinal numbers
       puzzles/
         mod.rs                the Puzzle trait
         label.rs              Labeled, Mask, PieceSet: which pieces must be in place or oriented
@@ -220,16 +222,17 @@ crates/
                               face turns
           moves.rs            Move type, MovablePart/MoveModifier enums, move-sequence parsing
                               and printing
+          widget.rs           ratatui optional widget
           moves/
             table.rs          ALL_MOVES table: 9 hand-written face and slice moves, rotations
                               and wide moves derived from them, then inverses and doubles of
                               everything; its tests pin the derivations only
-      indexed.rs
       methods/
         mod.rs                the Method trait, Technique and its solve loop
         context.rs            the cache context definition and a global context to be shared
         step.rs               the Step trait
         solution.rs           Solution, Segment
+        neutrality.rs         the Neutrality implementation, WIP.
         step/
           search_step/
             mod.rs            SearchStep: a forward search that meets the memo in the middle
@@ -242,7 +245,7 @@ crates/
             mod.rs            PrunedCombine: a search guided by prune tables
             prune_table.rs    PruneTable
         test_steps.rs         FixedStep, a hand-written step for tests (compiled only in tests)
-        cube3x3.rs            the search memos shared by every Cube3x3 method
+        cube3x3.rs            the modules for 3x3 methods
         cube3x3/
           roux.rs             Roux and its options
           zz.rs               ZZ and its options
@@ -258,18 +261,15 @@ crates/
                               mask, algebra (group laws), moves (handedness pins for each
                               base move, move orders), notation (parsing and its errors),
                               reconstructions (real solves), solving (every Roux option
-                              combination on seeded random scrambles), scramble, kociemba,
-                              and stats
+                              combination on seeded random scrambles), scramble, and stats
+      tables/                 heavier tests: Kociemba and scrambling
     benches/
-      solves.rs               two passes of 1000 seeded Roux solves, timed and heap-counted per
-                              step
+      solves.rs               warm and cold cache solves for every step
     examples/
       main.rs                 solves one scramble with two option sets and prints the solutions
       sketch.rs               a design sketch
       DESIGN.md               a document for writing things down while writing to sketch.rs
-  rubiks-cube-cli/            the command-line tool
-    src/
-      main.rs
+  virtual-cube-timer/         the command-line tool
   twisty-puzzles-py/          exported python library
     src/
       lib.rs
@@ -280,19 +280,39 @@ tools/
 
 ## Building and testing
 
-Requires a Rust toolchain with the 2024 edition. The library depends on `fastrand` for random cube
-states, and no public function takes or returns a `fastrand` type. It also depends on `log`, through
-which the solver reports each step at the `debug` level. It never prints. `rayon` runs the searches
-and the prune-table builds in parallel. `thiserror`helps define errors. `itertools`makes some
-iterator method chains less verbose. `dyn-clone` allows for cloning dyn types internally. None of
-their types are ever returned.
+Requires a Rust toolchain with the 2024 edition.
+
+### Required Dependencies
+
+The library depends on `fastrand` for random cube states.
+It also depends on `log`, through which the solver reports each step at the `debug` level.
+It never prints.
+`rayon` runs the searches and the prune-table builds in parallel.
+`thiserror` helps define errors.
+`itertools` makes some iterator method chains less verbose.
+`dyn-clone` allows for cloning dyn types internally.
+
+None of their types are returned.
+
+### Optional Dependencies
+
+For feature `anstyle`:
+
+- `anstyle` is used for simple colored output of the cubes for easier debugging.
+- `termprofile` is turned on to automatically downgrade the colors as your terminal needs it.
+
+For feature `ratatui`:
+
+- `ratatui` and `ratatui-core` are turned on for the widget itself, the `anstyle` feature is also turned on.
+
+Both features turn on public interface with dependency types.
 
 ```sh
 cargo build
 cargo test
 cargo bench --bench solves
 RUST_LOG=rubiks_cube=debug cargo run --example main
-cargo run -p rubiks-cube-cli -- --method roux --number 3
+cargo run -p virtual-cube-timer -- --method roux --number 3
 ```
 
 ## Contributing
@@ -301,7 +321,7 @@ You can find more information about contributing in [CONTRIBUTING.md](CONTRIBUTI
 
 ## Current state
 
-All unit, integration, and doc tests pass; none are `#[ignore]`d.
+All unit, integration, and doc tests pass; only one is `#[ignore]`d due to accessing an external file.
 
 What works today:
 
@@ -320,7 +340,7 @@ What works today:
   form a whole-cube rotation, so a state no move sequence can produce is rejected.
 - The Roux solver works with every combination of its options. A test runs all 18 combinations of
   first block, second block, and CMLL on four seeded random scrambles and replays each solution, and
-  the benchmark solves 2000 more.
+  the benchmark solves 200 more.
 - ZZ solves with an EO line, F2L, then the last layer as OCLL and PLL, or in one look with ZBLL. A
   test runs every option combination on seeded random scrambles.
 - Kociemba's two-phase method solves scrambles: phase 1 brings the cube into the domino subgroup
@@ -333,7 +353,8 @@ What works today:
 
 ## Roadmap
 
-- Fingertrick-aware output. A solution already prints as notation; this is why `2'` is kept distinct
+- Color neutrality. Necessary for recognition of rotation independent steps, so its implementation is necessary for CFOP solves.
+- Fingertrick-aware output. A solution already prints as notation; this is why `2'` is kept distinct.
   from `2` in the `Move` label even though they share a cube state.
 - More methods (CFOP, Petrus), and Kociemba in the command-line solver.
 - Reuse `PieceConfiguration` / `Piece` for other puzzles.

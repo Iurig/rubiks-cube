@@ -7,9 +7,10 @@ pub mod step;
 mod test_steps;
 
 use dyn_clone::arc_make_mut;
+use log::debug;
 pub use solution::{Segment, Solution};
 
-use std::{fmt::Debug, ops::Index, sync::Arc};
+use std::{fmt::Debug, ops::Index, sync::Arc, time::Instant};
 
 use crate::{
     PieceSet, SolveError, TechniqueError,
@@ -263,6 +264,7 @@ fn run_steps<P: Puzzle>(
     puzzle: &mut P,
 ) -> impl Iterator<Item = Result<Solution<P>, SolveError>> {
     let mut failed = false;
+
     steps.into_iter().map_while(move |step| {
         if failed {
             return None;
@@ -274,11 +276,34 @@ fn run_steps<P: Puzzle>(
                 puzzle.to_string(),
             )));
         }
+
+        let start = Instant::now();
         let result = match step.solve(puzzle) {
             Err(error) => Err(SolveError::couldnt_solve(step.name().to_string(), error)),
             Ok(_) if !step.is_done(puzzle) => Err(SolveError::not_done(step.name().to_string())),
             Ok(solution) => Ok(solution),
         };
+        match &result {
+            Ok(solution) => debug!(
+                "{}: {} moves in {:.0?}: {}",
+                step.name(),
+                solution.move_count(),
+                start.elapsed(),
+                solution
+                    .iter()
+                    .map(|segment| segment
+                        .moves()
+                        .clone()
+                        .iter()
+                        .map(|m| m.to_string())
+                        .collect::<Vec<_>>()
+                        .join(" "))
+                    .next()
+                    .expect("solution has no segments")
+            ),
+            Err(e) => debug!("{}: {}", step.name(), e),
+        }
+
         failed = result.is_err();
         Some(result)
     })
