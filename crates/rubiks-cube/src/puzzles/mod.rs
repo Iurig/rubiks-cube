@@ -1,11 +1,11 @@
 use std::{
     fmt::{Debug, Display},
     hash::Hash,
-    ops::{Add, Mul},
+    ops::{Add, Mul, MulAssign},
     str::FromStr,
 };
 
-use crate::{Algorithm, Cube3x3, ParseMoveError, SolveError, indexed::Indexed};
+use crate::{Algorithm, Cube3x3, Move3x3, ParseMoveError, SolveError, indexed::Indexed};
 
 pub mod algorithm;
 pub mod algset;
@@ -116,5 +116,11 @@ impl Mul<Algorithm<Self>> for Cube3x3 {
     type Output = Self;
     fn mul(self, rhs: Algorithm<Self>) -> Self::Output {
         rhs.iter().fold(self, |p, &m| p * m)
+    }
+}
+
+impl MulAssign<Move3x3> for Cube3x3 {
+    fn mul_assign(&mut self, rhs: Move3x3) {
+        *self = *self * rhs;
     }
 }

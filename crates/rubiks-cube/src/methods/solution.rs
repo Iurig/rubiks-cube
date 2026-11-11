@@ -1,6 +1,6 @@
-use std::{fmt::Display, str::FromStr};
+use std::{fmt::Display, ops::Mul, str::FromStr};
 
-use crate::{Algorithm, ParseSequenceError, puzzles::Puzzle};
+use crate::{Algorithm, Cube3x3, ParseSequenceError, puzzles::Puzzle};
 
 /// The moves a method found, as one segment per step, in solving order.
 ///
@@ -24,6 +24,28 @@ pub struct Solution<P: Puzzle> {
 pub struct Segment<P: Puzzle> {
     name: String,
     moves: Algorithm<P>,
+}
+
+impl<P: Puzzle> IntoIterator for Segment<P> {
+    type Item = <P as Puzzle>::Move;
+    type IntoIter = <Algorithm<P> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.moves.into_iter()
+    }
+}
+
+impl Mul<Segment<Self>> for Cube3x3 {
+    type Output = Self;
+    fn mul(self, rhs: Segment<Self>) -> Self::Output {
+        rhs.into_iter().fold(self, |p, m| p * m)
+    }
+}
+
+impl Display for Segment<Cube3x3> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{}    // {}", self.moves, self.name)?;
+        Ok(())
+    }
 }
 
 impl<P: Puzzle> FromStr for Solution<P> {

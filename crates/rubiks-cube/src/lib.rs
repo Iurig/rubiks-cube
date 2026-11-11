@@ -73,10 +73,11 @@
 //! is what the solver needs from a puzzle, and [`Facelets`] shows a cube as a sticker net.
 mod error;
 mod fast_hash;
-mod indexed;
+pub mod indexed;
 mod methods;
 mod ops;
 mod ordinal;
+pub mod permutation;
 mod piece;
 mod puzzles;
 pub mod zn;
@@ -104,6 +105,7 @@ pub use piece::{Piece, PieceConfiguration};
 pub use puzzles::cube3x3::{
     Cube3x3,
     facelets::{ColorScheme3x3, Colored3x3, Facelets},
+    moves::{Axis3x3, MovablePart, Move3x3, MoveModifier},
     pieces::{Center, Corner, Edge, Face, Orientation3x3, Piece3x3},
 };
 pub use puzzles::{

@@ -14,43 +14,50 @@ use crate::{
 
 use table::cube_state;
 
-#[expect(
-    unnameable_types,
-    reason = "reachable through `Move3x3::part`; not exported until ticket 01 derives the parts' \
-              `Display` and `FromStr` from one list and ticket 04 settles the face role"
-)]
+/// A part of a [`Cube3x3`] that can be moved (e.g. F, M, y).
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MovablePart {
+    /// A 3x3 face.
     Face(Face),
+    /// A 3x3 slice.
     Slice(Slice),
+    /// A 3x3 rotation axis.
     Rotation(Rotation),
+    /// A 3x3 wide move type.
     Wide(Face),
 }
 
-#[expect(
-    unnameable_types,
-    reason = "reachable through `Move3x3::modifier`; exported together with `Move3x3`"
-)]
+/// Types of qualifiers that moves can have (e.g. `2` or `'`).
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum MoveModifier {
+    /// The qualifier of moves without written qualifiers, usually associated with clockwise
+    /// movement.
     Clockwise,
+    /// The qualifier of moves qualified by `'`, usually associated with counterclockwise movement.
     Prime,
+    /// A double move, when executed without a specified direction, or in the direction defined by
+    /// [`Clockwise`](MoveModifier::Clockwise).
     Double,
+    /// A double move executed in the [`Prime`](MoveModifier::Prime) direction.
     DoublePrime,
 }
 
-#[expect(
-    unnameable_types,
-    reason = "reachable as `<Cube3x3 as Puzzle>::Move`, and callers build moves from notation; \
-              not exported until `MovablePart` is, since `new` and `part` take and return one"
-)]
+/// A move on [`Cube3x3`].
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Move3x3 {
     part: MovablePart,
     modifier: MoveModifier,
 }
 
+/// The axis moves and parts can have one for each cartesian axis.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Axis3x3(Slice);
+
 impl Move3x3 {
+    /// The Constructor for [`Move3x3`].
     #[must_use]
     pub const fn new(part: MovablePart, modifier: MoveModifier) -> Self {
         Self { part, modifier }
@@ -66,6 +73,12 @@ impl Move3x3 {
     #[must_use]
     pub const fn modifier(self) -> MoveModifier {
         self.modifier
+    }
+
+    /// The axis of a move, so parallel moves can be differentiated.
+    #[must_use]
+    pub fn axis(self) -> Axis3x3 {
+        self.part().axis()
     }
 }
 
@@ -102,6 +115,18 @@ impl MovablePart {
         assert!(next == all.len());
         all
     };
+
+    /// The axis of a part, so parallel parts can be differentiated.
+    #[must_use]
+    pub fn axis(self) -> Axis3x3 {
+        match self {
+            Self::Slice(s) => Axis3x3(s),
+            Self::Wide(w) => Self::Face(w).axis(),
+            Self::Rotation(Rotation::X) | Self::Face(Face::R | Face::L) => Axis3x3(Slice::M),
+            Self::Rotation(Rotation::Y) | Self::Face(Face::U | Face::D) => Axis3x3(Slice::E),
+            Self::Rotation(Rotation::Z) | Self::Face(Face::F | Face::B) => Axis3x3(Slice::S),
+        }
+    }
 }
 
 impl MoveModifier {
@@ -112,6 +137,7 @@ impl MoveModifier {
         Self::DoublePrime,
     ];
 
+    /// The inverse of a move direction.
     #[must_use]
     pub const fn inverse(self) -> Self {
         match self {
@@ -121,16 +147,50 @@ impl MoveModifier {
             Self::DoublePrime => Self::Double,
         }
     }
+
+    /// Converts a modifier to a number.
+    ///
+    /// Here positive numbers mean it is equivalent to that number of clockwise moves, negatives
+    /// mean the same for counterclockwise.
+    #[must_use]
+    pub const fn as_number(self) -> i32 {
+        match self {
+            Self::Clockwise => 1,
+            Self::Double => 2,
+            Self::DoublePrime => -2,
+            Self::Prime => -1,
+        }
+    }
+
+    /// Converts a number to a modifier.
+    ///
+    /// Here, the simplest form that has an equivalent effect on the cube is returned, so double
+    /// counterclockwise moves are never returned over double moves. Follows the same convention as
+    /// [`as_number`](MoveModifier::as_number).
+    #[must_use]
+    #[expect(
+        clippy::unreachable,
+        reason = "type sytem doesn't support range bounds, manually verified"
+    )]
+    pub fn from_number(n: i32) -> Option<Self> {
+        match n.rem_euclid(4) {
+            0 => None,
+            1 => Some(Self::Clockwise),
+            2 => Some(Self::Double),
+            3 => Some(Self::Prime),
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl Indexed for MovablePart {
     const COUNT: usize = Self::ALL.len();
-    fn index(self) -> usize {
+    fn index(&self) -> usize {
         match self {
-            Self::Face(f) => f as usize,
-            Self::Slice(s) => Face::ALL.len() + s as usize,
-            Self::Rotation(r) => Face::ALL.len() + Slice::ALL.len() + r as usize,
-            Self::Wide(f) => Face::ALL.len() + Slice::ALL.len() + Rotation::ALL.len() + f as usize,
+            Self::Face(f) => *f as usize,
+            Self::Slice(s) => Face::ALL.len() + *s as usize,
+            Self::Rotation(r) => Face::ALL.len() + Slice::ALL.len() + *r as usize,
+            Self::Wide(f) => Face::ALL.len() + Slice::ALL.len() + Rotation::ALL.len() + *f as usize,
         }
     }
     fn from_index(index: usize) -> Self {
@@ -140,8 +200,8 @@ impl Indexed for MovablePart {
 
 impl Indexed for MoveModifier {
     const COUNT: usize = Self::ALL.len();
-    fn index(self) -> usize {
-        self as usize
+    fn index(&self) -> usize {
+        *self as usize
     }
     fn from_index(index: usize) -> Self {
         *Self::ALL.get(index).expect("index in 0..COUNT")
@@ -150,7 +210,7 @@ impl Indexed for MoveModifier {
 
 impl Indexed for Move3x3 {
     const COUNT: usize = <(MovablePart, MoveModifier)>::COUNT;
-    fn index(self) -> usize {
+    fn index(&self) -> usize {
         (self.part, self.modifier).index()
     }
     fn from_index(index: usize) -> Self {

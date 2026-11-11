@@ -1,3 +1,8 @@
+use crate::{
+    app::navigation::{NavigationApp, NavigationMode},
+    view::{CUBE_HEIGHT, CUBE_LENGTH, SCRAMBLE_HEIGHT, help::HelpWidget},
+};
+
 use std::io::stdout;
 
 use ratatui::{
@@ -9,11 +14,16 @@ use ratatui::{
 use rubiks_cube::{ColorScheme3x3, Cube3x3};
 use termprofile::{DetectorSettings, TermProfile};
 
-use crate::app::{App, Mode};
+pub fn render_navigation(app: &NavigationApp, frame: &mut Frame) {
+    let scramble = app.scramble().clone();
 
-const CUBE_HEIGHT: u16 = 23;
-const CUBE_LENGTH: u16 = 43; // ignores back
-const SCRAMBLE_HEIGHT: u16 = 3;
+    let cube = Cube3x3::default() * scramble;
+
+    match app.nav_mode {
+        NavigationMode::Solves => view_browse(app, frame, cube),
+        NavigationMode::Inspect(_) => view_inspect(app, frame, cube),
+    }
+}
 
 pub fn draw_cli_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &mut Frame) {
     let border = Block::bordered().title(format!("Solve {}", solve_number + 1));
@@ -30,27 +40,19 @@ pub fn draw_cli_widget(solve_number: usize, cube: &Cube3x3, area: Rect, frame: &
     frame.render_widget(colored, inner_area);
 }
 
-pub fn view(app: &App, frame: &mut Frame) {
-    let scramble_text = app.scramble();
+/// Draws the cube and the reconstruction, returning (`cube_area`, `scramble_area`, `recon_area`)
+fn draw_base(
+    app: &NavigationApp,
+    frame: &mut Frame,
+    solve_space: Rect,
+    cube: Cube3x3,
+) -> (Rect, Rect, Rect) {
+    let scramble_text = app.scramble().to_string();
 
-    let cube = Cube3x3::from_moves(scramble_text).expect("scramble should parse");
+    let solve_text = app.solution().to_string();
 
-    match app.mode {
-        Mode::BrowseSolves => view_browse(app, frame, cube),
-        Mode::Inspect {
-            step: _,
-            move_in_step: _,
-        } => view_inspect(app, frame, cube),
-        Mode::Exited => panic!("exit mode should never be view()ed"),
-    }
-}
-
-fn draw_base(app: &App, frame: &mut Frame, solve_space: Rect, cube: Cube3x3) {
-    let scramble_text = app.scramble();
-
-    let solve_text = app.solution().collect::<Vec<_>>().join("\n");
-
-    let scramble_widget = Paragraph::new(scramble_text).block(Block::bordered().title("Scramble"));
+    let scramble_widget =
+        Paragraph::new(scramble_text.clone()).block(Block::bordered().title("Scramble"));
 
     let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title("Solve"));
 
@@ -86,35 +88,32 @@ fn draw_base(app: &App, frame: &mut Frame, solve_space: Rect, cube: Cube3x3) {
 
     frame.render_widget(scramble_widget, scramble_area);
     frame.render_widget(solve_widget, solve_area);
+
+    (cube_area, scramble_area, solve_area)
 }
 
-fn view_browse(app: &App, frame: &mut Frame, cube: Cube3x3) {
-    let [solve_space, help_space] =
+fn view_browse(app: &NavigationApp, frame: &mut Frame, cube: Cube3x3) {
+    let [app_space, help_space] =
         Layout::vertical([Constraint::Fill(1), Constraint::Length(2)]).areas(frame.area());
 
-    draw_base(app, frame, solve_space, cube);
+    draw_base(app, frame, app_space, cube);
 
-    let help_widgets = [
-        Line::from("Inspect solve: Enter").centered(),
-        Line::from("Next solve: N").centered(),
-        Line::from("Previous solve: P").centered(),
-        Line::from("Exit: Esc").centered(),
-    ];
+    let help = HelpWidget::new([
+        "Inspect solve: Enter",
+        "Next solve: N",
+        "Previous solve: P",
+        "Exit: Esc",
+    ]);
 
-    let help_areas =
-        Layout::horizontal(help_widgets.iter().map(|_| Constraint::Fill(1))).split(help_space);
-
-    for (widget, area) in help_widgets.iter().zip(help_areas.iter()) {
-        frame.render_widget(widget, *area);
-    }
+    frame.render_widget(help, help_space);
 }
 
-fn view_inspect(app: &App, frame: &mut Frame, mut cube: Cube3x3) {
+fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
     #[cfg(feature = "debug")]
     let [solve_space, help_space, dbg_area] = Layout::vertical([
         Constraint::Fill(1),
         Constraint::Length(2),
-        Constraint::Length(4),
+        Constraint::Length(2),
     ])
     .areas(frame.area());
 
@@ -128,47 +127,40 @@ fn view_inspect(app: &App, frame: &mut Frame, mut cube: Cube3x3) {
         Line::from("Back to browsing: Esc").centered(),
     ];
 
-    let [_, recon_space] =
-        Layout::vertical([Constraint::Length(CUBE_HEIGHT), Constraint::Fill(1)]).areas(solve_space);
-
-    let [_, solve_area] =
-        Layout::vertical([Constraint::Length(SCRAMBLE_HEIGHT), Constraint::Fill(1)])
-            .areas(recon_space);
-
     let cursor_position_in_recon = Offset::new(
         i32::try_from(
-            app.step_text()
+            app.step()
+                .expect("invalid step")
+                .to_string()
                 .char_indices()
                 .filter(|&(_, c)| c == ' ')
-                .nth(app.mode.cur_move())
+                .nth(app.unchecked_inspect_options().move_index)
                 .map(|(index, _)| index)
                 .expect("move out of range"),
         )
         .expect("overflowed")
         .strict_add(1),
-        i32::try_from(app.mode.cur_step())
+        i32::try_from(app.unchecked_inspect_options().step_index)
             .expect("overflowed")
             .strict_add(1),
     );
 
-    for (step, line) in app.solution().enumerate() {
-        if step >= app.mode.cur_step() {
+    for (step, line) in app.solve_iter().enumerate() {
+        if step >= app.unchecked_inspect_options().step_index {
             break;
         }
-        cube = cube.apply_moves(line).expect("should parse");
+        cube = cube * line;
     }
 
-    cube = cube
-        .apply_moves(
-            &app.step_text()
-                .chars()
-                .zip(0..cursor_position_in_recon.x)
-                .map(|(c, _)| c)
-                .collect::<String>(),
-        )
-        .expect("should parse");
+    cube = app
+        .step()
+        .expect("step not found")
+        .clone()
+        .into_iter()
+        .zip(0..cursor_position_in_recon.x)
+        .fold(cube, |c, (m, _)| c * m);
 
-    draw_base(app, frame, solve_space, cube);
+    let (_cube_area, _, solve_area) = draw_base(app, frame, solve_space, cube);
 
     frame.set_cursor_position(solve_area.as_position() + cursor_position_in_recon);
 
@@ -181,28 +173,26 @@ fn view_inspect(app: &App, frame: &mut Frame, mut cube: Cube3x3) {
 
     #[cfg(feature = "debug")]
     {
-        let mut dbg_rows = dbg_area.rows();
+        let print_info = [
+            format!("Step: {}", app.step().unwrap()),
+            format!("Step: {}", app.step().unwrap()),
+            format!("Total moves: {}", app.cur_step_move_count().unwrap()),
+        ];
 
-        frame.render_widget(
-            Line::from(format!("Step: {}", app.mode.cur_step())),
-            dbg_rows
-                .next()
-                .expect("dbg_rows should have at least 3 rows"),
-        );
-        frame.render_widget(
-            Line::from(format!("Move: {}", app.mode.cur_move())),
-            dbg_rows
-                .next()
-                .expect("dbg_rows should have at least 3 rows"),
-        );
-        frame.render_widget(
-            Line::from(format!(
-                "Total moves: {}",
-                crate::app::total_moves_in_cur_step(app)
-            )),
-            dbg_rows
-                .next()
-                .expect("dbg_rows should have at least 3 rows"),
-        );
+        let mut dbg_rows = dbg_area
+            .layout_vec(&Layout::new(
+                ratatui::layout::Direction::Horizontal,
+                (0..print_info.len()).map(|_| Constraint::Fill(1)),
+            ))
+            .into_iter();
+
+        print_info.into_iter().for_each(|info| {
+            frame.render_widget(
+                Line::from(info),
+                dbg_rows
+                    .next()
+                    .expect("dbg_rows should have at least 3 rows"),
+            )
+        });
     }
 }

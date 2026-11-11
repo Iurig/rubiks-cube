@@ -91,17 +91,18 @@ impl Puzzle for Cube3x3 {
             .iter()
             .flat_map(|s| s.moves().iter().copied())
             .collect::<Algorithm<Self>>()
-            .inv())
+            .inv()
+            .simplify_single_moves())
     }
 }
 
 impl Indexed for Piece3x3 {
     const COUNT: usize = Cube3x3::ALL_PIECES.len();
-    fn index(self) -> usize {
+    fn index(&self) -> usize {
         match self {
-            Self::Center(c) => c as usize,
-            Self::Corner(c) => Center::ALL.len() + c as usize,
-            Self::Edge(e) => Center::ALL.len() + Corner::ALL.len() + e as usize,
+            Self::Center(c) => *c as usize,
+            Self::Corner(c) => Center::ALL.len() + *c as usize,
+            Self::Edge(e) => Center::ALL.len() + Corner::ALL.len() + *e as usize,
         }
     }
     fn from_index(index: usize) -> Self {
@@ -208,19 +209,19 @@ impl Cube3x3 {
         ]
         .contains(&Face::F)
         {
-            rotated_self = rotated_self
-                * Move3x3::new(MovablePart::Rotation(Rotation::Y), MoveModifier::Clockwise);
+            rotated_self *=
+                Move3x3::new(MovablePart::Rotation(Rotation::Y), MoveModifier::Clockwise);
         }
         for _ in 0..4 {
             if rotated_self.centers().piece_at(Face::F) != Face::F {
-                rotated_self = rotated_self
-                    * Move3x3::new(MovablePart::Rotation(Rotation::X), MoveModifier::Clockwise);
+                rotated_self *=
+                    Move3x3::new(MovablePart::Rotation(Rotation::X), MoveModifier::Clockwise);
             }
         }
         for _ in 0..4 {
             if rotated_self.centers().piece_at(Face::U) != Face::U {
-                rotated_self = rotated_self
-                    * Move3x3::new(MovablePart::Rotation(Rotation::Z), MoveModifier::Clockwise);
+                rotated_self *=
+                    Move3x3::new(MovablePart::Rotation(Rotation::Z), MoveModifier::Clockwise);
             }
         }
 

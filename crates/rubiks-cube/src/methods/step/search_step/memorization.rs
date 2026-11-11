@@ -347,7 +347,7 @@ mod tests {
         let mut rng = Rng::with_seed(0);
 
         for _ in 0..100 {
-            cube = cube * sb_moves[rng.usize(0..4)];
+            cube *= sb_moves[rng.usize(0..4)];
             assert_eq!(
                 fb_filter,
                 PieceSet::<Cube3x3>::filter_by_piece(&cube, &fb_filter)
