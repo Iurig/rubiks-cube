@@ -267,9 +267,6 @@ crates/
       main.rs                 solves one scramble with two option sets and prints the solutions
       sketch.rs               a design sketch
       DESIGN.md               a document for writing things down while writing to sketch.rs
-    docs/
-      design/                 settled designs
-        step-builders.md      the "Technique builds from StepBuilders" design
   rubiks-cube-cli/            the command-line tool
     src/
       main.rs
