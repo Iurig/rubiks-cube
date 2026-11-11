@@ -16,7 +16,7 @@ The crate now has its own README, and the changelog is new.
 
 <csr-read-only-do-not-edit/>
 
- - 5 commits contributed to the release.
+ - 8 commits contributed to the release.
  - 0 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -27,6 +27,9 @@ The crate now has its own README, and the changelog is new.
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Release notes for rubiks-cube 0.1.1 ([`6ba4d2e`](https://github.com/Iurig/rubiks-cube-lib/commit/6ba4d2ec8965de2f628e0ffbc5487ac027383576))
+    - Release notes for rubiks-cube 0.1.1 ([`6f586fb`](https://github.com/Iurig/rubiks-cube-lib/commit/6f586fb9a68965a8e015b840eba50f58b9248e45))
+    - Adjusting changelogs prior to release of rubiks-cube v0.1.1 ([`0ad76a3`](https://github.com/Iurig/rubiks-cube-lib/commit/0ad76a37378ac6bab2479874c4b66c62f16be33f))
     - Added changelog ([`ee042c2`](https://github.com/Iurig/rubiks-cube-lib/commit/ee042c24d4f3c7b78d9d226d012050c953fc1357))
     - Version bump ([`f9ab9c4`](https://github.com/Iurig/rubiks-cube-lib/commit/f9ab9c4ce2a87832fe2b3875903a677eab0ca352))
     - Separate the readmes ([`4a772ac`](https://github.com/Iurig/rubiks-cube-lib/commit/4a772ac4cb5197fa7bd1378e1106dd1ebd7668cb))
