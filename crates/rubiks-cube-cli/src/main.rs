@@ -1,20 +1,46 @@
+mod app;
+mod message;
+mod view;
+
+use std::sync::LazyLock;
+
 use anyhow::ensure;
-use clap::Parser;
+use clap::{Parser, ValueEnum};
+use crossterm::event::{self, KeyCode, KeyEvent, KeyModifiers};
+use ratatui_core as _;
 use rubiks_cube::{Method, Puzzle, Roux, ZZ};
 
-#[derive(Debug, Parser)]
+use crate::app::{App, Mode};
+use crate::message::{BrowseMessage, InspectMessage, Message};
+use crate::view::view;
+
+#[derive(Debug, Parser, Clone)]
 #[command(version, about, long_about = None)]
 struct Args {
-    #[arg(short, long)]
-    method: String,
+    #[arg(value_enum)]
+    method: Methods,
 
     #[arg(long)]
     number: u32,
+
+    #[arg(long)]
+    interactive: bool,
+
+    #[arg(long)]
+    lib_widget: bool,
 }
 
-fn reconstruct_n<P: Puzzle, T: Method<P>>(n: u32, technique: &T) -> anyhow::Result<()> {
-    for count in 1..=n {
+#[derive(Debug, Clone, ValueEnum)]
+enum Methods {
+    Roux,
+    Zz,
+}
+
+fn reconstruct_n<P: Puzzle, T: Method<P>>(n: u32, technique: &T) -> anyhow::Result<Vec<String>> {
+    let mut recons = Vec::new();
+    for _ in 0..n {
         let scramble = P::scramble()?;
+        let scramble_text = scramble.to_string().replace("2'", "2");
 
         let mut puzzle = P::default().apply(&scramble);
 
@@ -22,25 +48,92 @@ fn reconstruct_n<P: Puzzle, T: Method<P>>(n: u32, technique: &T) -> anyhow::Resu
 
         ensure!(
             puzzle.is_solved(),
-            "scramble:\n {scramble} \n and solve:\n {solution} \n did not solve the cube"
+            "scramble:\n {scramble_text} \n and solve:\n {solution} \n did not solve the cube"
         );
 
-        println!("{count}. {scramble} {solution}");
+        recons.push(format!("{scramble_text}\n{solution}"));
     }
-    Ok(())
+    Ok(recons)
 }
 
-fn main() -> anyhow::Result<()> {
-    let args = Args::parse();
-    match args.method.as_str() {
-        "roux" => {
-            reconstruct_n(args.number, &Roux::default())?;
-        }
-        "zz" => {
-            reconstruct_n(args.number, &ZZ::default())?;
-        }
-        _ => println!("invalid method"),
-    }
+static ARGS: LazyLock<Args> = LazyLock::new(Args::parse);
 
+fn main() -> anyhow::Result<()> {
+    let args = ARGS.clone();
+
+    let recons = match args.method {
+        Methods::Roux => reconstruct_n(args.number, &Roux::default())?,
+        Methods::Zz => reconstruct_n(args.number, &ZZ::default())?,
+    };
+
+    if args.interactive {
+        let mut app = App {
+            solve_index: 0,
+            all_recons: recons,
+            mode: app::Mode::BrowseSolves,
+        };
+        ratatui::run(|terminal| -> anyhow::Result<()> {
+            while app.mode != Mode::Exited {
+                terminal.draw(|frame| view(&app, frame))?;
+                if let Some(KeyEvent {
+                    code: pressed_key,
+                    modifiers: KeyModifiers::NONE | KeyModifiers::SHIFT,
+                    kind: _,
+                    state: _,
+                }) = event::read()?.as_key_press_event()
+                {
+                    match app.mode {
+                        Mode::BrowseSolves => match pressed_key {
+                            KeyCode::Esc => app.update(Message::ExitProgram),
+
+                            KeyCode::Char('p' | 'P') => {
+                                app.update(Message::BrowseSolves(BrowseMessage::PreviousSolve));
+                            }
+
+                            KeyCode::Char('n' | 'N') => {
+                                app.update(Message::BrowseSolves(BrowseMessage::NextSolve));
+                            }
+
+                            KeyCode::Enter => {
+                                app.update(Message::BrowseSolves(BrowseMessage::EnterInspect));
+                            }
+
+                            _ => (),
+                        },
+
+                        Mode::Inspect {
+                            step: _,
+                            move_in_step: _,
+                        } => match pressed_key {
+                            KeyCode::Esc => app.update(Message::Inspect(InspectMessage::Exit)),
+
+                            KeyCode::Left => {
+                                app.update(Message::Inspect(InspectMessage::PreviousMove));
+                            }
+
+                            KeyCode::Right => {
+                                app.update(Message::Inspect(InspectMessage::NextMove));
+                            }
+
+                            KeyCode::Up => {
+                                app.update(Message::Inspect(InspectMessage::PreviousStep));
+                            }
+
+                            KeyCode::Down => app.update(Message::Inspect(InspectMessage::NextStep)),
+
+                            _ => (),
+                        },
+
+                        Mode::Exited => (),
+                    }
+                }
+            }
+            Ok(())
+        })?;
+    } else {
+        for (i, solve) in recons.into_iter().enumerate() {
+            println!("{}. {solve}", i + 1);
+        }
+    }
     Ok(())
 }

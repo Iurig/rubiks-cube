@@ -1,6 +1,8 @@
 pub mod facelets;
 pub mod moves;
 pub mod pieces;
+#[cfg(feature = "ratatui")]
+pub mod widget;
 
 #[allow(
     clippy::wildcard_imports,

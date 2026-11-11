@@ -135,7 +135,7 @@ impl<P: Puzzle> IntoIterator for Solution<P> {
 impl<P: Puzzle> Display for Solution<P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for alg in self {
-            writeln!(f, "{}\t//{}", alg.moves, alg.name)?;
+            writeln!(f, "{}    // {}", alg.moves, alg.name)?;
         }
         Ok(())
     }

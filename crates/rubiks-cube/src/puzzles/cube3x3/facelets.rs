@@ -9,13 +9,15 @@
 
 use std::fmt::{self, Display};
 
+use anstyle::{AnsiColor, Color, Reset, RgbColor, Style};
 use itertools::izip;
+use termprofile::TermProfile;
 
 use super::{
     Cube3x3,
     pieces::{Center, Corner, Edge, Orientation3x3, Piece3x3},
 };
-use crate::{Mask, Piece, Puzzle, piece::index};
+use crate::{Face, Mask, Piece, Puzzle, piece::index};
 
 /// The colour on each facelet of a [`Cube3x3`], one `[Center; 9]` per face
 /// in [`Center::ALL`] order, each read row by row as in [`Display`].
@@ -245,15 +247,15 @@ fn mask_char(mask: &Mask<Cube3x3>, slot: Piece3x3, facelet: Center) -> char {
     match (condition.label, condition.orient) {
         (Some(piece), Some(orientation)) => stickers(piece, orientation)
             .and_then(|stickers| stickers.get(position).copied())
-            .map_or('?', letter),
-        (Some(Piece3x3::Center(c)), None) => letter(c),
+            .map_or('?', face_to_letter),
+        (Some(Piece3x3::Center(c)), None) => face_to_letter(c),
         (Some(_), None) => '?',
         (None, Some(orientation)) if orientation_position(orientation) == Some(position) => 'o',
         (None, _) => '.',
     }
 }
 
-const fn letter(face: Center) -> char {
+const fn face_to_letter(face: Center) -> char {
     match face {
         Center::U => 'U',
         Center::F => 'F',
@@ -264,11 +266,34 @@ const fn letter(face: Center) -> char {
     }
 }
 
+const fn letter_to_face(letter: char) -> Option<Face> {
+    match letter {
+        'U' => Some(Center::U),
+        'F' => Some(Center::F),
+        'R' => Some(Center::R),
+        'B' => Some(Center::B),
+        'L' => Some(Center::L),
+        'D' => Some(Center::D),
+        _ => None,
+    }
+}
+
 impl Facelets {
     /// The nine facelets of `face`, read row by row as in [`Display`].
     #[must_use]
-    pub const fn face(&self, face: Center) -> &[Center; 9] {
+    pub const fn face(&self, face: Face) -> &[Face; 9] {
         &self.faces[index(face)]
+    }
+
+    /// The facelet at `(row, column)` of the 9 by 12 grid the unfolded net fills, counted from
+    /// its top left and skipping the spaces [`Display`] puts between faces. `None` where the grid
+    /// has no facelet, such as left of `U`.
+    #[must_use]
+    pub fn sticker(&self, pos: (usize, usize)) -> Option<Face> {
+        self.to_string()
+            .lines()
+            .nth(pos.0)
+            .and_then(|line| letter_to_face(line.chars().nth(pos.1 + pos.1 / 3)?))
     }
 }
 
@@ -333,7 +358,7 @@ fn write_net(f: &mut fmt::Formatter<'_>, faces: &[[char; 9]; 6]) -> fmt::Result 
 
 impl Display for Facelets {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write_net(f, &self.faces.map(|face| face.map(letter)))
+        write_net(f, &self.faces.map(|face| face.map(face_to_letter)))
     }
 }
 
@@ -341,6 +366,159 @@ impl Display for Cube3x3 {
     /// The facelet net; see [`Facelets`].
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.facelets().fmt(f)
+    }
+}
+
+/// A colored representation of a [`Cube3x3`].
+///
+/// Should be created by invoking [`colored`](Cube3x3::colored) or
+/// [`with_color_scheme`](Cube3x3::with_color_scheme).
+///
+/// # Example
+///
+/// ```
+/// use rubiks_cube::{ColorScheme3x3, Cube3x3};
+///
+/// println!("{}", Cube3x3::default().colored());
+/// println!(
+///     "{}",
+///     Cube3x3::default().with_color_scheme(ColorScheme3x3::JAPANESE)
+/// );
+/// ```
+#[derive(Debug, Clone, Copy)]
+pub struct Colored3x3 {
+    cube: Cube3x3,
+    scheme: ColorScheme3x3,
+}
+
+/// A representation of a [`Cube3x3`]s color scheme.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ColorScheme3x3 {
+    /// The color of the U face.
+    pub u: Color,
+    /// The color of the F face.
+    pub f: Color,
+    /// The color of the R face.
+    pub r: Color,
+    /// The color of the L face.
+    pub l: Color,
+    /// The color of the B face.
+    pub b: Color,
+    /// The color of the D face.
+    pub d: Color,
+}
+
+const WHITE: (u8, u8, u8) = (255, 255, 255);
+const GREEN: (u8, u8, u8) = (92, 230, 92);
+const RED: (u8, u8, u8) = (185, 37, 37);
+const ORANGE: (u8, u8, u8) = (255, 126, 51);
+const BLUE: (u8, u8, u8) = (0, 84, 230);
+const YELLOW: (u8, u8, u8) = (255, 235, 77);
+
+macro_rules! rgb {
+    ($color_code:ident) => {
+        RgbColor($color_code.0, $color_code.1, $color_code.2)
+    };
+}
+
+impl ColorScheme3x3 {
+    /// The standard [`Cube3x3`] color scheme, held in WCA scrambling orientation.
+    pub const STANDARD: Self = Self {
+        u: Color::Rgb(rgb!(WHITE)),
+        f: Color::Rgb(rgb!(GREEN)),
+        r: Color::Rgb(rgb!(RED)),
+        l: Color::Rgb(rgb!(ORANGE)),
+        b: Color::Rgb(rgb!(BLUE)),
+        d: Color::Rgb(rgb!(YELLOW)),
+    };
+
+    /// The Japanese [`Cube3x3`] color scheme, held in WCA scrambling orientation.
+    pub const JAPANESE: Self = Self {
+        u: Color::Ansi(AnsiColor::BrightWhite),
+        f: Color::Ansi(AnsiColor::Green),
+        r: Color::Ansi(AnsiColor::Red),
+        l: Color::Ansi(AnsiColor::BrightYellow),
+        b: Color::Ansi(AnsiColor::Yellow),
+        d: Color::Ansi(AnsiColor::Blue),
+    };
+
+    /// Styles a [`ColorScheme3x3`] according to the terminal.
+    ///
+    /// Uses `truecolor` in terminals that support it, failing that, falls back to `ANSI 256`,
+    /// failing that, falls back to basic `ANSI`.
+    #[must_use]
+    pub fn on_terminal(&self, profile: TermProfile) -> Self {
+        Self {
+            u: profile
+                .adapt_color(self.u)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+            f: profile
+                .adapt_color(self.f)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+            r: profile
+                .adapt_color(self.r)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+            l: profile
+                .adapt_color(self.l)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+            b: profile
+                .adapt_color(self.b)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+            d: profile
+                .adapt_color(self.d)
+                .unwrap_or(Color::Ansi(AnsiColor::Black)),
+        }
+    }
+
+    /// The [`Color`] of a given [`Face`] under the [`ColorScheme3x3`].
+    #[must_use]
+    pub const fn face_color(self, face: Face) -> Color {
+        match face {
+            Face::U => self.u,
+            Face::F => self.f,
+            Face::R => self.r,
+            Face::L => self.l,
+            Face::D => self.d,
+            Face::B => self.b,
+        }
+    }
+}
+
+impl Cube3x3 {
+    /// Returns a colored representation of the given [`Cube3x3`].
+    ///
+    /// The representation is colored by the standard color scheme held in the standard WCA
+    /// scrambling orientation.
+    #[must_use]
+    pub const fn colored(&self) -> Colored3x3 {
+        Colored3x3 {
+            cube: *self,
+            scheme: ColorScheme3x3::STANDARD,
+        }
+    }
+
+    /// Returns a colored representation of a given [`Cube3x3`] under a provided [`ColorScheme3x3`].
+    #[must_use]
+    pub const fn with_color_scheme(&self, scheme: ColorScheme3x3) -> Colored3x3 {
+        Colored3x3 {
+            cube: *self,
+            scheme,
+        }
+    }
+}
+
+impl Display for Colored3x3 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.cube.to_string().chars().try_for_each(|c| match c {
+            'U' => write!(f, "{}U{Reset}", Style::new().bg_color(Some(self.scheme.u))),
+            'F' => write!(f, "{}F{Reset}", Style::new().bg_color(Some(self.scheme.f))),
+            'R' => write!(f, "{}R{Reset}", Style::new().bg_color(Some(self.scheme.r))),
+            'L' => write!(f, "{}L{Reset}", Style::new().bg_color(Some(self.scheme.l))),
+            'B' => write!(f, "{}B{Reset}", Style::new().bg_color(Some(self.scheme.b))),
+            'D' => write!(f, "{}D{Reset}", Style::new().bg_color(Some(self.scheme.d))),
+
+            c => write!(f, "{c}"),
+        })
     }
 }
 
@@ -652,6 +830,20 @@ mod tests {
             let there_and_back = Cube3x3::from_moves(&format!("{m} {m}'"))?;
             assert_eq!(there_and_back.to_string(), solved, "{m}");
         }
+        Ok(())
+    }
+
+    #[test]
+    fn sticker_reads_the_net_by_row_and_column() -> anyhow::Result<()> {
+        let facelets = Cube3x3::from_moves("R")?.facelets();
+        assert_eq!(facelets.sticker((0, 5)), Some(Center::F));
+        assert_eq!(facelets.sticker((3, 5)), Some(Center::D));
+        assert_eq!(facelets.sticker((3, 9)), Some(Center::U));
+        assert_eq!(facelets.sticker((8, 5)), Some(Center::B));
+        // Left of U, right of B, below D.
+        assert_eq!(facelets.sticker((0, 0)), None);
+        assert_eq!(facelets.sticker((3, 12)), None);
+        assert_eq!(facelets.sticker((9, 3)), None);
         Ok(())
     }
 }

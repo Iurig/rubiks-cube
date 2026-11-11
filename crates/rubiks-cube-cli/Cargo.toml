@@ -12,7 +12,14 @@ description = "A command line interface for scrambling and solving a rubiks cube
 [dependencies]
 anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive"] }
-rubiks-cube = { path = "../rubiks-cube" }
+crossterm = "0.29.0"
+ratatui = { version = "0.30.2", features = ["unstable-rendered-line-info"] }
+ratatui-core = { version = "0.1.2", features = ["anstyle"] }
+rubiks-cube = { path = "../rubiks-cube", features = ["ratatui"] }
+termprofile = "0.2.5"
+
+[features]
+debug = []
 
 [lints.clippy]
 allow_attributes_without_reason = "warn"
@@ -25,8 +32,6 @@ map_err_ignore = "warn"
 mem_forget = "warn"
 multiple_unsafe_ops_per_block = "warn"
 nursery = { level = "warn", priority = -1 }
-panic = "warn"
-panic_in_result_fn = "warn"
 pedantic = { level = "warn", priority = -1 }
 perf = { level = "warn", priority = -1 }
 rc_mutex = "warn"
