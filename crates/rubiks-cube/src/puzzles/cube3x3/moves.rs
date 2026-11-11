@@ -118,16 +118,13 @@ impl MovablePart {
 
     /// The axis of a part, so parallel parts can be differentiated.
     #[must_use]
-    pub fn axis(&self) -> Axis3x3 {
+    pub fn axis(self) -> Axis3x3 {
         match self {
-            Self::Slice(s) => Axis3x3(*s),
-            Self::Wide(w) => Self::Face(*w).axis(),
-            Self::Rotation(Rotation::X) => Axis3x3(Slice::M),
-            Self::Rotation(Rotation::Y) => Axis3x3(Slice::E),
-            Self::Rotation(Rotation::Z) => Axis3x3(Slice::S),
-            Self::Face(Face::R | Face::L) => Axis3x3(Slice::M),
-            Self::Face(Face::U | Face::D) => Axis3x3(Slice::E),
-            Self::Face(Face::F | Face::B) => Axis3x3(Slice::S),
+            Self::Slice(s) => Axis3x3(s),
+            Self::Wide(w) => Self::Face(w).axis(),
+            Self::Rotation(Rotation::X) | Self::Face(Face::R | Face::L) => Axis3x3(Slice::M),
+            Self::Rotation(Rotation::Y) | Self::Face(Face::U | Face::D) => Axis3x3(Slice::E),
+            Self::Rotation(Rotation::Z) | Self::Face(Face::F | Face::B) => Axis3x3(Slice::S),
         }
     }
 }
@@ -171,6 +168,10 @@ impl MoveModifier {
     /// counterclockwise moves are never returned over double moves. Follows the same convention as
     /// [`as_number`](MoveModifier::as_number).
     #[must_use]
+    #[expect(
+        clippy::unreachable,
+        reason = "type sytem doesn't support range bounds, manually verified"
+    )]
     pub fn from_number(n: i32) -> Option<Self> {
         match n.rem_euclid(4) {
             0 => None,

@@ -50,7 +50,7 @@ impl<const BEGIN: usize, const END: usize> Indexed for RangedInt<BEGIN, END> {
 
 /// Checks the round-trip law for every index of `T`: `from_index` and `index` undo each other.
 #[cfg(test)]
-pub fn assert_round_trips<T: Indexed + Eq + std::fmt::Debug>() {
+pub(crate) fn assert_round_trips<T: Indexed + Eq + std::fmt::Debug>() {
     for i in 0..T::COUNT {
         let value = T::from_index(i);
         assert_eq!(
@@ -59,7 +59,6 @@ pub fn assert_round_trips<T: Indexed + Eq + std::fmt::Debug>() {
             "Total: {}\n Value: {value:?}",
             T::COUNT
         );
-        dbg!(i);
     }
 }
 

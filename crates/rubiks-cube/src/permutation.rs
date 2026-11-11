@@ -18,6 +18,10 @@ impl<T: Indexed> Default for Permutation<T> {
 
 impl<T: Indexed> Index<usize> for Permutation<T> {
     type Output = T;
+    #[expect(
+        clippy::indexing_slicing,
+        reason = "an index out of range should panick"
+    )]
     fn index(&self, index: usize) -> &Self::Output {
         &self.0[index]
     }
@@ -27,7 +31,7 @@ impl<T: Indexed> IntoIterator for Permutation<T> {
     type Item = T;
     type IntoIter = IntoIter<T>;
     fn into_iter(self) -> Self::IntoIter {
-        self.0.to_vec().into_iter()
+        self.0.into_iter()
     }
 }
 
@@ -45,9 +49,9 @@ impl<T: Indexed> Permutation<T> {
     }
 
     /// Swaps 2 positions in a permutation.
-    pub fn swap_slots(&mut self, slot_1: usize, slot_2: usize) -> Option<&mut Self> {
+    pub fn swap_slots(&mut self, slot_1: usize, slot_2: usize) -> &mut Self {
         self.0.swap(slot_1, slot_2);
-        Some(self)
+        self
     }
 
     /// Walks the given cycle.
@@ -66,17 +70,18 @@ impl<T: Indexed> Permutation<T> {
     }
 }
 
-impl<T: Indexed> Indexed for Permutation<T> {
-    const COUNT: usize = {
-        let mut decreasing = T::COUNT;
-        let mut resp = 1;
-        while decreasing > 1 {
-            resp *= decreasing;
-            decreasing -= 1;
-        }
-        resp
-    };
+pub(crate) const fn factorial(n: usize) -> usize {
+    let mut decreasing = n;
+    let mut resp = 1;
+    while decreasing > 1 {
+        resp *= decreasing;
+        decreasing -= 1;
+    }
+    resp
+}
 
+impl<T: Indexed> Indexed for Permutation<T> {
+    const COUNT: usize = factorial(T::COUNT);
     fn index(&self) -> usize {
         self.0
             .iter()
@@ -103,15 +108,7 @@ impl<T: Indexed> Indexed for Permutation<T> {
                         let value = T::all()
                             .filter(|v| !permutation.contains(v))
                             .nth(remaining_index % base)
-                            .unwrap_or_else(|| {
-                                panic!(
-                                    "invalid index, was {}, shouldn't surpass {}. vector:{:?}, {}",
-                                    remaining_index % base,
-                                    base,
-                                    permutation,
-                                    Self::COUNT
-                                )
-                            });
+                            .expect("invalid index");
                         permutation.push(value);
                         (permutation, remaining_index / base)
                     },

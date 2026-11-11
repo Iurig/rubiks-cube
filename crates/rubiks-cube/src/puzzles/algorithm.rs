@@ -197,6 +197,10 @@ impl Algorithm<Cube3x3> {
 
     /// Simplifies an algorithm by canceling moves where possible.
     #[must_use]
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "panicking breaks invariants - nothing useful to the final user"
+    )]
     pub fn simplify_cancelations(self) -> Self {
         let cancel_once = |alg: Self| -> Self {
             alg.into_iter()
