@@ -235,17 +235,17 @@ impl<P: Puzzle> Technique<P> {
         run_steps(self.steps.iter().cloned(), puzzle)
     }
 
-    /// Constructs the [`Technique`] with a given neutrality.
-    #[must_use]
-    fn with_neutrality(
-        steps: impl IntoIterator<Item = Arc<dyn Step<P>>>,
-        // neutrality: Neutrality<P>,
-    ) -> Self {
-        Self {
-            steps: steps.into_iter().collect(),
-            // neutrality,
-        }
-    }
+    // Constructs the [`Technique`] with a given neutrality.
+    // #[must_use]
+    // fn with_neutrality(
+    //     steps: impl IntoIterator<Item = Arc<dyn Step<P>>>,
+    //     // neutrality: Neutrality<P>,
+    // ) -> Self {
+    //     Self {
+    //         steps: steps.into_iter().collect(),
+    //         // neutrality,
+    //     }
+    // }
     /*
     /// Sets the neutrality of the [`Technique`].{}
     #[must_use]
