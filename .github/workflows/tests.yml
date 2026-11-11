@@ -28,7 +28,7 @@ jobs:
       - run: cargo test
       - run: cargo build --all-targets --features ratatui
       - run: cargo test
-      - run: cargo build --all-targets --features ratatui anstyle
+      - run: cargo build --all-targets --features ratatui,anstyle
       - run: cargo test
 
   python-test:
