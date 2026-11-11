@@ -1,10 +1,5 @@
 [workspace]
-members = [
-    "crates/rubiks-cube",
-    "crates/virtual-cube-timer",
-    "crates/twisty-puzzles-py",
-    "tools/cargo-bin",
-]
+members = ["crates/lib", "crates/virtual-cube-timer", "crates/twisty-puzzles-py", "tools/cargo-bin"]
 resolver = "3"
 
 [workspace.package]
