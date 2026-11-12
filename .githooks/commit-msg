@@ -1,0 +1,3 @@
+#!/bin/sh
+# Reject commit messages that don't follow Conventional Commits, or other common commit conventions.
+exec committed --commit-file "$1"
