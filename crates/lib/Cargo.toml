@@ -1,6 +1,5 @@
 [package]
 name = "rubiks-cube"
-readme = "README.md"
 version = "0.1.1"
 
 categories = ["games", "simulation"]
@@ -76,3 +75,6 @@ unwrap_used = "warn"
 missing_debug_implementations = "warn"
 missing_docs = "warn"
 unnameable_types = "warn"
+
+[lints.cargo]
+pedantic = "warn"

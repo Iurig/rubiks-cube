@@ -55,3 +55,6 @@ unwrap_used = "warn"
 
 [lints.rust]
 unused_crate_dependencies = "warn"
+
+[lints.cargo]
+pedantic = "warn"
