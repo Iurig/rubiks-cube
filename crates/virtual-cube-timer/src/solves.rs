@@ -1,14 +1,15 @@
 use std::{fmt::Display, fs, io::ErrorKind, str::FromStr, time::Duration};
 
+use anyhow::anyhow;
 use dirs::config_dir;
-use rubiks_cube::{Algorithm, Cube3x3, Solution};
+use rubiks_cube::{Algorithm, Cube3x3, ParseSequenceError, Segment, Solution};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 #[derive(Debug, Clone, PartialEq, Eq, SerializeDisplay, DeserializeFromStr)]
-pub struct SolveList(Vec<Solve>);
+pub struct SolveList(Vec<(usize, TimedSolve)>);
 
 #[derive(Debug, Clone, PartialEq, Eq, SerializeDisplay, DeserializeFromStr)]
-pub struct Solve {
+pub struct TimedSolve {
     moves: ReconWithScramble,
     time: Duration,
 }
@@ -31,6 +32,10 @@ impl TimedSolve {
     pub const fn solution(&self) -> &Solution<Cube3x3> {
         &self.moves.solution
     }
+
+    fn time(&self) -> &Duration {
+        &self.time
+    }
 }
 
 impl ReconWithScramble {
@@ -48,8 +53,18 @@ impl ReconWithScramble {
 }
 
 impl SolveList {
-    const fn new() -> Self {
+    pub const fn new() -> Self {
         Self(Vec::new())
+    }
+
+    pub fn from_solves(solves: impl IntoIterator<Item = TimedSolve>) -> Self {
+        Self(
+            solves
+                .into_iter()
+                .enumerate()
+                .map(|(index, value)| (index + 1, value))
+                .collect(),
+        )
     }
 
     pub fn from_solves_file() -> anyhow::Result<Self> {
@@ -72,9 +87,16 @@ impl SolveList {
     }
 }
 
-impl Display for Solve {
+impl Display for TimedSolve {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}\n\n{}", self.scramble(), self.solution())
+        write!(
+            f,
+            "{:?}.{:.0?}: {}\n{}",
+            self.time().as_secs(),
+            self.time().as_millis(),
+            self.scramble(),
+            self.solution()
+        )
     }
 }
 
@@ -87,12 +109,18 @@ impl FromStr for ReconWithScramble {
                 .next()
                 .ok_or(anyhow::format_err!("reconstruction has no first line"))?
                 .parse()?,
-            solution: s.lines().skip(1).collect::<String>().parse()?,
+            solution: s
+                .lines()
+                .skip(1)
+                .map(|line| line.parse::<Segment<Cube3x3>>())
+                .collect::<Result<Vec<_>, ParseSequenceError>>()?
+                .into_iter()
+                .collect(),
         })
     }
 }
 
-impl FromStr for Solve {
+impl FromStr for TimedSolve {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Some((time, solve)) = s.split_once(':') {
@@ -101,7 +129,7 @@ impl FromStr for Solve {
                 time: parse_to_duration(time)?,
             })
         } else {
-            Err(anyhow::format_err!("invalid string"))
+            Err(anyhow::format_err!("invalid solve: {s}"))
         }
     }
 }
@@ -113,7 +141,7 @@ pub fn parse_to_duration(text: &str) -> anyhow::Result<Duration> {
                 .split(':')
                 .try_fold((0, 1), |(seconds, multiplier), text| {
                     anyhow::Ok((
-                        seconds + multiplier * (text.parse::<u64>()?),
+                        seconds + multiplier * (text.trim().parse::<u64>()?),
                         multiplier * 60,
                     ))
                 })?
@@ -126,14 +154,14 @@ pub fn parse_to_duration(text: &str) -> anyhow::Result<Duration> {
 
         Ok(secs + milis)
     } else {
-        Err(anyhow::format_err!("invalid string"))
+        Err(anyhow::format_err!("invalid duration: {text}"))
     }
 }
 
 impl Display for SolveList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (index, solve) in self.0.iter().enumerate() {
-            writeln!(f, "{}. {}\n\n", index + 1, solve)?;
+        for (index, solve) in self.0.iter() {
+            write!(f, "{}. {}\n", index, solve)?;
         }
         Ok::<(), std::fmt::Error>(())
     }
@@ -144,8 +172,54 @@ impl FromStr for SolveList {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self(
             s.split("\n\n")
-                .map(str::parse::<Solve>)
-                .collect::<Result<Vec<_>, _>>()?,
+                .map(|s| {
+                    let (number, solve) = s
+                        .split_once(".")
+                        .ok_or_else(|| anyhow!("didn't have .: {s}"))?;
+                    Ok::<_, anyhow::Error>((number.parse::<usize>()?, solve.parse()?))
+                })
+                .flatten()
+                .collect::<Vec<_>>(),
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use anyhow::{Context, Ok};
+    use rubiks_cube::{Method, Puzzle, Roux};
+
+    use super::*;
+
+    #[test]
+    fn roux_solve_round_trip() -> anyhow::Result<()> {
+        let solves = (0..10)
+            .map(|_| -> anyhow::Result<TimedSolve> {
+                let scramble = Cube3x3::scramble()?;
+                Ok(TimedSolve::new(
+                    ReconWithScramble::new(
+                        scramble.clone(),
+                        Roux::new()
+                            .solve(
+                                &mut Cube3x3::from_moves(&scramble.to_string())
+                                    .with_context(|| format!("{scramble:?}"))?,
+                            )
+                            .with_context(|| format!("{scramble:?}"))?,
+                    ),
+                    Duration::ZERO,
+                ))
+            })
+            .collect::<anyhow::Result<Vec<_>>>()?;
+        let list = SolveList::from_solves(solves);
+
+        dbg!(list.to_string());
+
+        assert_eq!(
+            list,
+            SolveList::from_str(&list.to_string())
+                .with_context(|| format!("{:?}", &list.to_string()))?
+        );
+        Ok(())
     }
 }
