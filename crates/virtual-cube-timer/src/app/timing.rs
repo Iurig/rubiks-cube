@@ -27,16 +27,6 @@ pub enum TimerState {
     Solved,
 }
 
-impl TimerState {
-    const fn next(&self) -> Self {
-        match self {
-            Self::Scrambled => Self::Solving,
-            Self::Solving => Self::Solved,
-            Self::Solved => Self::Scrambled,
-        }
-    }
-}
-
 impl TimingApp {
     pub fn update(&mut self, message: &TimingMessage) {
         match message {
