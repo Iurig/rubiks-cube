@@ -85,6 +85,10 @@ impl SolveList {
             Err(e) => Err(e.into()),
         }
     }
+
+    pub fn push(&mut self, solve: TimedSolve) {
+        self.0.push((self.0.len(), solve));
+    }
 }
 
 impl Display for TimedSolve {
