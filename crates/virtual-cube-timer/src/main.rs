@@ -25,7 +25,7 @@ use crate::{
     event::EventHandler,
     keybinds::Keybinds,
     message::Message,
-    solves::{SolveList, SolveMoves},
+    solves::{ReconWithScramble, SolveList},
     view::{navigation::render_navigation, timing::render_timing, untimed::render_untimed},
 };
 
@@ -135,7 +135,7 @@ fn main() -> anyhow::Result<()> {
 fn reconstruct_n<T: rubiks_cube::Method<Cube3x3>>(
     n: u32,
     technique: &T,
-) -> anyhow::Result<Vec<SolveMoves>> {
+) -> anyhow::Result<Vec<ReconWithScramble>> {
     let mut recons = Vec::new();
     for _ in 0..n {
         let scramble = Cube3x3::scramble()?;
@@ -148,7 +148,7 @@ fn reconstruct_n<T: rubiks_cube::Method<Cube3x3>>(
             puzzle.is_solved(),
             "scramble:\n {scramble} \n and solve:\n {solution} \n did not solve the cube"
         );
-        recons.push(SolveMoves::new(scramble, solution));
+        recons.push(ReconWithScramble::new(scramble, solution));
     }
     Ok(recons)
 }

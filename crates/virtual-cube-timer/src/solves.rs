@@ -9,17 +9,21 @@ pub struct SolveList(Vec<Solve>);
 
 #[derive(Debug, Clone, PartialEq, Eq, SerializeDisplay, DeserializeFromStr)]
 pub struct Solve {
-    moves: SolveMoves,
+    moves: ReconWithScramble,
     time: Duration,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SolveMoves {
+pub struct ReconWithScramble {
     scramble: Algorithm<Cube3x3>,
     solution: Solution<Cube3x3>,
 }
 
-impl Solve {
+impl TimedSolve {
+    pub fn new(moves: ReconWithScramble, time: Duration) -> Self {
+        Self { moves, time }
+    }
+
     pub const fn scramble(&self) -> &Algorithm<Cube3x3> {
         &self.moves.scramble
     }
@@ -29,7 +33,7 @@ impl Solve {
     }
 }
 
-impl SolveMoves {
+impl ReconWithScramble {
     pub const fn new(scramble: Algorithm<Cube3x3>, solution: Solution<Cube3x3>) -> Self {
         Self { scramble, solution }
     }
@@ -74,7 +78,7 @@ impl Display for Solve {
     }
 }
 
-impl FromStr for SolveMoves {
+impl FromStr for ReconWithScramble {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self {

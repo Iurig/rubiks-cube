@@ -3,13 +3,13 @@ use rubiks_cube::{Algorithm, Cube3x3, Segment, Solution};
 
 use crate::{
     message::{Message, NavigationMessage},
-    solves::SolveMoves,
+    solves::ReconWithScramble,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct NavigationApp {
     pub solve_index: usize,
-    pub all_recons: Vec<SolveMoves>,
+    pub all_recons: Vec<ReconWithScramble>,
     pub nav_mode: NavigationMode,
 }
 
