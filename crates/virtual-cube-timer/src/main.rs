@@ -115,8 +115,7 @@ fn main() -> anyhow::Result<()> {
                             .second_block(SecondBlock::EdgePairPair),
                     )?,
                     ValidMethods::Zz => reconstruct_n(
-                        args.number
-                            .expect("demo mode must have a number paramenter"),
+                        args.number.expect("demo mode must have a number parameter"),
                         &<rubiks_cube::ZZ as rubiks_cube::Method<Cube3x3>>::new(),
                     )?,
                 },

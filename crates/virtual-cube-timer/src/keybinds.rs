@@ -114,7 +114,7 @@ impl Keybinds {
     pub fn from_config() -> anyhow::Result<Self> {
         let dir = config_dir()
             .map(|dir| dir.join("virtual_cube_timer"))
-            .expect("manually writen");
+            .expect("manually written");
 
         fs::create_dir_all(dir.clone())?;
 
