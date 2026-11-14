@@ -270,7 +270,7 @@ impl Cube3x3 {
     /// Errors if the solving process to produce the scramble errors. See [`solve`](Method::solve)
     /// for more details.
     pub fn get_scramble(&self) -> Result<Algorithm<Self>, SolveError> {
-        let mut cube_copy = self.clone();
+        let mut cube_copy = *self;
         Ok(Kociemba
             .solve(&mut cube_copy)?
             .iter()
