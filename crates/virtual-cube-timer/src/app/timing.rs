@@ -13,7 +13,7 @@ use crate::{
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct TimingApp {
     pub cube: Cube3x3,
-    pub method: crate::Method,
+    pub method: crate::ValidMethods,
     pub solves: SolveList,
     pub starting_time: Instant,
     pub timer_number: Duration,

@@ -33,7 +33,7 @@ use crate::{
 #[command(version, about, long_about = None)]
 pub struct Args {
     #[arg(value_enum)]
-    method: Method,
+    method: ValidMethods,
 
     #[arg(value_enum)]
     mode: ModeArg,
@@ -52,7 +52,7 @@ enum ModeArg {
 }
 
 #[derive(Debug, Clone, ValueEnum, PartialEq, Eq)]
-enum Method {
+enum ValidMethods {
     Roux,
     Zz,
 }
@@ -79,13 +79,13 @@ fn main() -> anyhow::Result<()> {
             _mode => Mode::Navigation(NavigationApp {
                 solve_index: 0,
                 all_recons: match args.method {
-                    Method::Roux => reconstruct_n(
+                    ValidMethods::Roux => reconstruct_n(
                         args.number.unwrap_or(30),
                         &<rubiks_cube::Roux as rubiks_cube::Method<Cube3x3>>::new()
                             .first_block(FirstBlock::SquarePair)
                             .second_block(SecondBlock::EdgePairPair),
                     )?,
-                    Method::Zz => reconstruct_n(
+                    ValidMethods::Zz => reconstruct_n(
                         args.number
                             .expect("demo mode must have a number paramenter"),
                         &<rubiks_cube::ZZ as rubiks_cube::Method<Cube3x3>>::new(),
