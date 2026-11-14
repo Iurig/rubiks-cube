@@ -155,6 +155,13 @@ tools/
 
 Requires a Rust toolchain with the 2024 edition.
 
+To install the pre-commit hooks used, make sure you have [uv](https://docs.astral.sh/uv/#highlights) installed, then run
+
+```bash
+uv tool install pre-commit
+pre-commit install
+```
+
 ### Required Dependencies
 
 The library depends on `fastrand` for random cube states.

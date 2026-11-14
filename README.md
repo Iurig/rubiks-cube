@@ -1,5 +1,6 @@
 # rubiks-cube
 
+![workspace](https://github.com/Iurig/rubiks-cube/actions/workflows/workspace.yml/badge.svg)
 ![lib](https://github.com/Iurig/rubiks-cube/actions/workflows/lib.yml/badge.svg)
 ![python](https://github.com/Iurig/rubiks-cube/actions/workflows/python.yml/badge.svg)
 ![timer](https://github.com/Iurig/rubiks-cube/actions/workflows/timer.yml/badge.svg)

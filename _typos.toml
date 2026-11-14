@@ -1,0 +1,10 @@
+[default]
+extend-ignore-re = ["`[0-9a-f]{7}`"]
+
+[default.extend-words]
+# allowed
+befores = "befores"
+nd = "nd"
+oll = "oll"
+pll = "pll"
+ratatui = "ratatui"
