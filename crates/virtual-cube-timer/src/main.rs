@@ -5,7 +5,11 @@ mod message;
 mod solves;
 mod view;
 
-use std::time::{Duration, Instant};
+use std::{
+    collections::VecDeque,
+    sync::{Arc, Mutex, mpsc},
+    time::{Duration, Instant},
+};
 
 use anyhow::{Ok, ensure};
 use clap::{Parser, ValueEnum};
@@ -93,7 +97,8 @@ fn main() -> anyhow::Result<()> {
             ModeArg::Normal => Mode::Timing(TimingApp {
                 cube: Cube3x3::default(),
                 method: args.method.clone(),
-                solves: SolveList::from_solves_file()?,
+                solves: Arc::new(Mutex::new(SolveList::from_solves_file()?)),
+                curr_solve_scramble: VecDeque::new(),
                 curr_solve_moves: Solution::single_segment(args.method.name(), Algorithm::new()),
                 starting_time: Instant::now(),
                 timer_number: Duration::ZERO,
