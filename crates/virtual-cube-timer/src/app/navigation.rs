@@ -28,7 +28,7 @@ pub struct InspectOptions {
 impl NavigationApp {
     pub fn update(&mut self, message: &NavigationMessage) {
         fn clamp_move(app: &mut NavigationApp) {
-            let max_move_count = app.cur_step_move_count().expect("move count is invalid");
+            let max_move_count = app.cur_step_move_count();
             if let Some(opt) = app.mut_inspect_options() {
                 opt.move_index = std::cmp::min(opt.move_index, max_move_count);
             } else {
@@ -63,10 +63,7 @@ impl NavigationApp {
                     step_index,
                 }) => {
                     self.nav_mode = NavigationMode::Inspect(InspectOptions {
-                        move_index: std::cmp::min(
-                            move_index + 1,
-                            self.cur_step_move_count().expect("cur_step_move_count didn't return a valid move count for the current step"),
-                        ),
+                        move_index: std::cmp::min(move_index + 1, self.cur_step_move_count()),
                         step_index,
                     });
                 }
@@ -200,8 +197,8 @@ impl NavigationApp {
         )
     }
 
-    pub fn cur_step_move_count(&self) -> Option<usize> {
-        Some(self.step().iter().count())
+    pub fn cur_step_move_count(&self) -> usize {
+        self.step().iter().count()
     }
 
     pub fn solve_iter(&self) -> impl Iterator<Item = Segment<Cube3x3>> {
