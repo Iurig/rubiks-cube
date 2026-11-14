@@ -11,7 +11,7 @@ use anyhow::{Ok, ensure};
 use clap::{Parser, ValueEnum};
 use ratatui_core as _;
 use rubiks_cube::{
-    Cube3x3, Puzzle,
+    Algorithm, Cube3x3, Method, Puzzle, Roux, Solution, ZZ,
     roux::{FirstBlock, SecondBlock},
 };
 
@@ -51,10 +51,33 @@ enum ModeArg {
     Browse,
 }
 
-#[derive(Debug, Clone, ValueEnum, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, ValueEnum, PartialEq, Eq)]
 enum ValidMethods {
+    #[default]
     Roux,
     Zz,
+}
+
+impl Method<Cube3x3> for ValidMethods {
+    fn new() -> Self {
+        Self::default()
+    }
+
+    fn to_technique(&self) -> rubiks_cube::Technique<Cube3x3> {
+        match self {
+            Self::Roux => Roux::default().to_technique(),
+            Self::Zz => ZZ::default().to_technique(),
+        }
+    }
+}
+
+impl ValidMethods {
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Roux => "Roux",
+            Self::Zz => "ZZ",
+        }
+    }
 }
 
 fn main() -> anyhow::Result<()> {
