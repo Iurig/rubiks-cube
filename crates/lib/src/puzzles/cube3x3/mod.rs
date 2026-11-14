@@ -265,6 +265,10 @@ impl Cube3x3 {
     }
 
     /// The scramble that gets the cube to the state provided.
+    ///
+    /// # Errors
+    /// Errors if the solving process to produce the scramble errors. See [`solve`](Method::solve)
+    /// for more details.
     pub fn get_scramble(&self) -> Result<Algorithm<Cube3x3>, SolveError> {
         let mut cube_copy = self.clone();
         Ok(Kociemba
