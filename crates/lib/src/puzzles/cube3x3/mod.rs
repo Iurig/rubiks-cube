@@ -88,13 +88,7 @@ impl Puzzle for Cube3x3 {
 
     fn scramble_with_seed(seed: u64) -> Result<Algorithm<Self>, SolveError> {
         let mut cube = Self::scrambled_with_seed(seed);
-        Ok(Kociemba
-            .solve(&mut cube)?
-            .iter()
-            .flat_map(|s| s.moves().iter().copied())
-            .collect::<Algorithm<Self>>()
-            .inv()
-            .simplify_single_moves())
+        cube.get_scramble()
     }
 }
 
@@ -269,8 +263,19 @@ impl Cube3x3 {
     fn centers_form_a_rotation(&self) -> bool {
         self.rotated_until_solved_centers().is_some()
     }
-}
 
+    /// The scramble that gets the cube to the state provided.
+    pub fn get_scramble(&self) -> Result<Algorithm<Cube3x3>, SolveError> {
+        let mut cube_copy = self.clone();
+        Ok(Kociemba
+            .solve(&mut cube_copy)?
+            .iter()
+            .flat_map(|s| s.moves().iter().copied())
+            .collect::<Algorithm<Self>>()
+            .inv()
+            .simplify_single_moves())
+    }
+}
 #[cfg(test)]
 #[expect(
     clippy::panic_in_result_fn,
