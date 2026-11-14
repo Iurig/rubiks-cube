@@ -18,7 +18,7 @@ use crate::{
 ///     .first_block(roux::FirstBlock::SquarePair)
 ///     .cmll(roux::Cmll::TwoLook);
 /// ```
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Roux {
     first_block: FirstBlock,
     second_block: SecondBlock,
@@ -34,7 +34,7 @@ impl Roux {
 }
 
 /// How [`Roux`] builds the first block, the 1x2x3 block on the left.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 #[non_exhaustive]
 pub enum FirstBlock {
     /// One search for the whole block.
@@ -47,7 +47,7 @@ pub enum FirstBlock {
 }
 
 /// How [`Roux`] builds the second block, the 1x2x3 block on the right.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 #[non_exhaustive]
 pub enum SecondBlock {
     /// One search for the whole block.
@@ -60,7 +60,7 @@ pub enum SecondBlock {
 }
 
 /// How [`Roux`] solves the U-layer corners.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 #[non_exhaustive]
 pub enum Cmll {
     /// One algorithm from the full CMLL set.
@@ -71,7 +71,7 @@ pub enum Cmll {
 }
 
 /// How [`Roux`] solves the last six edges.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 #[non_exhaustive]
 pub enum Lse {
     /// One search for all six edges with `U` and `M`.

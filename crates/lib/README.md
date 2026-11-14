@@ -8,7 +8,7 @@ step at a time. Its solving methods are Roux, ZZ, and Kociemba. More methods and
 are planned.
 
 A cube state is a value of type `Cube3x3`. Moves are cube states too, and applying a move is just
-group multiplication. Everything is `Copy`, and the move table is built on first use.
+group multiplication. The move table is built on first use.
 
 > **Status: Initial Release** The core group structure and every move in standard notation
 > (faces, slices, rotations, wide moves) work and are tested against real reconstructions. The Roux,

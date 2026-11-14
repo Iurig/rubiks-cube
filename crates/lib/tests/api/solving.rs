@@ -34,7 +34,10 @@ fn every_roux_option_solves_on_multiple_seeds() -> anyhow::Result<()> {
             SecondBlock::EdgePairPair,
         ] {
             for cmll in [Cmll::OneLook, Cmll::TwoLook] {
-                let roux = Roux::default().first_block(fb).second_block(sb).cmll(cmll);
+                let roux = Roux::default()
+                    .first_block(fb.clone())
+                    .second_block(sb.clone())
+                    .cmll(cmll);
                 let described = format!("{roux:?}");
                 for (i, scrambled) in scrambles.iter().enumerate() {
                     let recon = roux
@@ -115,7 +118,10 @@ fn every_zz_option_combination_solves() -> anyhow::Result<()> {
     let mut last_layers = vec![LL::OneLook];
     for first in [FirstLook::Ocll, FirstLook::Coll] {
         for second in [SecondLook::OneLook, SecondLook::TwoLook] {
-            last_layers.push(LL::TwoLook { first, second });
+            last_layers.push(LL::TwoLook {
+                first: first.clone(),
+                second,
+            });
         }
     }
     for (seed, ll) in (0..).zip(last_layers) {

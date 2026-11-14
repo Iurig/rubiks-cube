@@ -8,7 +8,7 @@ use crate::methods::cube3x3::helpers::{
 use crate::{AlgSet, Cube3x3, Method, PieceSet, Step, Technique};
 
 /// The ZZ method for the 3x3 Rubik's Cube: EO line, first two layers, then last layer.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct ZZ {
     eoline: EoLine,
     f2l: F2L,
@@ -29,15 +29,15 @@ impl ZZ {
 
 /// How [`ZZ`] builds its first step, the `EOLine`.
 #[non_exhaustive]
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct EoLine;
 /// How [`ZZ`] builds its F2L.
 #[non_exhaustive]
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct F2L;
 /// How [`ZZ`] builds its last layer.
 #[non_exhaustive]
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum LL {
     /// 2-look last layer.
     TwoLook {
@@ -51,7 +51,7 @@ pub enum LL {
 }
 /// The first step of a two-look ZZ last layer.
 #[non_exhaustive]
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub enum FirstLook {
     /// Orientation of the Corners of the Last Layer.
     #[default]
@@ -61,7 +61,7 @@ pub enum FirstLook {
 }
 /// The second step of a two-look ZZ last layer.
 #[non_exhaustive]
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub enum SecondLook {
     /// Standard PLL
     #[default]
@@ -94,7 +94,7 @@ impl Method<Cube3x3> for ZZ {
             )) as Arc<dyn Step<Cube3x3>>],
         };
 
-        let ll_tech = match self.ll {
+        let ll_tech = match &self.ll {
             LL::TwoLook {
                 first: oll,
                 second: pll,

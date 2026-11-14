@@ -161,7 +161,7 @@ fn phase_2() -> PrunedCombine<Cube3x3> {
 
 /// Kociemba's two-phase method.
 /// The first call builds the pruning tables, which takes a few seconds.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Kociemba;
 
 impl Method<Cube3x3> for Kociemba {
