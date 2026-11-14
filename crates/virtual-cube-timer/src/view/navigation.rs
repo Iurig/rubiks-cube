@@ -176,7 +176,7 @@ fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
         let print_info = [
             format!("Step: {}", app.step().unwrap()),
             format!("Step: {}", app.step().unwrap()),
-            format!("Total moves: {}", app.cur_step_move_count().unwrap()),
+            format!("Total moves: {}", app.cur_step_move_count()),
         ];
 
         let mut dbg_rows = dbg_area
