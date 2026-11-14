@@ -22,7 +22,7 @@ use rubiks_cube::{
 use crate::{
     app::{
         App, Mode,
-        navigation::{NavigationApp, NavigationMode},
+        navigation::{ListNavApp, NavigationApp},
         timing::TimingApp,
         untimed::UntimedApp,
     },
@@ -76,7 +76,7 @@ impl Method<Cube3x3> for ValidMethods {
 }
 
 impl ValidMethods {
-    pub fn name(&self) -> &str {
+    pub const fn name(&self) -> &str {
         match self {
             Self::Roux => "Roux",
             Self::Zz => "ZZ",
@@ -105,7 +105,7 @@ fn main() -> anyhow::Result<()> {
                 timer_state: app::timing::TimerState::Solved,
             }),
 
-            _mode => Mode::Navigation(NavigationApp {
+            _mode => Mode::Nav(NavigationApp::List(ListNavApp {
                 solve_index: 0,
                 all_recons: match args.method {
                     ValidMethods::Roux => reconstruct_n(
@@ -119,8 +119,7 @@ fn main() -> anyhow::Result<()> {
                         &<rubiks_cube::ZZ as rubiks_cube::Method<Cube3x3>>::new(),
                     )?,
                 },
-                nav_mode: NavigationMode::Solves,
-            }),
+            })),
         },
     };
 
@@ -142,12 +141,12 @@ fn main() -> anyhow::Result<()> {
                         .map_or_default(|event| untimed_app.update_with_message(event, &keybinds))
                 }
 
-                Mode::Navigation(ref mut navigation_app) => {
-                    terminal.draw(|frame| render_navigation(navigation_app, frame))?;
+                Mode::Nav(ref mut solve_app) => {
+                    terminal.draw(|frame| render_navigation(solve_app, frame))?;
 
                     crossterm::event::read()?
                         .as_key_press_event()
-                        .map_or_default(|event| navigation_app.update_with_message(event))
+                        .map_or_default(|event| solve_app.update_with_message(event))
                 }
             };
             match message {

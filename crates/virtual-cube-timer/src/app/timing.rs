@@ -54,7 +54,7 @@ impl TimingApp {
                     .expect("no receivers from solves");
                 let solves_to_send = self.solves.clone();
                 let solve_moves = self.curr_solve_moves.clone();
-                let solve_time = self.timer_number.clone();
+                let solve_time = self.timer_number;
                 thread::spawn(move || {
                     let mut unlocked_solves = solves_to_send.lock().expect("mutex should be clean");
                     let solve = TimedSolve::new(
@@ -74,7 +74,7 @@ impl TimingApp {
                     self.timer_state = TimerState::Scrambled;
                     self.cube = Cube3x3::scrambled();
                     let (sender, receiver) = mpsc::channel::<Algorithm<Cube3x3>>();
-                    let cube_state = self.cube.clone();
+                    let cube_state = self.cube;
                     self.curr_solve_scramble.push_back(receiver);
                     thread::spawn(move || {
                         sender.send(cube_state.get_scramble().expect("cube should solve"))

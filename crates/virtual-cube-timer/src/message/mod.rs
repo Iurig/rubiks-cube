@@ -5,14 +5,20 @@ pub enum Message {
 }
 
 pub enum NavigationMessage {
+    EnterList,
+    EnterSolve,
+}
+
+pub enum SolveNavMessage {
     PreviousMove,
     NextMove,
     PreviousStep,
     NextStep,
+}
+
+pub enum ListNavMessage {
     PreviousSolve,
     NextSolve,
-    EnterSolves,
-    EnterInspect,
 }
 
 pub enum CubeMessage {

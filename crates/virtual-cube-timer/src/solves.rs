@@ -21,7 +21,7 @@ pub struct ReconWithScramble {
 }
 
 impl TimedSolve {
-    pub fn new(moves: ReconWithScramble, time: Duration) -> Self {
+    pub const fn new(moves: ReconWithScramble, time: Duration) -> Self {
         Self { moves, time }
     }
 
@@ -33,7 +33,7 @@ impl TimedSolve {
         &self.moves.solution
     }
 
-    fn time(&self) -> &Duration {
+    const fn time(&self) -> &Duration {
         &self.time
     }
 }
@@ -111,12 +111,12 @@ impl FromStr for ReconWithScramble {
             scramble: s
                 .lines()
                 .next()
-                .ok_or(anyhow::format_err!("reconstruction has no first line"))?
+                .ok_or_else(|| anyhow::format_err!("reconstruction has no first line"))?
                 .parse()?,
             solution: s
                 .lines()
                 .skip(1)
-                .map(|line| line.parse::<Segment<Cube3x3>>())
+                .map(str::parse::<Segment<Cube3x3>>)
                 .collect::<Result<Vec<_>, ParseSequenceError>>()?
                 .into_iter()
                 .collect(),
@@ -164,8 +164,8 @@ pub fn parse_to_duration(text: &str) -> anyhow::Result<Duration> {
 
 impl Display for SolveList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for (index, solve) in self.0.iter() {
-            write!(f, "{}. {}\n", index, solve)?;
+        for (index, solve) in &self.0 {
+            writeln!(f, "{index}. {solve}")?;
         }
         Ok::<(), std::fmt::Error>(())
     }
@@ -176,13 +176,12 @@ impl FromStr for SolveList {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self(
             s.split("\n\n")
-                .map(|s| {
+                .flat_map(|s| {
                     let (number, solve) = s
-                        .split_once(".")
+                        .split_once('.')
                         .ok_or_else(|| anyhow!("didn't have .: {s}"))?;
                     Ok::<_, anyhow::Error>((number.parse::<usize>()?, solve.parse()?))
                 })
-                .flatten()
                 .collect::<Vec<_>>(),
         ))
     }
