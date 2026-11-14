@@ -92,8 +92,9 @@ fn main() -> anyhow::Result<()> {
             }),
             ModeArg::Normal => Mode::Timing(TimingApp {
                 cube: Cube3x3::default(),
-                method: args.method,
+                method: args.method.clone(),
                 solves: SolveList::from_solves_file()?,
+                curr_solve_moves: Solution::single_segment(args.method.name(), Algorithm::new()),
                 starting_time: Instant::now(),
                 timer_number: Duration::ZERO,
                 timer_state: app::timing::TimerState::Solved,

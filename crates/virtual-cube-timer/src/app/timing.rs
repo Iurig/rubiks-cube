@@ -1,7 +1,7 @@
 use std::time::{Duration, Instant};
 
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Cube3x3, Puzzle};
+use rubiks_cube::{Cube3x3, Puzzle, Solution};
 
 use crate::{
     event::Event,
@@ -15,6 +15,7 @@ pub struct TimingApp {
     pub cube: Cube3x3,
     pub method: crate::ValidMethods,
     pub solves: SolveList,
+    pub curr_solve_moves: Solution<Cube3x3>,
     pub starting_time: Instant,
     pub timer_number: Duration,
     pub timer_state: TimerState,
