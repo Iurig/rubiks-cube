@@ -1,2 +1,3 @@
+allowed_scopes = ["workspace", "lib", "timer", "py-lib"]
 style = "conventional"
 subject_capitalized = false

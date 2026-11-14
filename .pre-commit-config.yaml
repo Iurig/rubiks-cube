@@ -1,9 +1,11 @@
 default_install_hook_types: [pre-commit, commit-msg]
+
 repos:
   - repo: https://github.com/crate-ci/committed
     rev: v1.1.12
     hooks:
       - id: committed
+
   - repo: https://github.com/crate-ci/typos
     rev: v1.52.2
     hooks:
@@ -13,4 +15,13 @@ repos:
         alias: typos-commit-msg
         name: typos (commit message)
         args: []
+        stages: [commit-msg]
+
+  - repo: local
+    hooks:
+      - id: require-scope
+        name: commit subject needs a scope, like chore(lib)
+        language: pygrep
+        entry: '\A[a-z]+\([a-z-]+\)!?: '
+        args: [--negate, --multiline]
         stages: [commit-msg]
