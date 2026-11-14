@@ -87,7 +87,7 @@ impl Puzzle for Cube3x3 {
     }
 
     fn scramble_with_seed(seed: u64) -> Result<Algorithm<Self>, SolveError> {
-        let mut cube = Self::scrambled_with_seed(seed);
+        let cube = Self::scrambled_with_seed(seed);
         cube.get_scramble()
     }
 }
