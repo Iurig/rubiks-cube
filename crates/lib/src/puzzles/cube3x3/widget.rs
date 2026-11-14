@@ -13,7 +13,7 @@ const fn set_color(cell: &mut Cell, color: Color) -> &mut Cell {
 }
 
 /// A [`ratatui`] [`Widget`] for displaying a [`Cube3x3`].
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct WidgetCube3x3 {
     cube: Cube3x3,
     color_scheme: ColorScheme3x3,
@@ -62,7 +62,7 @@ impl Cube3x3 {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct WidgetFace3x3 {
     face: [Face; 9],
     color_scheme: ColorScheme3x3,
