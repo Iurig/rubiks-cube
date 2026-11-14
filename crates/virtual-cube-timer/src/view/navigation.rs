@@ -1,5 +1,5 @@
 use crate::{
-    app::navigation::{NavigationApp, NavigationMode},
+    app::navigation::{ListNavApp, NavigationApp, SolveNavApp},
     view::{CUBE_HEIGHT, CUBE_LENGTH, SCRAMBLE_HEIGHT, help::HelpWidget},
 };
 
@@ -15,13 +15,13 @@ use rubiks_cube::{ColorScheme3x3, Cube3x3};
 use termprofile::{DetectorSettings, TermProfile};
 
 pub fn render_navigation(app: &NavigationApp, frame: &mut Frame) {
-    let scramble = app.scramble().clone();
+    let scramble = app.list_app().scramble().clone();
 
     let cube = Cube3x3::default() * scramble;
 
-    match app.nav_mode {
-        NavigationMode::Solves => view_browse(app, frame, cube),
-        NavigationMode::Inspect(_) => view_inspect(app, frame, cube),
+    match app {
+        NavigationApp::List(list_app) => view_list(list_app, frame, cube),
+        NavigationApp::Solve(solve_app) => view_solve(solve_app, frame, cube),
     }
 }
 
@@ -47,9 +47,9 @@ fn draw_base(
     solve_space: Rect,
     cube: Cube3x3,
 ) -> (Rect, Rect, Rect) {
-    let scramble_text = app.scramble().to_string();
+    let scramble_text = app.list_app().scramble().to_string();
 
-    let solve_text = app.solution().to_string();
+    let solve_text = app.list_app().solution().to_string();
 
     let scramble_widget =
         Paragraph::new(scramble_text.clone()).block(Block::bordered().title("Scramble"));
@@ -80,7 +80,7 @@ fn draw_base(
     .nth(1)
     .expect("layout should have 3 rectangles, but has no 1 indexed rectangle");
 
-    draw_cli_widget(app.solve_index, &cube, cube_area, frame);
+    draw_cli_widget(app.list_app().solve_index, &cube, cube_area, frame);
 
     let [scramble_area, solve_area] =
         Layout::vertical([Constraint::Length(SCRAMBLE_HEIGHT), Constraint::Fill(1)])
@@ -92,11 +92,11 @@ fn draw_base(
     (cube_area, scramble_area, solve_area)
 }
 
-fn view_browse(app: &NavigationApp, frame: &mut Frame, cube: Cube3x3) {
+fn view_list(app: &ListNavApp, frame: &mut Frame, cube: Cube3x3) {
     let [app_space, help_space] =
         Layout::vertical([Constraint::Fill(1), Constraint::Length(2)]).areas(frame.area());
 
-    draw_base(app, frame, app_space, cube);
+    draw_base(&NavigationApp::List(app.clone()), frame, app_space, cube);
 
     let help = HelpWidget::new([
         "Inspect solve: Enter",
@@ -108,7 +108,7 @@ fn view_browse(app: &NavigationApp, frame: &mut Frame, cube: Cube3x3) {
     frame.render_widget(help, help_space);
 }
 
-fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
+fn view_solve(app: &SolveNavApp, frame: &mut Frame, mut cube: Cube3x3) {
     #[cfg(feature = "debug")]
     let [solve_space, help_space, dbg_area] = Layout::vertical([
         Constraint::Fill(1),
@@ -134,19 +134,19 @@ fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
                 .to_string()
                 .char_indices()
                 .filter(|&(_, c)| c == ' ')
-                .nth(app.unchecked_inspect_options().move_index)
+                .nth(app.move_index)
                 .map(|(index, _)| index)
                 .expect("move out of range"),
         )
         .expect("overflowed")
         .strict_add(1),
-        i32::try_from(app.unchecked_inspect_options().step_index)
+        i32::try_from(app.step_index)
             .expect("overflowed")
             .strict_add(1),
     );
 
-    for (step, line) in app.solve_iter().enumerate() {
-        if step >= app.unchecked_inspect_options().step_index {
+    for (step, line) in app.list_app.solve_iter().enumerate() {
+        if step >= app.step_index {
             break;
         }
         cube = cube * line;
@@ -160,7 +160,8 @@ fn view_inspect(app: &NavigationApp, frame: &mut Frame, mut cube: Cube3x3) {
         .zip(0..cursor_position_in_recon.x)
         .fold(cube, |c, (m, _)| c * m);
 
-    let (_cube_area, _, solve_area) = draw_base(app, frame, solve_space, cube);
+    let (_cube_area, _, solve_area) =
+        draw_base(&NavigationApp::Solve(app.clone()), frame, solve_space, cube);
 
     frame.set_cursor_position(solve_area.as_position() + cursor_position_in_recon);
 

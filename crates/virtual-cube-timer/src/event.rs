@@ -14,10 +14,10 @@ pub enum Event {
 
 #[derive(Debug)]
 pub struct EventHandler {
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "here for future use")]
     sender: mpsc::Sender<Event>,
     receiver: mpsc::Receiver<Event>,
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "here for future use")]
     handler: thread::JoinHandle<()>,
 }
 

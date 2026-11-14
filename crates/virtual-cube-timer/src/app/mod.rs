@@ -13,5 +13,5 @@ pub struct App {
 pub enum Mode {
     Untimed(UntimedApp),
     Timing(TimingApp),
-    Navigation(NavigationApp),
+    Nav(NavigationApp),
 }
