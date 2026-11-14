@@ -45,14 +45,7 @@ pub trait Puzzle:
     type Piece: Copy + Eq + Debug + Hash + 'static + Send + Sync + Indexed + Display;
     /// How a piece is oriented in its slot. One type covers every kind of piece, so a puzzle with
     /// several kinds, such as the cube's corners and edges, uses an enum with one variant per kind.
-    type Orientation: Debug
-        + Eq
-        + Hash
-        + Clone
-        + Copy
-        + Send
-        + Sync
-        + Add<Output = Self::Orientation>;
+    type Orientation: Debug + Eq + Hash + Copy + Send + Sync + Add<Output = Self::Orientation>;
     /// One move of the puzzle, such as `R'` on the cube.
     type Move: crate::Inv
         + Eq
