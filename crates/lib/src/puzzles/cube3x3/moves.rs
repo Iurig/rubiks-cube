@@ -170,7 +170,7 @@ impl MoveModifier {
     #[must_use]
     #[expect(
         clippy::unreachable,
-        reason = "type sytem doesn't support range bounds, manually verified"
+        reason = "type system doesn't support range bounds, manually verified"
     )]
     pub fn from_number(n: i32) -> Option<Self> {
         match n.rem_euclid(4) {

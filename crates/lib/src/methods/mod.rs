@@ -46,7 +46,7 @@ pub struct Technique<P: Puzzle> {
 
 /// Builder for [`Technique`].
 ///
-/// Can be used to build a [`Technique`] from uncomplete [`StepBuilder`]s.
+/// Can be used to build a [`Technique`] from incomplete [`StepBuilder`]s.
 ///
 /// # Examples
 ///

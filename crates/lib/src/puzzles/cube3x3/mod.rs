@@ -300,7 +300,7 @@ mod tests {
     }
 
     #[test]
-    fn center_3_cyle_isnt_reachable_even_if_respects_parity() {
+    fn center_3_cycle_isnt_reachable_even_if_respects_parity() {
         assert!(
             !Cube3x3 {
                 centers: CenterConfiguration::cycle([[Center::F, Center::R, Center::U]]),

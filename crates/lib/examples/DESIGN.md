@@ -29,7 +29,7 @@ It is a trait.
 ### Trait Method
 
 ```rust
-#[non_exaustive]
+#[non_exhaustive]
 struct Roux{
     fb: FirstBlockOptions,
     sb: SecondBlockOptions,
@@ -40,7 +40,7 @@ struct Roux{
 trait Method: Default {
     fn to_technique(&self) -> Technique;
     fn new(&self) -> Self {
-        self.default()    
+        self.default()
     }
     fn solve(&self, puzzle: &mut P) -> P::Solution {
         self.to_technique().solve
@@ -53,8 +53,8 @@ impl Method for Roux {
         let FB = match roux.fb{
         }
         ...
-        
-        Technique([FB, SB, CMLL, LSE].join())    
+
+        Technique([FB, SB, CMLL, LSE].join())
     }
 }
 ```
@@ -88,7 +88,7 @@ ALL.split_at_with_name(goal, name)
     let goal: &AlgSet<Cube3x3> = (&OCLL_ALGS);
     let free: &AlgSet<Cube3x3> = (&AlgSet::default());
     {
-        let steps: Vec<Arc<dyn Step<Cube3x3>>> = 
+        let steps: Vec<Arc<dyn Step<Cube3x3>>> =
                 vec![(Arc::new(Choose::named(
                     "F2L",
                     [{

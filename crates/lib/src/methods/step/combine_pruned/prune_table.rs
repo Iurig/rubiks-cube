@@ -32,7 +32,7 @@ impl<P: Puzzle, L: Marker<P, Label: Send + Sync> + Clone + Eq + Hash + Send + Sy
     /// step of distance, the same unit [`PrunedCombine`](super::PrunedCombine) searches in.
     #[expect(
         clippy::indexing_slicing,
-        reason = "vector made to always comport the lenght: breaking this invariant should fail loudly"
+        reason = "vector made to always comport the length: breaking this invariant should fail loudly"
     )]
     pub(crate) fn populate(&self, algset: &AlgSet<P>) {
         // Every key in the frontier is at `depth`, so the depth lives once, outside the loop.

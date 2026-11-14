@@ -164,7 +164,7 @@ pub struct ParseSequenceError {
 pub enum SearchStepError<P: Puzzle> {
     /// The step prerequisite was not guaranteed by the goal.
     #[error(
-        "expected {before} to be solved, but the previous goal only promisses {after} to be solved"
+        "expected {before} to be solved, but the previous goal only promises {after} to be solved"
     )]
     InvalidPrerequisite {
         /// The prerequisite

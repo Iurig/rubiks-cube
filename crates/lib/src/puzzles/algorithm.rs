@@ -207,7 +207,7 @@ impl Algorithm<Cube3x3> {
         clippy::missing_panics_doc,
         reason = "panicking breaks invariants - nothing useful to the final user"
     )]
-    pub fn simplify_cancelations(self) -> Self {
+    pub fn simplify_cancellations(self) -> Self {
         let cancel_once = |alg: Self| -> Self {
             alg.into_iter()
                 .map(Some)
@@ -236,7 +236,7 @@ impl Algorithm<Cube3x3> {
             (next != *alg).then_some(next)
         })
         .last()
-        .expect("empy iterator")
+        .expect("empty iterator")
     }
 }
 
@@ -285,11 +285,11 @@ mod tests {
     fn cancels_to_equal(alg1: &str, alg2: &str) {
         let alg: Algorithm<Cube3x3> = alg1.parse().unwrap();
         let expected: Algorithm<Cube3x3> = alg2.parse().unwrap();
-        assert_eq!(expected, alg.simplify_cancelations());
+        assert_eq!(expected, alg.simplify_cancellations());
     }
 
     #[test]
-    fn simplify_same_part_cancelations() {
+    fn simplify_same_part_cancellations() {
         cancels_to_equal("R R", "R2");
         cancels_to_equal("R R'", "");
         cancels_to_equal("R R R R U U' R", "R");

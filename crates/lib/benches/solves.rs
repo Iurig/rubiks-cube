@@ -2,7 +2,7 @@
 
 #![allow(
     clippy::panic_in_result_fn,
-    reason = "bechmarks follow the same convention as tests"
+    reason = "benchmarks follow the same convention as tests"
 )]
 
 use rubiks_cube::{Cube3x3, Kociemba, Method, Puzzle, Roux, ZZ};

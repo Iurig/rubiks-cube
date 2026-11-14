@@ -37,7 +37,7 @@ impl WidgetCube3x3 {
         self.cube
     }
 
-    /// A mutable reference for the [`Cube3x3`] the widged displays.
+    /// A mutable reference for the [`Cube3x3`] the widget displays.
     pub const fn mut_cube(&mut self) -> &mut Cube3x3 {
         &mut self.cube
     }
