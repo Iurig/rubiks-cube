@@ -3,6 +3,7 @@ mod event;
 mod keybinds;
 mod message;
 mod solves;
+mod time;
 mod view;
 
 use std::{

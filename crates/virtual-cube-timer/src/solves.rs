@@ -5,6 +5,8 @@ use dirs::config_dir;
 use rubiks_cube::{Algorithm, Cube3x3, ParseSequenceError, Segment, Solution};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
+use crate::time::{to_duration, to_text};
+
 #[derive(Debug, Clone, PartialEq, Eq, SerializeDisplay, DeserializeFromStr)]
 pub struct SolveList(Vec<(usize, TimedSolve)>);
 
@@ -95,9 +97,8 @@ impl Display for TimedSolve {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{:?}.{:.0?}: {}\n{}",
-            self.time().as_secs(),
-            self.time().as_millis(),
+            "{}: {}\n{}",
+            to_text(*self.time()),
             self.scramble(),
             self.solution()
         )
@@ -127,38 +128,14 @@ impl FromStr for ReconWithScramble {
 impl FromStr for TimedSolve {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some((time, solve)) = s.split_once(':') {
+        if let Some((time, solve)) = s.rsplit_once(':') {
             Ok(Self {
                 moves: solve.parse()?,
-                time: parse_to_duration(time)?,
+                time: to_duration(time)?,
             })
         } else {
             Err(anyhow::format_err!("invalid solve: {s}"))
         }
-    }
-}
-
-pub fn parse_to_duration(text: &str) -> anyhow::Result<Duration> {
-    if let Some((seconds_or_more, sub_second)) = text.split_once('.') {
-        let secs = Duration::from_secs(
-            seconds_or_more
-                .split(':')
-                .try_fold((0, 1), |(seconds, multiplier), text| {
-                    anyhow::Ok((
-                        seconds + multiplier * (text.trim().parse::<u64>()?),
-                        multiplier * 60,
-                    ))
-                })?
-                .0,
-        );
-
-        let milis = Duration::from_millis(
-            (sub_second.parse::<u64>()? * 1000) / 10u64.pow(u32::try_from(sub_second.len())?),
-        );
-
-        Ok(secs + milis)
-    } else {
-        Err(anyhow::format_err!("invalid duration: {text}"))
     }
 }
 
@@ -210,7 +187,7 @@ mod tests {
                             )
                             .with_context(|| format!("{scramble:?}"))?,
                     ),
-                    Duration::ZERO,
+                    Duration::from_millis(fastrand::u64(0..2 * 3_600_000)),
                 ))
             })
             .collect::<anyhow::Result<Vec<_>>>()?;
