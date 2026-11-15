@@ -125,6 +125,13 @@ mod tests {
     use super::*;
 
     #[test]
+    fn factorial_test() {
+        assert_eq!(factorial(1), 1);
+        assert_eq!(factorial(0), 1);
+        assert_eq!(factorial(4), 24);
+    }
+
+    #[test]
     fn permutations_of_ranged_round_trip() {
         assert_round_trips::<Permutation<RangedInt<0, 5>>>();
         assert_round_trips::<Permutation<RangedInt<30, 36>>>();
