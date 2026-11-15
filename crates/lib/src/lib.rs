@@ -83,8 +83,8 @@ mod puzzles;
 pub mod zn;
 
 pub use error::{
-    BuildStepError, ParseMoveError, ParseSequenceError, SearchStepError, SolveError,
-    SolveErrorKind, StepError, TechniqueError,
+    BuildStepError, ParseMoveError, ParseSequenceError, PermutationError, SearchStepError,
+    SolveError, SolveErrorKind, StepError, TechniqueError,
 };
 pub use indexed::Indexed;
 pub use permutation::Permutation;

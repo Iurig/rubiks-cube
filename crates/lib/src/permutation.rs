@@ -2,7 +2,7 @@
 
 use std::{hash::Hash, ops::Index, vec::IntoIter};
 
-use crate::Indexed;
+use crate::{Indexed, error::PermutationError};
 
 /// Permutations of a [`Indexed`] type.
 ///
@@ -46,6 +46,27 @@ impl<T: Indexed> Permutation<T> {
     #[must_use]
     pub fn new() -> Self {
         Self((0..T::COUNT).map(|index| T::from_index(index)).collect())
+    }
+
+    /// Constructor for [`Permutation<T>`] for iterators of `T` in order.
+    pub fn try_from_iter(iter: impl IntoIterator<Item = T>) -> Result<Self, PermutationError> {
+        let to_vec = iter.into_iter().collect::<Vec<_>>();
+        let mut to_sorted_vec = to_vec.clone();
+        to_sorted_vec.sort_by(|t1, t2| t1.index().cmp(&t2.index()));
+        let mut repeats = false;
+        for index in 0..(to_vec.len() - 1) {
+            if to_sorted_vec[index] == to_sorted_vec[index + 1] {
+                repeats = true;
+                break;
+            }
+        }
+        if to_vec.len() != T::COUNT {
+            Err(PermutationError::WrongSize)
+        } else if repeats {
+            Err(PermutationError::RepeatedElement)
+        } else {
+            Ok(Self(to_vec))
+        }
     }
 
     /// Swaps 2 positions in a permutation.

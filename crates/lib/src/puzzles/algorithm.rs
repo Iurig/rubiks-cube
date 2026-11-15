@@ -252,8 +252,10 @@ mod tests {
     fn algorithm_into_iter_and_iter_agree() -> anyhow::Result<()> {
         let alg: Algorithm<Cube3x3> = "R U R' U' R' F R2 U' R' U' R U R' F'".parse()?;
         let alg_vec_2 = alg.iter().copied().collect::<Vec<_>>();
-        let alg_vec_1 = alg.into_iter().collect::<Vec<_>>();
+        let alg_vec_1 = alg.clone().into_iter().collect::<Vec<_>>();
+        let alg_vec_3 = alg.to_vec();
         assert_eq!(alg_vec_1, alg_vec_2);
+        assert_eq!(alg_vec_1, alg_vec_3);
         Ok(())
     }
 
