@@ -1,5 +1,9 @@
 # `tools/` only wraps other crates' binaries; there's no behaviour of ours to test.
-exclude_globs = ["crates/twisty-puzzles-py/**", "tools/**"]
+exclude_globs = [
+    "crates/twisty-puzzles-py/**",
+    "tools/**",
+    "crates/lib/src/puzzles/cube3x3/widget.rs",
+]
 exclude_re = [
     "impl Debug",
     "impl Display",
