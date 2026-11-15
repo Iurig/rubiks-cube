@@ -141,7 +141,12 @@ impl<T: Indexed> Indexed for Permutation<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::indexed::{RangedInt, assert_round_trips};
+    use std::error::Error;
+
+    use crate::{
+        indexed::{RangedInt, assert_round_trips},
+        zn::Zn,
+    };
 
     use super::*;
 
@@ -158,5 +163,22 @@ mod tests {
         assert_round_trips::<Permutation<RangedInt<30, 36>>>();
         assert_round_trips::<Permutation<RangedInt<40, 40>>>();
         assert_round_trips::<Permutation<RangedInt<0, 0>>>();
+    }
+
+
+
+    #[test]
+    fn into_iter_and_try_from_iter_round_trips() -> Result<(), Box<dyn Error>> {
+        let perm = Permutation::<Zn<8>>::try_from_iter(
+            [4, 0, 2, 3, 1, 5, 6, 7]
+                .iter()
+                .map(|&i| Zn::<8>::new(i))
+                .collect::<Vec<_>>(),
+        )?;
+        assert_eq!(
+            perm.clone(),
+            Permutation::<Zn<8>>::try_from_iter(perm.into_iter())?
+        );
+        Ok(())
     }
 }
