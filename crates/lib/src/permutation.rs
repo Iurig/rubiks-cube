@@ -165,10 +165,23 @@ mod tests {
         assert_round_trips::<Permutation<RangedInt<0, 0>>>();
     }
 
-
+    #[test]
+    fn simple_cycles() {
+        let mut perm = Permutation::<Zn<8>>::new();
+        assert_eq!(
+            *perm.swap_cycle([0, 1, 4]),
+            Permutation::<Zn<8>>::try_from_iter(dbg!(
+                [4, 0, 2, 3, 1, 5, 6, 7]
+                    .iter()
+                    .map(|&i| Zn::<8>::new(i))
+                    .collect::<Vec<_>>()
+            ))
+            .unwrap()
+        );
+    }
 
     #[test]
-    fn into_iter_and_try_from_iter_round_trips() -> Result<(), Box<dyn Error>> {
+    fn into_iter_and_try_from_iter_round_trops() -> Result<(), Box<dyn Error>> {
         let perm = Permutation::<Zn<8>>::try_from_iter(
             [4, 0, 2, 3, 1, 5, 6, 7]
                 .iter()
