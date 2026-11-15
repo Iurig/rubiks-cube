@@ -87,6 +87,7 @@ pub use error::{
     SolveErrorKind, StepError, TechniqueError,
 };
 pub use indexed::Indexed;
+pub use permutation::Permutation;
 // Methods with options are re-exported as modules too (`roux::Cmll`), so the options need no method
 // prefix. `kociemba` has no options.
 pub use methods::{
