@@ -103,6 +103,7 @@ pub(crate) const fn factorial(n: usize) -> usize {
 
 impl<T: Indexed> Indexed for Permutation<T> {
     const COUNT: usize = factorial(T::COUNT);
+
     fn index(&self) -> usize {
         self.0
             .iter()
