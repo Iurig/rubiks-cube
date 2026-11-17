@@ -79,7 +79,7 @@ impl<P: Puzzle> FromStr for SolutionSegment<P> {
 }
 
 impl<P: Puzzle> SolutionSegment<P> {
-    /// Constructor for an empty [`Segment`] with a name.
+    /// Constructor for an empty [`SolutionSegment`] with a name.
     #[must_use]
     pub fn new(name: &str) -> Self {
         Self {
