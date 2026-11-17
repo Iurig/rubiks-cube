@@ -30,6 +30,14 @@ pub struct SolutionSegment<P: Puzzle> {
     moves: Algorithm<P>,
 }
 
+impl<'a, P: Puzzle> IntoIterator for &'a SolutionSegment<P> {
+    type Item = &'a <P as Puzzle>::Move;
+    type IntoIter = <&'a Algorithm<P> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.moves.iter()
+    }
+}
+
 impl<P: Puzzle> IntoIterator for SolutionSegment<P> {
     type Item = <P as Puzzle>::Move;
     type IntoIter = <Algorithm<P> as IntoIterator>::IntoIter;
