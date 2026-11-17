@@ -3,7 +3,7 @@ use rubiks_cube::{Algorithm, Cube3x3, Solution, SolutionSegment};
 
 use crate::{
     message::{ListNavMessage, Message, NavigationMessage, SolveNavMessage},
-    solves::SolveList,
+    solves::{SolveList, TimedSolve},
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -71,12 +71,16 @@ impl SolveNavApp {
 }
 
 impl ListNavApp {
-    pub fn solution(&self) -> &Solution<Cube3x3> {
+    pub fn timed_solve(&self) -> &TimedSolve {
         self.all_recons
             .get(self.solve_index)
             .expect("index doesn't match an existing reconstruction")
-            .solution()
     }
+
+    pub fn solution(&self) -> &Solution<Cube3x3> {
+        self.timed_solve().solution()
+    }
+
     pub fn scramble(&self) -> &Algorithm<Cube3x3> {
         self.all_recons
             .get(self.solve_index)

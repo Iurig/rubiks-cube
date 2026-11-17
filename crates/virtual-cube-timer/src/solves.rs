@@ -5,7 +5,10 @@ use dirs::config_dir;
 use rubiks_cube::{Algorithm, Cube3x3, ParseSequenceError, Solution, SolutionSegment};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
-use crate::time::{to_duration, to_text};
+use crate::{
+    ValidMethods,
+    time::{to_duration, to_text},
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, SerializeDisplay, DeserializeFromStr)]
 pub struct SolveList(Vec<(usize, TimedSolve)>);
@@ -14,6 +17,7 @@ pub struct SolveList(Vec<(usize, TimedSolve)>);
 pub struct TimedSolve {
     moves: ReconWithScramble,
     time: Duration,
+    method: ValidMethods,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -23,20 +27,28 @@ pub struct ReconWithScramble {
 }
 
 impl TimedSolve {
-    pub const fn new(moves: ReconWithScramble, time: Duration) -> Self {
-        Self { moves, time }
+    pub const fn new(moves: ReconWithScramble, time: Duration, method: ValidMethods) -> Self {
+        Self {
+            moves,
+            time,
+            method,
+        }
     }
 
     pub const fn scramble(&self) -> &Algorithm<Cube3x3> {
-        &self.moves.scramble
+        self.moves.scramble()
     }
 
     pub const fn solution(&self) -> &Solution<Cube3x3> {
-        &self.moves.solution
+        self.moves.solution()
     }
 
-    const fn time(&self) -> &Duration {
+    pub const fn time(&self) -> &Duration {
         &self.time
+    }
+
+    pub const fn method(&self) -> &ValidMethods {
+        &self.method
     }
 }
 
@@ -139,10 +151,11 @@ impl FromStr for TimedSolve {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Some((time, solve)) = s.rsplit_once(':') {
-            Ok(Self {
-                moves: solve.parse()?,
-                time: to_duration(time)?,
-            })
+            Ok(Self::new(
+                solve.parse()?,
+                to_duration(time)?,
+                ValidMethods::Roux,
+            ))
         } else {
             Err(anyhow::format_err!("invalid solve: {s}"))
         }
@@ -210,6 +223,7 @@ mod tests {
                             .with_context(|| format!("{scramble:?}"))?,
                     ),
                     Duration::from_millis(fastrand::u64(0..2 * 3_600_000)),
+                    ValidMethods::Roux,
                 ))
             })
             .collect::<anyhow::Result<Vec<_>>>()?;

@@ -8,13 +8,13 @@ use std::{
 use bimap::BiHashMap;
 use crossterm::event::{KeyCode, KeyModifiers};
 use dirs::config_dir;
-use rubiks_cube::{Cube3x3, Move3x3, Puzzle};
+use rubiks_cube::Move3x3;
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Keybinds {
-    moves: BiHashMap<KeyPress, Move3x3>,
+    pub moves: BiHashMap<KeyPress, Move3x3>,
 }
 
 #[derive(Debug, Clone, Copy, SerializeDisplay, DeserializeFromStr, PartialEq, Eq, Hash)]
@@ -147,10 +147,6 @@ impl Keybinds {
             }
             Err(e) => Err(e.into()),
         }
-    }
-
-    pub fn move_to_key(&self, m: <Cube3x3 as Puzzle>::Move) -> Option<KeyPress> {
-        self.moves.get_by_right(&m).copied()
     }
 }
 

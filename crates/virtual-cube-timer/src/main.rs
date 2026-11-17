@@ -118,18 +118,7 @@ fn main() -> anyhow::Result<()> {
 
             _mode => Mode::Nav(NavigationApp::List(ListNavApp {
                 solve_index: 0,
-                all_recons: match args.method {
-                    ValidMethods::Roux => reconstruct_n(
-                        args.number.unwrap_or(30),
-                        &<rubiks_cube::Roux as rubiks_cube::Method<Cube3x3>>::new()
-                            .first_block(FirstBlock::SquarePair)
-                            .second_block(SecondBlock::EdgePairPair),
-                    )?,
-                    ValidMethods::Zz => reconstruct_n(
-                        args.number.expect("demo mode must have a number parameter"),
-                        &<rubiks_cube::ZZ as rubiks_cube::Method<Cube3x3>>::new(),
-                    )?,
-                },
+                all_recons: reconstruct_n(args.number.unwrap_or(30), &args.method)?,
             })),
         },
     };
@@ -170,11 +159,17 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn reconstruct_n<T: rubiks_cube::Method<Cube3x3>>(
-    n: u32,
-    technique: &T,
-) -> anyhow::Result<SolveList> {
+fn reconstruct_n(n: u32, method: &ValidMethods) -> anyhow::Result<SolveList> {
     let mut recons = Vec::new();
+    let technique = match method {
+        ValidMethods::Roux => &<rubiks_cube::Roux as rubiks_cube::Method<Cube3x3>>::new()
+            .first_block(FirstBlock::SquarePair)
+            .second_block(SecondBlock::EdgePairPair)
+            .to_technique(),
+        ValidMethods::Zz => {
+            &<rubiks_cube::ZZ as rubiks_cube::Method<Cube3x3>>::new().to_technique()
+        }
+    };
     for _ in 0..n {
         let scramble = Cube3x3::scramble()?;
 
@@ -189,6 +184,7 @@ fn reconstruct_n<T: rubiks_cube::Method<Cube3x3>>(
         recons.push(TimedSolve::new(
             ReconWithScramble::new(scramble, solution),
             Duration::ZERO,
+            method.clone(),
         ));
     }
     Ok(SolveList::from_solves(recons))
