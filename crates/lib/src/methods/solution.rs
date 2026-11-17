@@ -102,6 +102,7 @@ impl<P: Puzzle> SolutionSegment<P> {
     pub fn name(&self) -> &str {
         &self.name
     }
+
     /// Getter for the moves that make the segment up.
     #[must_use]
     pub const fn moves(&self) -> &Algorithm<P> {
