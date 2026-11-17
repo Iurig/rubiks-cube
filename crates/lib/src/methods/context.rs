@@ -35,7 +35,13 @@ pub type UntypedCache = Arc<dyn Any + Send + Sync>;
 ///
 /// // A separate context holds its own caches.
 /// let other = BuildContext::default();
-/// assert_eq!(other.get_or_create::<NodeCounter>().0.load(Ordering::Relaxed), 0);
+/// assert_eq!(
+///     other
+///         .get_or_create::<NodeCounter>()
+///         .0
+///         .load(Ordering::Relaxed),
+///     0
+/// );
 /// ```
 #[derive(Default, Debug)]
 pub struct BuildContext {

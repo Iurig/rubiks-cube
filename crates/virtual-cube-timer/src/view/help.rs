@@ -25,7 +25,10 @@ impl Widget for HelpWidget {
 impl HelpWidget {
     pub fn new<'a>(messages: impl IntoIterator<Item = &'a str>) -> Self {
         Self {
-            messages: messages.into_iter().map(std::string::ToString::to_string).collect(),
+            messages: messages
+                .into_iter()
+                .map(std::string::ToString::to_string)
+                .collect(),
         }
     }
 }

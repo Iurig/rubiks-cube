@@ -162,6 +162,8 @@ uv tool install pre-commit
 pre-commit install
 ```
 
+The pre-commit hook uses `committed`, `typos`, `pygrep`, and nightly `rustfmt`. They should install on first use if you don't have them, check [`.pre-commit-config.yaml`] for versions if it doesn't, or if you prefer installing manually.
+
 ### Required Dependencies
 
 The library depends on `fastrand` for random cube states.

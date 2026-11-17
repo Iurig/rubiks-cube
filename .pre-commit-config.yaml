@@ -25,3 +25,10 @@ repos:
         entry: '\A[a-z]+\([a-z-]+\)!?: '
         args: [--negate, --multiline]
         stages: [commit-msg]
+      - id: rustfmt-nightly
+        name: rustfmt (nightly)
+        language: system
+        entry: cargo +nightly-2026-11-16 fmt --all -- --check --config wrap_comments=true,comment_width=100,format_code_in_doc_comments=true
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-commit]
