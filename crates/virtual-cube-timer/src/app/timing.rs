@@ -140,7 +140,7 @@ impl TimingApp {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
 
     use crossterm::event::KeyModifiers;
     use rubiks_cube::{Method, Move3x3, MoveModifier, Roux, SolutionSegment, Step};
