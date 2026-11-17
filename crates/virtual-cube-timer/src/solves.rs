@@ -94,7 +94,7 @@ impl SolveList {
         self.0.push((self.0.len(), solve));
     }
 
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.0.len()
     }
 
