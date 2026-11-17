@@ -1,4 +1,8 @@
-use std::{fmt::Display, ops::Mul, str::FromStr};
+use std::{
+    fmt::Display,
+    ops::{Index, IndexMut, Mul},
+    str::FromStr,
+};
 
 use crate::{Algorithm, Cube3x3, ParseSequenceError, puzzles::Puzzle};
 
@@ -140,6 +144,31 @@ impl<P: Puzzle> Solution<P> {
             .iter()
             .map(|segment| segment.moves.len())
             .sum()
+    }
+
+    /// Constructor for [`Solution`] with named, but empty [`Segment`]s.
+    pub fn with_empty_steps<'a>(steps: impl IntoIterator<Item = &'a str>) -> Self {
+        Self {
+            step_solutions: steps
+                .into_iter()
+                .map(|name| SolutionSegment::new(name))
+                .collect(),
+        }
+    }
+}
+
+impl<P: Puzzle> Index<usize> for Solution<P> {
+    type Output = SolutionSegment<P>;
+    #[expect(clippy::indexing_slicing, reason = "it defines the indexing API")]
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.step_solutions[index]
+    }
+}
+
+impl<P: Puzzle> IndexMut<usize> for Solution<P> {
+    #[expect(clippy::indexing_slicing, reason = "it defines the indexing API")]
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.step_solutions[index]
     }
 }
 
