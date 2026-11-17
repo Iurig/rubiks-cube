@@ -67,7 +67,7 @@ impl TimingApp {
                     unlocked_solves.push(solve);
                 });
             }
-            TimingMessage::Next => match self.timer_state {
+            TimingMessage::NextSolve => match self.timer_state {
                 TimerState::Scrambled => self.update(&TimingMessage::Start),
                 TimerState::Solving => self.update(&TimingMessage::Stop),
                 TimerState::Solved => {
@@ -98,7 +98,7 @@ impl TimingApp {
                 match (code, modifiers) {
                     (KeyCode::Esc, _) => return Some(Message::ExitProgram),
                     (KeyCode::Char(' '), _) => {
-                        self.update(&TimingMessage::Next);
+                        self.update(&TimingMessage::NextSolve);
                     }
                     _ if let Some(m) =
                         keybinds.as_move(&KeyPress::with_modifiers(code, modifiers)) =>

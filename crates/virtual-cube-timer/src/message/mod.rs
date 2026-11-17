@@ -28,6 +28,6 @@ pub enum CubeMessage {
 pub enum TimingMessage {
     Start,
     Stop,
-    Next,
+    NextSolve,
     Cube(CubeMessage),
 }
