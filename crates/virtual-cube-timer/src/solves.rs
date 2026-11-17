@@ -2,7 +2,7 @@ use std::{fmt::Display, fs, io::ErrorKind, str::FromStr, time::Duration};
 
 use anyhow::anyhow;
 use dirs::config_dir;
-use rubiks_cube::{Algorithm, Cube3x3, ParseSequenceError, Segment, Solution};
+use rubiks_cube::{Algorithm, Cube3x3, ParseSequenceError, Solution, SolutionSegment};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 use crate::time::{to_duration, to_text};
@@ -117,7 +117,7 @@ impl FromStr for ReconWithScramble {
             solution: s
                 .lines()
                 .skip(1)
-                .map(str::parse::<Segment<Cube3x3>>)
+                .map(str::parse::<SolutionSegment<Cube3x3>>)
                 .collect::<Result<Vec<_>, ParseSequenceError>>()?
                 .into_iter()
                 .collect(),

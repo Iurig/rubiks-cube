@@ -8,7 +8,7 @@ mod test_steps;
 
 use dyn_clone::arc_make_mut;
 use log::debug;
-pub use solution::{Segment, Solution};
+pub use solution::{Solution, SolutionSegment};
 
 use std::{fmt::Debug, ops::Index, sync::Arc, time::Instant};
 

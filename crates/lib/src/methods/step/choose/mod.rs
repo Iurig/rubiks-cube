@@ -113,7 +113,7 @@ mod tests {
     )]
 
     use super::*;
-    use crate::{Cube3x3, Segment, Technique, methods::test_steps::FixedStep};
+    use crate::{Cube3x3, SolutionSegment, Technique, methods::test_steps::FixedStep};
 
     fn cannot_start() -> StepError {
         StepError::InvalidStartingState {
@@ -143,7 +143,7 @@ mod tests {
             "only the short moves are applied"
         );
         assert_eq!(solution.move_count(), 1);
-        let names: Vec<&str> = solution.iter().map(Segment::name).collect();
+        let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
         assert_eq!(
             names,
             ["Short"],
@@ -164,7 +164,7 @@ mod tests {
         let solution = choose.solve(&mut cube)?;
 
         assert_eq!(cube, Cube3x3::from_moves("U")?);
-        let names: Vec<&str> = solution.iter().map(Segment::name).collect();
+        let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
         assert_eq!(names, ["Runs"]);
         Ok(())
     }
@@ -237,7 +237,7 @@ mod tests {
 
             let solution = choose.solve(&mut cube)?;
 
-            let names: Vec<&str> = solution.iter().map(Segment::name).collect();
+            let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
             assert_eq!(names, ["Short"], "short first: {short_first}");
             assert_eq!(
                 cube,
@@ -259,7 +259,7 @@ mod tests {
 
         let solution = choose.solve(&mut cube)?;
 
-        let names: Vec<&str> = solution.iter().map(Segment::name).collect();
+        let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
         assert_eq!(names, ["First"]);
         assert_eq!(cube, Cube3x3::from_moves("R")?);
         Ok(())

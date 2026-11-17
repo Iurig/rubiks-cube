@@ -115,7 +115,7 @@ fn kociemba_solves_a_scramble() {
     let start = Cube3x3::scrambled_with_seed(0);
     let mut cube = start;
     let solution = Kociemba.solve(&mut cube).unwrap();
-    let names: Vec<&str> = solution.iter().map(Segment::name).collect();
+    let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
     assert_eq!(names, ["Phase 1", "Phase 2"]);
     assert!(
         cube.is_solved(),

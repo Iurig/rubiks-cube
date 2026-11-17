@@ -1,5 +1,5 @@
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, Segment, Solution};
+use rubiks_cube::{Algorithm, Cube3x3, SolutionSegment, Solution};
 
 use crate::{
     message::{ListNavMessage, Message, NavigationMessage, SolveNavMessage},
@@ -61,7 +61,7 @@ impl SolveNavApp {
         }
     }
 
-    pub fn step(&self) -> Option<&Segment<Cube3x3>> {
+    pub fn step(&self) -> Option<&SolutionSegment<Cube3x3>> {
         self.list_app.solution().iter().nth(self.step_index + 1)
     }
 
@@ -88,7 +88,7 @@ impl ListNavApp {
         self.solution().iter().count()
     }
 
-    pub fn solve_iter(&self) -> impl Iterator<Item = Segment<Cube3x3>> {
+    pub fn solve_iter(&self) -> impl Iterator<Item = SolutionSegment<Cube3x3>> {
         self.solution().iter().cloned()
     }
 }
