@@ -2,6 +2,8 @@
 
 use std::{hash::Hash, ops::Index, vec::IntoIter};
 
+use itertools::Itertools;
+
 use crate::{Indexed, error::PermutationError};
 
 /// Permutations of a [`Indexed`] type.
@@ -53,29 +55,14 @@ impl<T: Indexed> Permutation<T> {
     /// # Errors
     /// Errors if the iterator does not represent a permutation - i.e. if there are repeated
     /// elements, or not all elements are present.
-    #[expect(
-        clippy::missing_panics_doc,
-        reason = "panics only happen on broken invariants, not user actionable"
-    )]
     pub fn try_from_iter(iter: impl IntoIterator<Item = T>) -> Result<Self, PermutationError> {
-        let to_vec = iter.into_iter().collect::<Vec<_>>();
-        let mut to_sorted_vec = to_vec.clone();
-        to_sorted_vec.sort_by_key(<T as Indexed>::index);
-        let mut repeats = false;
-        for index in 0..(to_vec.len() - 1) {
-            if to_sorted_vec.get(index).expect("index out of range")
-                == to_sorted_vec.get(index + 1).expect("index out of range")
-            {
-                repeats = true;
-                break;
-            }
-        }
+        let to_vec = iter.into_iter().map(|v| T::index(&v)).collect::<Vec<_>>();
         if to_vec.len() != T::COUNT {
             Err(PermutationError::WrongSize)
-        } else if repeats {
+        } else if to_vec.iter().all_unique() {
             Err(PermutationError::RepeatedElement)
         } else {
-            Ok(Self(to_vec))
+            Ok(Self(to_vec.into_iter().map(|i| T::from_index(i)).collect()))
         }
     }
 
