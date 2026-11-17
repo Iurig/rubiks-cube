@@ -151,6 +151,7 @@ impl<T: Indexed> Indexed for Permutation<T> {
 }
 
 #[cfg(test)]
+#[expect(clippy::panic_in_result_fn, reason = "tests")]
 mod tests {
     use std::error::Error;
 
