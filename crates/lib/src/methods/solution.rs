@@ -175,12 +175,14 @@ impl<P: Puzzle> Solution<P> {
     }
 
     /// How many steps the solution has.
-    pub fn len(&self) -> usize {
+    #[must_use]
+    pub const fn len(&self) -> usize {
         self.step_solutions.len()
     }
 
     /// If the solution is devoid of steps.
-    pub fn is_empty(&self) -> bool {
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
         self.step_solutions.is_empty()
     }
 }

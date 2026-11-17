@@ -71,11 +71,13 @@ impl<P: Puzzle> AlgSet<P> {
     }
 
     ///How many [`Algorithm`]s the [`AlgSet`] has.
+    #[must_use]
     pub fn len(&self) -> usize {
         self.0.len()
     }
 
     /// If the [`AlgSet`] is empty.
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
