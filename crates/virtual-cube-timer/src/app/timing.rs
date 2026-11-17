@@ -22,6 +22,7 @@ use crate::{
 pub struct TimingApp {
     pub cube: Cube3x3,
     pub technique: Technique<Cube3x3>,
+    pub keybinds: Keybinds,
     pub step_number: usize,
     pub solves: Arc<Mutex<SolveList>>,
     pub curr_solve_scramble: VecDeque<Receiver<Algorithm<Cube3x3>>>,
@@ -86,7 +87,7 @@ impl TimingApp {
         }
     }
 
-    pub fn update_with_message(&mut self, event: Event, keybinds: &Keybinds) -> Option<Message> {
+    pub fn update_with_message(&mut self, event: Event) -> Option<Message> {
         match event {
             Event::Key(event) => {
                 let KeyEvent {
@@ -101,8 +102,9 @@ impl TimingApp {
                     (KeyCode::Char(' '), _) => {
                         self.update(&TimingMessage::NextSolve);
                     }
-                    _ if let Some(m) =
-                        keybinds.as_move(&KeyPress::with_modifiers(code, modifiers)) =>
+                    _ if let Some(m) = self
+                        .keybinds
+                        .as_move(&KeyPress::with_modifiers(code, modifiers)) =>
                     {
                         while self
                             .technique
@@ -140,6 +142,7 @@ impl TimingApp {
 #[cfg(test)]
 mod test {
 
+    use crossterm::event::KeyModifiers;
     use rubiks_cube::{Method, Move3x3, MoveModifier, Roux, SolutionSegment, Step};
 
     use super::*;
@@ -161,6 +164,7 @@ mod test {
         let mut app = TimingApp {
             cube: scrambled_cube,
             technique: Roux::default().to_technique(),
+            keybinds: Keybinds::default(),
             step_number: 0,
             solves: Arc::new(Mutex::new(SolveList::new())),
             curr_solve_scramble: VecDeque::from([receiver]),
@@ -169,7 +173,7 @@ mod test {
             ),
             starting_time: Instant::now(),
             timer_number: Duration::ZERO,
-            timer_state: TimerState::Solving,
+            timer_state: TimerState::Scrambled,
         };
 
         let cube_recon = Roux::default()
@@ -200,10 +204,7 @@ mod test {
             let key = Keybinds::default()
                 .move_to_key(*m)
                 .unwrap_or_else(|| panic!("{m}"));
-            app.update_with_message(
-                Event::Key(KeyEvent::new(key.code(), key.modifiers())),
-                &Keybinds::default(),
-            );
+            app.update_with_message(Event::Key(KeyEvent::new(key.code(), key.modifiers())));
         }
 
         assert!(app.cube.is_solved());

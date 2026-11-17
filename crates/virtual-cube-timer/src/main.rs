@@ -94,15 +94,20 @@ fn main() -> anyhow::Result<()> {
         mode: match args.mode {
             ModeArg::Untimed => Mode::Untimed(UntimedApp {
                 cube: Cube3x3::default(),
+                keybinds,
             }),
             ModeArg::Normal => Mode::Timing(TimingApp {
                 cube: Cube3x3::default(),
                 technique: args.method.to_technique(),
+                keybinds,
                 step_number: 0,
                 solves: Arc::new(Mutex::new(SolveList::from_solves_file()?)),
                 curr_solve_scramble: VecDeque::new(),
                 curr_solve_moves: Solution::with_empty_steps(
-                    args.method.to_technique().steps().map(rubiks_cube::Step::name),
+                    args.method
+                        .to_technique()
+                        .steps()
+                        .map(rubiks_cube::Step::name),
                 ),
                 starting_time: Instant::now(),
                 timer_number: Duration::ZERO,
@@ -134,7 +139,7 @@ fn main() -> anyhow::Result<()> {
                 Mode::Timing(ref mut timing_app) => {
                     terminal.draw(|frame| render_timing(timing_app, frame))?;
 
-                    timing_app.update_with_message(event_handler.next()?, &keybinds)
+                    timing_app.update_with_message(event_handler.next()?)
                 }
 
                 Mode::Untimed(ref mut untimed_app) => {
@@ -142,7 +147,7 @@ fn main() -> anyhow::Result<()> {
 
                     crossterm::event::read()?
                         .as_key_press_event()
-                        .map_or_default(|event| untimed_app.update_with_message(event, &keybinds))
+                        .map_or_default(|event| untimed_app.update_with_message(event))
                 }
 
                 Mode::Nav(ref mut solve_app) => {
