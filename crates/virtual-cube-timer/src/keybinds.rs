@@ -42,10 +42,10 @@ impl KeyPress {
 
 impl Display for KeyPress {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.1 == KeyModifiers::empty() {
-            write!(f, "{}", self.0)?;
+        if self.modifiers() == KeyModifiers::empty() {
+            write!(f, "{}", self.code())?;
         } else {
-            write!(f, "{}+{}", self.1, self.0)?;
+            write!(f, "{}+{}", self.modifiers(), self.code())?;
         }
         Ok(())
     }
