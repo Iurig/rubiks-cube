@@ -62,7 +62,7 @@ mod tests {
     #[test]
     fn rand_duration_round_trips() -> anyhow::Result<()> {
         for _ in 0..100 {
-            let duration = Duration::from_millis(fastrand::u64(0..2 * 3_600_00));
+            let duration = Duration::from_millis(fastrand::u64(0..2 * 3_600_000));
             assert!(duration.abs_diff(to_duration(&to_text(duration))?) < Duration::from_millis(1));
         }
         Ok(())
