@@ -3,11 +3,11 @@ name = "rubiks-cube"
 version = "0.1.1"
 
 categories = ["games", "simulation"]
-description = "A twisty puzzle library that supports human solving methods"
 edition.workspace = true
 keywords = ["CFOP", "Roux", "cube", "rubiks", "twisty-puzzle"]
 license.workspace = true
 repository.workspace = true
+description = "A twisty puzzle library that supports human solving methods"
 
 [dependencies]
 anstyle = { version = "1.0.14", optional = true }

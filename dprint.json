@@ -1,22 +1,19 @@
 {
-    "lineWidth": 100,
-    "json": {
-        "indentWidth": 4,
-        "useTabs": false
-    },
-    "markdown": {
-        "textWrap": "always"
-    },
-    "toml": { "sortKeys": true },
-    "includes": ["**/*.md", "**/*.toml", "**/*.json", "**/*.yaml"],
+  "lineWidth": 100,
+  "json": {
+    "useTabs": false
+  },
+  "markdown": {
+    "textWrap": "always"
+  },
+  "toml": { "sortKeys": true },
+  "includes": ["**/*.md", "**/*.toml", "**/*.json", "**/*.yaml"],
 
-    "excludes": [
-        "target/**"
-    ],
-    "plugins": [
-        "https://plugins.dprint.dev/markdown-0.28.0.wasm",
-        "npm:@dprint/toml@0.9.0",
-        "npm:@dprint/json@0.25.2",
-        "npm:dprint-plugin-yaml@0.6.0"
-    ]
+  "excludes": ["target/**", "**/CHANGELOG.md"],
+  "plugins": [
+    "https://plugins.dprint.dev/markdown-0.28.0.wasm",
+    "npm:@dprint/toml@0.9.0",
+    "npm:@dprint/json@0.25.2",
+    "npm:dprint-plugin-yaml@0.6.0"
+  ]
 }

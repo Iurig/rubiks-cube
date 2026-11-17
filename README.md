@@ -10,7 +10,9 @@ A Rust library that models the 3×3×3 Rubik's Cube and solves it the way a pers
 step at a time. Its solving methods are Roux, ZZ, and Kociemba. More methods and other cube types
 are planned.
 
-For more information about the library, see the [library README.md](crates/lib/README.md). If you're interested in contributing, or want to know more about how the workspace is organized, see [CONTRIBUTING](CONTRIBUTING.md).
+For more information about the library, see the [library README.md](crates/lib/README.md). If you're
+interested in contributing, or want to know more about how the workspace is organized, see
+[CONTRIBUTING](CONTRIBUTING.md).
 
 ## License
 

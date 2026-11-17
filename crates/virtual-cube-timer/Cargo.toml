@@ -3,12 +3,12 @@ name = "virtual-cube-timer"
 version = "0.1.0"
 
 categories = ["games", "simulation"]
-description = "A simple, command line, interactive Rubik's Cube and timer"
 edition.workspace = true
 keywords = ["Rubik's", "timer", "virtual", "simulation"]
 license.workspace = true
 readme.workspace = true
 repository.workspace = true
+description = "A simple, command line, interactive Rubik's Cube and timer"
 
 [dev-dependencies]
 fastrand = "2.5.0"

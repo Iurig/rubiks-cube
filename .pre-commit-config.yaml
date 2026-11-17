@@ -32,3 +32,10 @@ repos:
         types: [rust]
         pass_filenames: false
         stages: [pre-commit]
+      - id: dprint
+        name: dprint
+        language: system
+        entry: cargo bin dprint check
+        types_or: [markdown, toml, json, yaml]
+        pass_filenames: false
+        stages: [pre-commit]
