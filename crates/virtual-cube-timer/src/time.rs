@@ -47,6 +47,7 @@ mod tests {
             Duration::ZERO,
             Duration::from_secs_f64(314.1315),
             Duration::from_secs_f64(4523.4324),
+            Duration::from_secs_f64(7.8),
         ];
 
         for d in durations {
