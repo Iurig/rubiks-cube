@@ -36,10 +36,7 @@ fn in_domino_subgroup(puzzle: &Cube3x3) -> bool {
 
 /// The moves of `solution`, all segments in order, applied to `start`.
 fn replay(start: &Cube3x3, solution: &Solution<Cube3x3>) -> Cube3x3 {
-    solution
-        .iter()
-        .flat_map(Segment::moves)
-        .fold(*start, |cube, &m| cube * m)
+    solution.moves().fold(*start, |cube, &m| cube * m)
 }
 
 #[test]

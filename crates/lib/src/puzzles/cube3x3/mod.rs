@@ -273,8 +273,8 @@ impl Cube3x3 {
         let mut cube_copy = *self;
         Ok(Kociemba
             .solve(&mut cube_copy)?
-            .iter()
-            .flat_map(|s| s.moves().iter().copied())
+            .moves()
+            .copied()
             .collect::<Algorithm<Self>>()
             .inv()
             .simplify_single_moves())

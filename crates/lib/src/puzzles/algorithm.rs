@@ -22,7 +22,7 @@ use crate::{Cube3x3, Inv, Move3x3, MoveModifier, ParseSequenceError, Puzzle};
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut cube = Cube3x3::from_moves("R U R' F2")?;
 /// let solution: Solution<Cube3x3> = Kociemba.solve(&mut cube)?;
-/// let moves: Algorithm<Cube3x3> = solution.iter().flat_map(|s| s.moves()).copied().collect();
+/// let moves: Algorithm<Cube3x3> = solution.moves().copied().collect();
 /// // The inverse of a solution is a scramble that gives back the state it solved.
 /// assert_eq!(
 ///     Cube3x3::from_moves(&moves.inv().to_string())?,
