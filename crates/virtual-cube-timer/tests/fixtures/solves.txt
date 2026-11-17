@@ -1,0 +1,80 @@
+1. 6.744 U' R2 U' R2 U L2 U L2 U2 R2 B2 F2 U F2 U' F' D2 R F L' B U' F' L2
+D Rw2 D2 M' F2 D B    // FB
+M U Rw2    // DR
+R2 U' R U R2    // SB Square
+R M2 U Rw2 R    // SB Pair
+U' F R' F' R U2 R U' R' U R U2 R' U2    // CMLL
+U M' U' M' U2 M U M' U M2    // LSE
+
+2. 3.998 L2 R2 F2 R2 F2 D' F2 D2 L2 U2 F2 U' F2 U' R' B D L R' D' L U' L
+U R2 F' B2 D M F'    // FB
+M2 U Rw' R'    // DR
+U Rw U' Rw'    // SB Square
+R' U M' U' M R    // SB Pair
+R' U2 R' D' R U2 R' D R2 U    // CMLL
+U2 M U M U2 M2 U'    // LSE
+
+3. 16.298 D' B2 U' L2 U F2 R2 F2 L2 F2 U2 R2 D' F' U' L D2 F2 U2 L2 U L2
+Rw D2 F' L' D' B    // FB
+R' Rw'    // DR
+Rw' U' Rw    // SB Square
+U' Rw U' M U R'    // SB Pair
+U F' L F L' U2 L' U2 L U2    // CMLL
+M U M U2 M' U2 M U M' U2 M'    // LSE
+
+4. 8.916 B2 U' B2 L2 D' R2 D L2 D2 L2 U' R2 F2 B' L U F L2 D2 R F2 R
+M2 U2 L' B M2 D' F    // FB
+M U R Rw    // DR
+U2 R U R2 U' R    // SB Square
+R U R' U' Rw U Rw'    // SB Pair
+F R U' R' U' R U R' F' R U R' U' R' F R F' U'    // CMLL
+M2 U' M' U M2 U2 M U2    // LSE
+
+5. 11.704 D' F2 R2 F2 U B2 U B2 R2 D2 U' F2 R2 F2 B' D' L' R2 D' F' U2 B' L F
+U2 R U2 F Rw2 B L' F'    // FB
+M' U R Rw    // DR
+U' R2 U R U' R2    // SB Square
+R Rw2 U M2 R    // SB Pair
+Rw U' Rw' U Rw' D' Rw U' Rw' D Rw U2    // CMLL
+M U' M2 U' M' U' M' U' M'    // LSE
+
+6. 6.158 B2 D2 B2 D R2 B2 U2 B2 D F2 R2 U2 L2 U' R' F' L2 D' F2 L' U2 F' U B'
+R' F2 U M D' L' D2    // FB
+U M' U R2    // DR
+U2 R U2 R2 U R    // SB Square
+U M U' Rw U2 R'    // SB Pair
+Rw U' Rw2 D' Rw U2 Rw' D Rw2 U Rw' U'    // CMLL
+U M U M2 U2 M U M' U2 M U    // LSE
+
+7. 4.971 U2 R2 D' F2 D' R2 F2 D' L2 F2 D' F2 U' L2 U2 B' D' B' L F' R U' R' B
+U' F' D' R2 F U B    // FB
+M' U Rw' R'    // DR
+U R' U2 R2 U M' U Rw'    // SB Square
+M' U R Rw2 U' Rw    // SB Pair
+U2 F R' F' R U R U' R' U2    // CMLL
+M U2 M' U2 M U M' U'    // LSE
+
+8. 15.531 L2 D F2 D' B2 R2 D2 B2 L2 U F2 U2 R2 U2 L' U' R F' R U' L' F' L2
+U' F2 L U' B M' F    // FB
+U' Rw' R'    // DR
+U' R' U M U' Rw    // SB Square
+U' R2 U2 R' U' R U' R2    // SB Pair
+U R U2 R' U2 R' F R F'    // CMLL
+M U M U' M U2 M U2    // LSE
+
+9. 14.556 F2 L2 D' B2 F2 L2 F2 U F2 D2 L2 U2 L' B' F L' F' L' D' L2
+U2 R2 D L' B2 D2    // FB
+Rw U M' U Rw2    // DR
+R M U2 R2 U Rw    // SB Square
+Rw U' R' U Rw U' Rw2 R    // SB Pair
+U Rw U' Rw2 D' Rw U Rw' D Rw2 U Rw'    // CMLL
+M U' M2 U' M U M' U' M U2    // LSE
+
+10. 2.976 F2 U' B2 D R2 D2 L2 F2 U R2 U' B2 U F2 U' B' D' U B' L' B F' L2 U
+U F B Rw2 D' M' F    // FB
+M' U' R2    // DR
+R' M' U M R    // SB Square
+M2 U' Rw U' M' R'    // SB Pair
+U' R' F R F' Rw U Rw' U    // CMLL
+U' M2 U' M U M' U' M U' M U'    // LSE
+
