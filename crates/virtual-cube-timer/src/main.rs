@@ -30,7 +30,7 @@ use crate::{
     event::EventHandler,
     keybinds::Keybinds,
     message::Message,
-    solves::{ReconWithScramble, SolveList},
+    solves::{ReconWithScramble, SolveList, TimedSolve},
     view::{navigation::render_navigation, timing::render_timing, untimed::render_untimed},
 };
 
@@ -90,6 +90,8 @@ fn main() -> anyhow::Result<()> {
 
     let keybinds = Keybinds::from_config()?;
 
+    let solves = SolveList::from_solves_file(SolveList::solves_path()?)?;
+
     let mut app = App {
         mode: match args.mode {
             ModeArg::Untimed => Mode::Untimed(UntimedApp {
@@ -101,7 +103,7 @@ fn main() -> anyhow::Result<()> {
                 technique: args.method.to_technique(),
                 keybinds,
                 step_number: 0,
-                solves: Arc::new(Mutex::new(SolveList::from_solves_file()?)),
+                solves: Arc::new(Mutex::new(solves)),
                 curr_solve_scramble: VecDeque::new(),
                 curr_solve_moves: Solution::with_empty_steps(
                     args.method
@@ -171,7 +173,7 @@ fn main() -> anyhow::Result<()> {
 fn reconstruct_n<T: rubiks_cube::Method<Cube3x3>>(
     n: u32,
     technique: &T,
-) -> anyhow::Result<Vec<ReconWithScramble>> {
+) -> anyhow::Result<SolveList> {
     let mut recons = Vec::new();
     for _ in 0..n {
         let scramble = Cube3x3::scramble()?;
@@ -184,7 +186,10 @@ fn reconstruct_n<T: rubiks_cube::Method<Cube3x3>>(
             puzzle.is_solved(),
             "scramble:\n {scramble} \n and solve:\n {solution} \n did not solve the cube"
         );
-        recons.push(ReconWithScramble::new(scramble, solution));
+        recons.push(TimedSolve::new(
+            ReconWithScramble::new(scramble, solution),
+            Duration::ZERO,
+        ));
     }
-    Ok(recons)
+    Ok(SolveList::from_solves(recons))
 }

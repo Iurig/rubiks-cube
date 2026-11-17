@@ -1,4 +1,4 @@
-use std::{fmt::Display, fs, io::ErrorKind, str::FromStr, time::Duration};
+use std::{fmt::Display, fs, io::ErrorKind, path::PathBuf, str::FromStr, time::Duration};
 
 use anyhow::anyhow;
 use dirs::config_dir;
@@ -69,19 +69,21 @@ impl SolveList {
         )
     }
 
-    pub fn from_solves_file() -> anyhow::Result<Self> {
+    pub fn solves_path() -> anyhow::Result<PathBuf> {
         let dir = config_dir()
             .map(|dir| dir.join("virtual_cube_timer"))
             .expect("manually written");
 
         fs::create_dir_all(dir.clone())?;
 
-        let solves_path = dir.join("solves.txt");
+        Ok(dir.join("solves.txt"))
+    }
 
-        match std::fs::read_to_string(&solves_path) {
+    pub fn from_solves_file(path: PathBuf) -> anyhow::Result<Self> {
+        match std::fs::read_to_string(&path) {
             Ok(text) => text.parse::<Self>(),
             Err(e) if e.kind() == ErrorKind::NotFound => {
-                fs::write(solves_path, Self::new().to_string())?;
+                fs::write(path, Self::new().to_string())?;
                 Ok(Self::new())
             }
             Err(e) => Err(e.into()),
@@ -90,6 +92,14 @@ impl SolveList {
 
     pub fn push(&mut self, solve: TimedSolve) {
         self.0.push((self.0.len(), solve));
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn get(&self, index: usize) -> Option<&TimedSolve> {
+        self.0.get(index).map(|s| &s.1)
     }
 }
 
