@@ -11,7 +11,7 @@ pub enum PermutationError {
     #[error("the number of elements is not compatible with a permutation")]
     WrongSize,
     /// Iterator had repeated elements.
-    #[error("at least one element use")]
+    #[error("at least one element used more than once")]
     RepeatedElement,
 }
 
