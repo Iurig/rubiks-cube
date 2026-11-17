@@ -28,7 +28,7 @@ repos:
       - id: rustfmt-nightly
         name: rustfmt (nightly)
         language: system
-        entry: cargo +nightly-2026-11-16 fmt --all -- --check --config wrap_comments=true,comment_width=100,format_code_in_doc_comments=true
+        entry: cargo +nightly-2026-11-16 fmt --all -- --check
         types: [rust]
         pass_filenames: false
         stages: [pre-commit]

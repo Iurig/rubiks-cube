@@ -1,6 +1,2 @@
 [rustfmt]
-extraArgs = [
-    "+nightly-2026-11-16",
-    "--config",
-    "wrap_comments=true,comment_width=100,format_code_in_doc_comments=true",
-]
+extraArgs = ["+nightly-2026-11-16"]
