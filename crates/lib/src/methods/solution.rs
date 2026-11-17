@@ -84,7 +84,16 @@ impl<P: Puzzle> SolutionSegment<P> {
     pub fn new(name: &str) -> Self {
         Self {
             name: String::from(name),
-            moves: Algorithm::<P>::new(),
+            moves: Algorithm::new(),
+        }
+    }
+
+    /// Constructor for a [`SolutionSegment`] with moves.
+    #[must_use]
+    pub fn with_moves(name: &str, moves: Algorithm<P>) -> Self {
+        Self {
+            name: String::from(name),
+            moves,
         }
     }
 
