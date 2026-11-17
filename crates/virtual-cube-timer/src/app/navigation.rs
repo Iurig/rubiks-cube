@@ -1,5 +1,5 @@
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, SolutionSegment, Solution};
+use rubiks_cube::{Algorithm, Cube3x3, Solution, SolutionSegment};
 
 use crate::{
     message::{ListNavMessage, Message, NavigationMessage, SolveNavMessage},
