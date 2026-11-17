@@ -246,6 +246,11 @@ impl<P: Puzzle> Technique<P> {
         run_steps(self.steps.iter().cloned(), puzzle)
     }
 
+    /// Iterate over the steps of the technique by reference.
+    pub fn iter(&self) -> impl Iterator<Item = &Arc<dyn Step<P>>> {
+        self.into_iter()
+    }
+
     /// How many steps the [`Technique`] has.
     #[must_use]
     pub fn len(&self) -> usize {
