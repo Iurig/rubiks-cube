@@ -52,7 +52,7 @@ impl<T: Indexed> Permutation<T> {
     pub fn try_from_iter(iter: impl IntoIterator<Item = T>) -> Result<Self, PermutationError> {
         let to_vec = iter.into_iter().collect::<Vec<_>>();
         let mut to_sorted_vec = to_vec.clone();
-        to_sorted_vec.sort_by(|t1, t2| t1.index().cmp(&t2.index()));
+        to_sorted_vec.sort_by_key(<T as Indexed>::index);
         let mut repeats = false;
         for index in 0..(to_vec.len() - 1) {
             if to_sorted_vec[index] == to_sorted_vec[index + 1] {
@@ -184,10 +184,7 @@ mod tests {
     #[test]
     fn into_iter_and_try_from_iter_round_trops() -> Result<(), Box<dyn Error>> {
         let perm = Permutation::<Zn<8>>::try_from_iter(
-            [4, 0, 2, 3, 1, 5, 6, 7]
-                .iter()
-                .map(|&i| Zn::<8>::new(i))
-                .collect::<Vec<_>>(),
+            [4, 0, 2, 3, 1, 5, 6, 7].iter().map(|&i| Zn::<8>::new(i)),
         )?;
         assert_eq!(
             perm.clone(),
