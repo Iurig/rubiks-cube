@@ -9,8 +9,8 @@ readme = "README.md"
 repository = "https://github.com/Iurig/rubiks-cube"
 
 [workspace.metadata.bin]
-cargo-binstall = { version = "1.26.1" }
-dprint = { version = "0.64.3" }
+cargo-binstall = { version = "1.26.1", locked = true }
+dprint = { version = "0.64.3", locked = true }
 
 [profile.dev]
 opt-level = 1
