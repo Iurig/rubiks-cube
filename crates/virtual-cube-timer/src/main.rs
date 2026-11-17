@@ -3,6 +3,7 @@ mod event;
 mod keybinds;
 mod message;
 mod solves;
+mod time;
 mod view;
 
 use std::{
@@ -15,7 +16,7 @@ use anyhow::{Ok, ensure};
 use clap::{Parser, ValueEnum};
 use ratatui_core as _;
 use rubiks_cube::{
-    Algorithm, Cube3x3, Method, Puzzle, Roux, Solution, ZZ,
+    Cube3x3, Method, Puzzle, Roux, Solution, ZZ,
     roux::{FirstBlock, SecondBlock},
 };
 
@@ -29,7 +30,7 @@ use crate::{
     event::EventHandler,
     keybinds::Keybinds,
     message::Message,
-    solves::{ReconWithScramble, SolveList},
+    solves::{ReconWithScramble, SolveList, TimedSolve},
     view::{navigation::render_navigation, timing::render_timing, untimed::render_untimed},
 };
 
@@ -89,17 +90,27 @@ fn main() -> anyhow::Result<()> {
 
     let keybinds = Keybinds::from_config()?;
 
+    let solves = SolveList::from_solves_file(SolveList::solves_path()?)?;
+
     let mut app = App {
         mode: match args.mode {
             ModeArg::Untimed => Mode::Untimed(UntimedApp {
                 cube: Cube3x3::default(),
+                keybinds,
             }),
             ModeArg::Normal => Mode::Timing(TimingApp {
                 cube: Cube3x3::default(),
-                method: args.method.clone(),
-                solves: Arc::new(Mutex::new(SolveList::from_solves_file()?)),
+                technique: args.method.to_technique(),
+                keybinds,
+                step_number: 0,
+                solves: Arc::new(Mutex::new(solves)),
                 curr_solve_scramble: VecDeque::new(),
-                curr_solve_moves: Solution::single_segment(args.method.name(), Algorithm::new()),
+                curr_solve_moves: Solution::with_empty_steps(
+                    args.method
+                        .to_technique()
+                        .steps()
+                        .map(rubiks_cube::Step::name),
+                ),
                 starting_time: Instant::now(),
                 timer_number: Duration::ZERO,
                 timer_state: app::timing::TimerState::Solved,
@@ -107,18 +118,7 @@ fn main() -> anyhow::Result<()> {
 
             _mode => Mode::Nav(NavigationApp::List(ListNavApp {
                 solve_index: 0,
-                all_recons: match args.method {
-                    ValidMethods::Roux => reconstruct_n(
-                        args.number.unwrap_or(30),
-                        &<rubiks_cube::Roux as rubiks_cube::Method<Cube3x3>>::new()
-                            .first_block(FirstBlock::SquarePair)
-                            .second_block(SecondBlock::EdgePairPair),
-                    )?,
-                    ValidMethods::Zz => reconstruct_n(
-                        args.number.expect("demo mode must have a number parameter"),
-                        &<rubiks_cube::ZZ as rubiks_cube::Method<Cube3x3>>::new(),
-                    )?,
-                },
+                all_recons: reconstruct_n(args.number.unwrap_or(30), &args.method)?,
             })),
         },
     };
@@ -130,7 +130,7 @@ fn main() -> anyhow::Result<()> {
                 Mode::Timing(ref mut timing_app) => {
                     terminal.draw(|frame| render_timing(timing_app, frame))?;
 
-                    timing_app.update_with_message(event_handler.next()?, &keybinds)
+                    timing_app.update_with_message(event_handler.next()?)
                 }
 
                 Mode::Untimed(ref mut untimed_app) => {
@@ -138,7 +138,7 @@ fn main() -> anyhow::Result<()> {
 
                     crossterm::event::read()?
                         .as_key_press_event()
-                        .map_or_default(|event| untimed_app.update_with_message(event, &keybinds))
+                        .map_or_default(|event| untimed_app.update_with_message(event))
                 }
 
                 Mode::Nav(ref mut solve_app) => {
@@ -159,11 +159,17 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn reconstruct_n<T: rubiks_cube::Method<Cube3x3>>(
-    n: u32,
-    technique: &T,
-) -> anyhow::Result<Vec<ReconWithScramble>> {
+fn reconstruct_n(n: u32, method: &ValidMethods) -> anyhow::Result<SolveList> {
     let mut recons = Vec::new();
+    let technique = match method {
+        ValidMethods::Roux => &<rubiks_cube::Roux as rubiks_cube::Method<Cube3x3>>::new()
+            .first_block(FirstBlock::SquarePair)
+            .second_block(SecondBlock::EdgePairPair)
+            .to_technique(),
+        ValidMethods::Zz => {
+            &<rubiks_cube::ZZ as rubiks_cube::Method<Cube3x3>>::new().to_technique()
+        }
+    };
     for _ in 0..n {
         let scramble = Cube3x3::scramble()?;
 
@@ -175,7 +181,11 @@ fn reconstruct_n<T: rubiks_cube::Method<Cube3x3>>(
             puzzle.is_solved(),
             "scramble:\n {scramble} \n and solve:\n {solution} \n did not solve the cube"
         );
-        recons.push(ReconWithScramble::new(scramble, solution));
+        recons.push(TimedSolve::new(
+            ReconWithScramble::new(scramble, solution),
+            Duration::ZERO,
+            method.clone(),
+        ));
     }
-    Ok(recons)
+    Ok(SolveList::from_solves(recons))
 }

@@ -11,8 +11,7 @@ repository.workspace = true
 [dependencies]
 cargo-run-bin = { version = "1.7.5", features = ["cli"] }
 
-
 [[bin]]
+doc = false
 name = "cargo-bin"
 path = "src/main.rs"
-doc = false

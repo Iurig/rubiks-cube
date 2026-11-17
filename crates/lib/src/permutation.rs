@@ -2,7 +2,9 @@
 
 use std::{hash::Hash, ops::Index, vec::IntoIter};
 
-use crate::Indexed;
+use itertools::Itertools;
+
+use crate::{Indexed, error::PermutationError};
 
 /// Permutations of a [`Indexed`] type.
 ///
@@ -48,6 +50,22 @@ impl<T: Indexed> Permutation<T> {
         Self((0..T::COUNT).map(|index| T::from_index(index)).collect())
     }
 
+    /// Constructor for [`Permutation<T>`] for iterators of `T` in order.
+    ///
+    /// # Errors
+    /// Errors if the iterator does not represent a permutation - i.e. if there are repeated
+    /// elements, or not all elements are present.
+    pub fn try_from_iter(iter: impl IntoIterator<Item = T>) -> Result<Self, PermutationError> {
+        let to_vec = iter.into_iter().map(|v| T::index(&v)).collect::<Vec<_>>();
+        if to_vec.len() != T::COUNT {
+            Err(PermutationError::WrongSize)
+        } else if !to_vec.iter().all_unique() {
+            Err(PermutationError::RepeatedElement)
+        } else {
+            Ok(Self(to_vec.into_iter().map(|i| T::from_index(i)).collect()))
+        }
+    }
+
     /// Swaps 2 positions in a permutation.
     pub fn swap_slots(&mut self, slot_1: usize, slot_2: usize) -> &mut Self {
         self.0.swap(slot_1, slot_2);
@@ -82,6 +100,7 @@ pub(crate) const fn factorial(n: usize) -> usize {
 
 impl<T: Indexed> Indexed for Permutation<T> {
     const COUNT: usize = factorial(T::COUNT);
+
     fn index(&self) -> usize {
         self.0
             .iter()
@@ -119,10 +138,23 @@ impl<T: Indexed> Indexed for Permutation<T> {
 }
 
 #[cfg(test)]
+#[expect(clippy::panic_in_result_fn, reason = "tests")]
 mod tests {
-    use crate::indexed::{RangedInt, assert_round_trips};
+    use std::error::Error;
+
+    use crate::{
+        indexed::{RangedInt, assert_round_trips},
+        zn::Zn,
+    };
 
     use super::*;
+
+    #[test]
+    fn factorial_test() {
+        assert_eq!(factorial(1), 1);
+        assert_eq!(factorial(0), 1);
+        assert_eq!(factorial(4), 24);
+    }
 
     #[test]
     fn permutations_of_ranged_round_trip() {
@@ -130,5 +162,32 @@ mod tests {
         assert_round_trips::<Permutation<RangedInt<30, 36>>>();
         assert_round_trips::<Permutation<RangedInt<40, 40>>>();
         assert_round_trips::<Permutation<RangedInt<0, 0>>>();
+    }
+
+    #[test]
+    fn simple_cycles() -> anyhow::Result<()> {
+        let mut perm = Permutation::<Zn<8>>::new();
+        assert_eq!(
+            *perm.swap_cycle([0, 1, 4]),
+            Permutation::<Zn<8>>::try_from_iter(dbg!(
+                [4, 0, 2, 3, 1, 5, 6, 7]
+                    .iter()
+                    .map(|&i| Zn::<8>::new(i))
+                    .collect::<Vec<_>>()
+            ))?
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn into_iter_and_try_from_iter_round_trops() -> Result<(), Box<dyn Error>> {
+        let perm = Permutation::<Zn<8>>::try_from_iter(
+            [4, 0, 2, 3, 1, 5, 6, 7].iter().map(|&i| Zn::<8>::new(i)),
+        )?;
+        assert_eq!(
+            perm.clone(),
+            Permutation::<Zn<8>>::try_from_iter(perm.into_iter())?
+        );
+        Ok(())
     }
 }

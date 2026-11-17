@@ -54,7 +54,12 @@ fn draw_base(
     let scramble_widget =
         Paragraph::new(scramble_text.clone()).block(Block::bordered().title("Scramble"));
 
-    let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title("Solve"));
+    let solve_title = format!(
+        "Solve ({} Method)",
+        app.list_app().timed_solve().method().name()
+    );
+
+    let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title(solve_title));
 
     let layout = if (solve_space.height as usize)
         < CUBE_HEIGHT as usize

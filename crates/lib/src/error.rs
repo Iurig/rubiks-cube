@@ -4,6 +4,17 @@ use thiserror::Error;
 
 use crate::{PieceSet, Puzzle};
 
+/// Why an iterable collection did not represent a [`Permutation`](crate::permutation::Permutation).
+#[derive(Debug, Error)]
+pub enum PermutationError {
+    /// Iterator had the wrong size.
+    #[error("the number of elements is not compatible with a permutation")]
+    WrongSize,
+    /// Iterator had repeated elements.
+    #[error("at least one element used more than once")]
+    RepeatedElement,
+}
+
 /// Why a [`Step`](crate::Step) could not solve.
 #[derive(Debug, Error)]
 #[non_exhaustive]

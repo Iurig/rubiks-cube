@@ -25,3 +25,17 @@ repos:
         entry: '\A[a-z]+\([a-z-]+\)!?: '
         args: [--negate, --multiline]
         stages: [commit-msg]
+      - id: rustfmt-nightly
+        name: rustfmt (nightly)
+        language: system
+        entry: cargo +nightly-2026-11-16 fmt --all -- --check
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: dprint
+        name: dprint
+        language: system
+        entry: cargo bin dprint check
+        types_or: [markdown, toml, json, yaml]
+        pass_filenames: false
+        stages: [pre-commit]

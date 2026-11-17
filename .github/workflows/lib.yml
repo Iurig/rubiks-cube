@@ -22,7 +22,8 @@ jobs:
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo fmt -p rubiks-cube --check
+      - run: rustup toolchain install nightly-2026-11-16 --profile minimal --component rustfmt --no-self-update
+      - run: cargo +nightly-2026-11-16 fmt -p rubiks-cube -- --check
       # `ratatui` turns on `anstyle`, so this lints the code behind every feature but `sketch`.
       - run: cargo clippy -p rubiks-cube --all-targets --features ratatui,serde -- -D warnings
 

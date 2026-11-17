@@ -1,4 +1,8 @@
-use std::{fmt::Display, ops::Mul, str::FromStr};
+use std::{
+    fmt::Display,
+    ops::{Index, IndexMut, Mul},
+    str::FromStr,
+};
 
 use crate::{Algorithm, Cube3x3, ParseSequenceError, puzzles::Puzzle};
 
@@ -14,19 +18,27 @@ use crate::{Algorithm, Cube3x3, ParseSequenceError, puzzles::Puzzle};
 /// ```
 ///
 /// Build one with [`single_segment`](Self::single_segment), or collect solutions to join them.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
 pub struct Solution<P: Puzzle> {
-    step_solutions: Vec<Segment<P>>,
+    step_solutions: Vec<SolutionSegment<P>>,
 }
 
 /// Segment of a solution: includes a name and the moves that make the solution up.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Segment<P: Puzzle> {
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct SolutionSegment<P: Puzzle> {
     name: String,
     moves: Algorithm<P>,
 }
 
-impl<P: Puzzle> IntoIterator for Segment<P> {
+impl<'a, P: Puzzle> IntoIterator for &'a SolutionSegment<P> {
+    type Item = &'a <P as Puzzle>::Move;
+    type IntoIter = <&'a Algorithm<P> as IntoIterator>::IntoIter;
+    fn into_iter(self) -> Self::IntoIter {
+        self.moves.iter()
+    }
+}
+
+impl<P: Puzzle> IntoIterator for SolutionSegment<P> {
     type Item = <P as Puzzle>::Move;
     type IntoIter = <Algorithm<P> as IntoIterator>::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
@@ -34,14 +46,14 @@ impl<P: Puzzle> IntoIterator for Segment<P> {
     }
 }
 
-impl Mul<Segment<Self>> for Cube3x3 {
+impl Mul<SolutionSegment<Self>> for Cube3x3 {
     type Output = Self;
-    fn mul(self, rhs: Segment<Self>) -> Self::Output {
+    fn mul(self, rhs: SolutionSegment<Self>) -> Self::Output {
         rhs.into_iter().fold(self, |p, m| p * m)
     }
 }
 
-impl Display for Segment<Cube3x3> {
+impl<P: Puzzle> Display for SolutionSegment<P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{}    // {}", self.moves, self.name)?;
         Ok(())
@@ -54,14 +66,16 @@ impl<P: Puzzle> FromStr for Solution<P> {
         s.lines()
             .enumerate()
             .filter_map(|(count, line)| {
-                (!line.trim().is_empty())
-                    .then_some(line.parse::<Segment<P>>().map_err(|e| e.on_line(count + 1)))
+                (!line.trim().is_empty()).then_some(
+                    line.parse::<SolutionSegment<P>>()
+                        .map_err(|e| e.on_line(count + 1)),
+                )
             })
             .collect()
     }
 }
 
-impl<P: Puzzle> FromStr for Segment<P> {
+impl<P: Puzzle> FromStr for SolutionSegment<P> {
     type Err = ParseSequenceError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let split_comment = s.split_once("//").unwrap_or((s, ""));
@@ -72,21 +86,45 @@ impl<P: Puzzle> FromStr for Segment<P> {
     }
 }
 
-impl<P: Puzzle> Segment<P> {
+impl<P: Puzzle> SolutionSegment<P> {
+    /// Constructor for an empty [`SolutionSegment`] with a name.
+    #[must_use]
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: String::from(name),
+            moves: Algorithm::new(),
+        }
+    }
+
+    /// Constructor for a [`SolutionSegment`] with moves.
+    #[must_use]
+    pub fn with_moves(name: &str, moves: Algorithm<P>) -> Self {
+        Self {
+            name: String::from(name),
+            moves,
+        }
+    }
+
     /// Getter for the name of the step that generated the segment.
     #[must_use]
     pub fn name(&self) -> &str {
         &self.name
     }
+
     /// Getter for the moves that make the segment up.
     #[must_use]
     pub const fn moves(&self) -> &Algorithm<P> {
         &self.moves
     }
 
-    /// Iterates on the [`Segment`]s moves.
+    /// Iterates on the [`SolutionSegment`]s moves.
     pub fn iter(&self) -> impl Iterator<Item = &P::Move> {
         self.moves().iter()
+    }
+
+    /// Append a move to the [`SolutionSegment`].
+    pub fn push(&mut self, m: P::Move) {
+        self.moves.extend([m]);
     }
 }
 
@@ -100,15 +138,20 @@ impl<P: Puzzle> Solution<P> {
     /// Constructs a solution with only one segment.
     #[must_use]
     pub fn single_segment(name: impl Into<String>, moves: Algorithm<P>) -> Self {
-        Self::from_iter([Segment {
+        Self::from_iter([SolutionSegment {
             name: name.into(),
             moves,
         }])
     }
 
     /// Each segment's moves and step name, in solving order.
-    pub fn iter(&self) -> std::slice::Iter<'_, Segment<P>> {
+    pub fn iter(&self) -> std::slice::Iter<'_, SolutionSegment<P>> {
         self.step_solutions.iter()
+    }
+
+    /// Returns an [`Iterator`] overall moves in the [`Solution`].
+    pub fn moves(&self) -> impl Iterator<Item = &P::Move> {
+        self.step_solutions.iter().flat_map(SolutionSegment::iter)
     }
 
     /// The number of moves in every segment, each move counting one whatever its part or
@@ -120,11 +163,48 @@ impl<P: Puzzle> Solution<P> {
             .map(|segment| segment.moves.len())
             .sum()
     }
+
+    /// Constructor for [`Solution`] with named, but empty [`SolutionSegment`]s.
+    pub fn with_empty_steps<'a>(steps: impl IntoIterator<Item = &'a str>) -> Self {
+        Self {
+            step_solutions: steps
+                .into_iter()
+                .map(|name| SolutionSegment::new(name))
+                .collect(),
+        }
+    }
+
+    /// How many steps the solution has.
+    #[must_use]
+    pub const fn len(&self) -> usize {
+        self.step_solutions.len()
+    }
+
+    /// If the solution is devoid of steps.
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.step_solutions.is_empty()
+    }
 }
 
-/// Builds a solution from [`Segment`]s, in order.
-impl<P: Puzzle> FromIterator<Segment<P>> for Solution<P> {
-    fn from_iter<I: IntoIterator<Item = Segment<P>>>(iter: I) -> Self {
+impl<P: Puzzle> Index<usize> for Solution<P> {
+    type Output = SolutionSegment<P>;
+    #[expect(clippy::indexing_slicing, reason = "it defines the indexing API")]
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.step_solutions[index]
+    }
+}
+
+impl<P: Puzzle> IndexMut<usize> for Solution<P> {
+    #[expect(clippy::indexing_slicing, reason = "it defines the indexing API")]
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.step_solutions[index]
+    }
+}
+
+/// Builds a solution from [`SolutionSegment`]s, in order.
+impl<P: Puzzle> FromIterator<SolutionSegment<P>> for Solution<P> {
+    fn from_iter<I: IntoIterator<Item = SolutionSegment<P>>>(iter: I) -> Self {
         Self {
             step_solutions: iter.into_iter().collect(),
         }
@@ -141,19 +221,19 @@ impl<P: Puzzle> FromIterator<Self> for Solution<P> {
 }
 
 impl<'a, P: Puzzle> IntoIterator for &'a Solution<P> {
-    type Item = &'a Segment<P>;
-    type IntoIter = std::slice::Iter<'a, Segment<P>>;
+    type Item = &'a SolutionSegment<P>;
+    type IntoIter = std::slice::Iter<'a, SolutionSegment<P>>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl<P: Puzzle> Extend<Segment<P>> for Solution<P> {
-    fn extend<T: IntoIterator<Item = Segment<P>>>(&mut self, iter: T) {
+impl<P: Puzzle> Extend<SolutionSegment<P>> for Solution<P> {
+    fn extend<T: IntoIterator<Item = SolutionSegment<P>>>(&mut self, iter: T) {
         self.step_solutions.extend(iter);
     }
 }
 impl<P: Puzzle> IntoIterator for Solution<P> {
-    type Item = Segment<P>;
+    type Item = SolutionSegment<P>;
     type IntoIter = <Vec<Self::Item> as IntoIterator>::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
         self.step_solutions.into_iter()
@@ -212,7 +292,7 @@ mod tests {
 
         solution.extend("U2 // Second\nF' L // Third".parse::<Solution<Cube3x3>>()?);
 
-        let names: Vec<&str> = solution.iter().map(Segment::name).collect();
+        let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
         assert_eq!(names, ["First", "Second", "Third"]);
         assert_eq!(solution.move_count(), 4);
         Ok(())

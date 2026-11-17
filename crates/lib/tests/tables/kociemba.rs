@@ -36,10 +36,7 @@ fn in_domino_subgroup(puzzle: &Cube3x3) -> bool {
 
 /// The moves of `solution`, all segments in order, applied to `start`.
 fn replay(start: &Cube3x3, solution: &Solution<Cube3x3>) -> Cube3x3 {
-    solution
-        .iter()
-        .flat_map(Segment::moves)
-        .fold(*start, |cube, &m| cube * m)
+    solution.moves().fold(*start, |cube, &m| cube * m)
 }
 
 #[test]
@@ -115,7 +112,7 @@ fn kociemba_solves_a_scramble() {
     let start = Cube3x3::scrambled_with_seed(0);
     let mut cube = start;
     let solution = Kociemba.solve(&mut cube).unwrap();
-    let names: Vec<&str> = solution.iter().map(Segment::name).collect();
+    let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
     assert_eq!(names, ["Phase 1", "Phase 2"]);
     assert!(
         cube.is_solved(),

@@ -8,7 +8,7 @@ mod test_steps;
 
 use dyn_clone::arc_make_mut;
 use log::debug;
-pub use solution::{Segment, Solution};
+pub use solution::{Solution, SolutionSegment};
 
 use std::{fmt::Debug, ops::Index, sync::Arc, time::Instant};
 
@@ -50,11 +50,12 @@ pub struct Technique<P: Puzzle> {
 ///
 /// # Examples
 ///
-/// ```ignore
-/// use rubiks_cube::{AlgSet, SearchStep, Technique, PieceSet, Cube3x3};
+/// ```
+/// use rubiks_cube::{AlgSet, Cube3x3, PieceSet, SearchStep, Technique};
 ///
 /// let eolr = SearchStep::builder("EOLR", AlgSet::from_static_parts("M U"))
-///     .goal(PieceSet::from_algset(&AlgSet::from_static("M\n U2")));
+///     .goal(PieceSet::from_algset(&AlgSet::from_static("M\n U2")))
+///     .clone();
 ///
 /// let advanced_roux = Technique::<Cube3x3>::start_with(SearchStep::builder(
 ///     "FB",
@@ -66,11 +67,12 @@ pub struct Technique<P: Puzzle> {
 /// ))
 /// .then(
 ///     SearchStep::builder(
-///        "CMLL",
-///         AlgSet::from_static_parts(concat!(include_str!("path/to/algs"))),
+///         "CMLL",
+///         AlgSet::from_static_parts(concat!(include_str!("cube3x3/algsets/cmll/one_look.txt"))),
 ///     )
 ///     .free_algs(AlgSet::from_static_parts("U"))
-///     .goal(PieceSet::from_algset(&AlgSet::from_static("U M' U' \n M"))),
+///     .goal(PieceSet::from_algset(&AlgSet::from_static("U M' U' \n M")))
+///     .clone(),
 /// )
 /// .then(eolr)
 /// .finish(SearchStep::builder("LSE", AlgSet::from_static("M U")));
@@ -193,6 +195,14 @@ impl<P: Puzzle> IntoIterator for Technique<P> {
     }
 }
 
+impl<'a, P: Puzzle> IntoIterator for &'a Technique<P> {
+    type IntoIter = std::slice::Iter<'a, Arc<dyn Step<P>>>;
+    type Item = &'a Arc<dyn Step<P>>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.steps.iter()
+    }
+}
+
 impl<P: Puzzle> Technique<P> {
     /// Constructor for a technique: takes in any
     pub fn new(steps: impl IntoIterator<Item = Arc<dyn Step<P>>>) -> Self {
@@ -234,6 +244,23 @@ impl<P: Puzzle> Technique<P> {
         puzzle: &mut P,
     ) -> impl Iterator<Item = Result<Solution<P>, SolveError>> {
         run_steps(self.steps.iter().cloned(), puzzle)
+    }
+
+    /// Iterate over the steps of the technique by reference.
+    pub fn iter(&self) -> impl Iterator<Item = &Arc<dyn Step<P>>> {
+        self.into_iter()
+    }
+
+    /// How many steps the [`Technique`] has.
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.steps.len()
+    }
+
+    /// If the [`Technique`] is empty.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     // Constructs the [`Technique`] with a given neutrality.

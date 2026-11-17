@@ -3,12 +3,15 @@ name = "virtual-cube-timer"
 version = "0.1.0"
 
 categories = ["games", "simulation"]
-description = "A simple, command line, interactive Rubik's Cube and timer"
 edition.workspace = true
 keywords = ["Rubik's", "timer", "virtual", "simulation"]
 license.workspace = true
 readme.workspace = true
 repository.workspace = true
+description = "A simple, command line, interactive Rubik's Cube and timer"
+
+[dev-dependencies]
+fastrand = "2.5.0"
 
 [dependencies]
 anyhow = "1.0.104"
@@ -49,7 +52,6 @@ undocumented_unsafe_blocks = "warn"
 unimplemented = "warn"
 unnecessary_safety_comment = "warn"
 unnecessary_safety_doc = "warn"
-unreachable = "warn"
 unused_result_ok = "warn"
 unwrap_used = "warn"
 

@@ -9,9 +9,10 @@ use std::{
 };
 
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, Puzzle, Solution};
+use rubiks_cube::{Algorithm, Cube3x3, Puzzle, Solution, Technique};
 
 use crate::{
+    ValidMethods,
     event::Event,
     keybinds::{KeyPress, Keybinds},
     message::{CubeMessage, Message, TimingMessage},
@@ -21,7 +22,9 @@ use crate::{
 #[derive(Debug)]
 pub struct TimingApp {
     pub cube: Cube3x3,
-    pub method: crate::ValidMethods,
+    pub technique: Technique<Cube3x3>,
+    pub keybinds: Keybinds,
+    pub step_number: usize,
     pub solves: Arc<Mutex<SolveList>>,
     pub curr_solve_scramble: VecDeque<Receiver<Algorithm<Cube3x3>>>,
     pub curr_solve_moves: Solution<Cube3x3>,
@@ -63,11 +66,12 @@ impl TimingApp {
                             solve_moves,
                         ),
                         solve_time,
+                        ValidMethods::Roux,
                     );
                     unlocked_solves.push(solve);
                 });
             }
-            TimingMessage::Next => match self.timer_state {
+            TimingMessage::NextSolve => match self.timer_state {
                 TimerState::Scrambled => self.update(&TimingMessage::Start),
                 TimerState::Solving => self.update(&TimingMessage::Stop),
                 TimerState::Solved => {
@@ -85,7 +89,7 @@ impl TimingApp {
         }
     }
 
-    pub fn update_with_message(&mut self, event: Event, keybinds: &Keybinds) -> Option<Message> {
+    pub fn update_with_message(&mut self, event: Event) -> Option<Message> {
         match event {
             Event::Key(event) => {
                 let KeyEvent {
@@ -98,12 +102,25 @@ impl TimingApp {
                 match (code, modifiers) {
                     (KeyCode::Esc, _) => return Some(Message::ExitProgram),
                     (KeyCode::Char(' '), _) => {
-                        self.update(&TimingMessage::Next);
+                        self.update(&TimingMessage::NextSolve);
                     }
-                    _ if let Some(m) =
-                        keybinds.as_move(&KeyPress::with_modifiers(code, modifiers)) =>
+                    _ if let Some(m) = self
+                        .keybinds
+                        .as_move(&KeyPress::with_modifiers(code, modifiers)) =>
                     {
+                        while self
+                            .technique
+                            .steps()
+                            .nth(self.step_number)
+                            .is_some_and(|s| s.is_done(&self.cube))
+                        {
+                            self.step_number += 1;
+                        }
+
                         self.update(&TimingMessage::Cube(CubeMessage::Apply(m)));
+
+                        self.curr_solve_moves[self.step_number].push(m);
+
                         if self.timer_state == TimerState::Scrambled {
                             self.update(&TimingMessage::Start);
                         }
@@ -121,5 +138,95 @@ impl TimingApp {
             }
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crossterm::event::KeyModifiers;
+    use rubiks_cube::{Method, Move3x3, MoveModifier, Roux, SolutionSegment, Step};
+
+    use super::*;
+
+    pub fn move_to_key(binds: &Keybinds, m: <Cube3x3 as Puzzle>::Move) -> Option<KeyPress> {
+        binds.moves.get_by_right(&m).copied()
+    }
+
+    #[test]
+    fn solution_is_constructed_with_messages() {
+        let scrambled_cube =
+            Cube3x3::from_moves("D' F' U2 D' R' F' B R B2 D' B2 D2 B2 R2 B2 U' R2 F2 B2 L")
+                .unwrap();
+
+        let (sender, receiver) = mpsc::channel();
+
+        sender
+            .send(Algorithm::from_static(
+                "D' F' U2 D' R' F' B R B2 D' B2 D2 B2 R2 B2 U' R2 F2 B2 L",
+            ))
+            .unwrap();
+
+        let mut app = TimingApp {
+            cube: scrambled_cube,
+            technique: Roux::default().to_technique(),
+            keybinds: Keybinds::default(),
+            step_number: 0,
+            solves: Arc::new(Mutex::new(SolveList::new())),
+            curr_solve_scramble: VecDeque::from([receiver]),
+            curr_solve_moves: Solution::with_empty_steps(
+                Roux::default().to_technique().steps().map(Step::name),
+            ),
+            starting_time: Instant::now(),
+            timer_number: Duration::ZERO,
+            timer_state: TimerState::Scrambled,
+        };
+
+        let cube_recon = Roux::default()
+            .to_technique()
+            .solve(&mut scrambled_cube.clone())
+            .unwrap();
+
+        let expanded_cube_recon = cube_recon
+            .iter()
+            .map(|s| {
+                SolutionSegment::with_moves(
+                    s.name(),
+                    s.iter()
+                        .flat_map(|m| {
+                            if m.modifier() == MoveModifier::Double {
+                                let inner_move = Move3x3::new(m.part(), MoveModifier::Clockwise);
+                                vec![inner_move, inner_move].into_iter()
+                            } else {
+                                vec![*m].into_iter()
+                            }
+                        })
+                        .collect::<Algorithm<Cube3x3>>(),
+                )
+            })
+            .collect::<Solution<Cube3x3>>();
+
+        for m in expanded_cube_recon.moves() {
+            let key = move_to_key(&Keybinds::default(), *m).unwrap_or_else(|| panic!("{m}"));
+            app.update_with_message(Event::Key(KeyEvent::new(key.code(), key.modifiers())));
+        }
+
+        assert!(app.cube.is_solved());
+        assert_eq!(expanded_cube_recon, app.curr_solve_moves);
+
+        app.update_with_message(Event::Key(KeyEvent::new(
+            KeyCode::Char(' '),
+            KeyModifiers::empty(),
+        )));
+
+        assert_eq!(app.timer_state, TimerState::Scrambled);
+
+        assert_eq!(
+            app.update_with_message(Event::Key(KeyEvent::new(
+                KeyCode::Esc,
+                KeyModifiers::empty(),
+            ))),
+            Some(Message::ExitProgram)
+        );
     }
 }

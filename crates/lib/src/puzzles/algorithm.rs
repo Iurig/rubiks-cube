@@ -22,7 +22,7 @@ use crate::{Cube3x3, Inv, Move3x3, MoveModifier, ParseSequenceError, Puzzle};
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut cube = Cube3x3::from_moves("R U R' F2")?;
 /// let solution: Solution<Cube3x3> = Kociemba.solve(&mut cube)?;
-/// let moves: Algorithm<Cube3x3> = solution.iter().flat_map(|s| s.moves()).copied().collect();
+/// let moves: Algorithm<Cube3x3> = solution.moves().copied().collect();
 /// // The inverse of a solution is a scramble that gives back the state it solved.
 /// assert_eq!(
 ///     Cube3x3::from_moves(&moves.inv().to_string())?,
@@ -252,8 +252,10 @@ mod tests {
     fn algorithm_into_iter_and_iter_agree() -> anyhow::Result<()> {
         let alg: Algorithm<Cube3x3> = "R U R' U' R' F R2 U' R' U' R U R' F'".parse()?;
         let alg_vec_2 = alg.iter().copied().collect::<Vec<_>>();
-        let alg_vec_1 = alg.into_iter().collect::<Vec<_>>();
+        let alg_vec_1 = alg.clone().into_iter().collect::<Vec<_>>();
+        let alg_vec_3 = alg.to_vec();
         assert_eq!(alg_vec_1, alg_vec_2);
+        assert_eq!(alg_vec_1, alg_vec_3);
         Ok(())
     }
 

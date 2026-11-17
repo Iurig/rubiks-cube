@@ -1,9 +1,12 @@
 # Contributing to rubiks-cube
 
-First of all, welcome! This is my first personal programming project, which I use for studying Rust and programming in general. Contributions are very much welcome, and don't hesitate on making a PR or issue if in doubt of anything.
+First of all, welcome! This is my first personal programming project, which I use for studying Rust
+and programming in general. Contributions are very much welcome, and don't hesitate on making a PR
+or issue if in doubt of anything.
 
-Issues of any kind are welcome: along with the usual fanfare, I'd gladly take any feedback you may have.
-API design, code organization, behavior, internal details, are all areas I'm improving as I go, and, as such, shouldn't be treated as "set in stone".
+Issues of any kind are welcome: along with the usual fanfare, I'd gladly take any feedback you may
+have. API design, code organization, behavior, internal details, are all areas I'm improving as I
+go, and, as such, shouldn't be treated as "set in stone".
 
 ### The Library
 
@@ -37,10 +40,10 @@ sticker belongs to when solved (`println!("{cube}")`); `cube.facelets()` gives t
 physical cube would look like, so a wrong twist or flip convention is visible at a glance.
 
 Only the nine base moves (six faces, three slices) are written by hand, as explicit cycles in
-[moves/table.rs](crates/rubiks-cube/src/puzzles/cube3x3/moves/table.rs). Rotations (`x = R M' L'`,
-`y = U E' D'`, `z = F S B'`), wide moves (a face turn followed by its parallel slice), and every
-inverse and double are derived from those nine, on first use, into a single `ALL_MOVES` table that
-string parsing looks up. A derived move therefore cannot drift from its base moves.
+[moves/table.rs](crates/lib/src/puzzles/cube3x3/moves/table.rs). Rotations (`x = R M' L'`, `y = U E'
+D'`, `z = F S B'`), wide moves (a face turn followed by its parallel slice), and every inverse and
+double are derived from those nine, on first use, into a single `ALL_MOVES` table that string
+parsing looks up. A derived move therefore cannot drift from its base moves.
 
 ## API Documentation
 
@@ -59,7 +62,8 @@ The main entry points:
 - **`Method`** is the trait of a solving method, such as **`Roux`** or **`Kociemba`**. It turns the
   method's options into a list of steps, and `solve` or `solve_steps` runs them.
 - **`Step`**, **`SearchStep`**, and **`Shortest`** are the steps a method is built from, and
-  **`Mask`** is a partial representation of a puzzle - it's what most steps operate on and try to solve. **`PieceSet`** is the immovable "label like" counterpart used to define goals.
+  **`Mask`** is a partial representation of a puzzle - it's what most steps operate on and try to
+  solve. **`PieceSet`** is the immovable "label like" counterpart used to define goals.
 - **`Solution`**, and **`SolveError`** are what a solve returns.
 
 ## Project Layout
@@ -155,22 +159,49 @@ tools/
 
 Requires a Rust toolchain with the 2024 edition.
 
-To install the pre-commit hooks used, make sure you have [uv](https://docs.astral.sh/uv/#highlights) installed, then run
+To install the pre-commit hooks used, make sure you have [uv](https://docs.astral.sh/uv/#highlights)
+installed, then run
 
 ```bash
 uv tool install pre-commit
 pre-commit install
 ```
 
+The pre-commit hook uses `committed`, `typos`, `pygrep` and `dprint`, and nightly `rustfmt`. They
+should install on first use if you don't have them.
+
+## Formatting
+
+Formatting is done by `dprint` and `rustfmt`. In case they don't install manually with the
+pre-commit hook:
+
+```bash
+rustup toolchain install nightly-2020-11-16 --profile minimal --component rustfmt
+cargo bin --install
+```
+
+To automatically apply formatting fixes, use:
+
+```bash
+cargo +nightly-2026-11-16 fmt --all
+cargo bin dprint fmt
+```
+
+We include editor configurations for formatting on save on `Zed` and `VS Code`. Feel free to add
+your editor of choice too.
+
+To bump the `rustfmt` nightly version everywhere, use:
+
+```bash
+grep -rn "nightly-20" .pre-commit-config.yaml .github/workflows rust-analyzer.toml CONTRIBUTING.md
+```
+
 ### Required Dependencies
 
-The library depends on `fastrand` for random cube states.
-It also depends on `log`, through which the solver reports each step at the `debug` level.
-It never prints.
-`rayon` runs the searches and the prune-table builds in parallel.
-`thiserror` helps define errors.
-`itertools` makes some iterator method chains less verbose.
-`dyn-clone` allows for cloning `dyn` types internally.
+The library depends on `fastrand` for random cube states. It also depends on `log`, through which
+the solver reports each step at the `debug` level. It never prints. `rayon` runs the searches and
+the prune-table builds in parallel. `thiserror` helps define errors. `itertools` makes some iterator
+method chains less verbose. `dyn-clone` allows for cloning `dyn` types internally.
 
 None of their types are returned.
 
@@ -183,7 +214,8 @@ For feature `anstyle`:
 
 For feature `ratatui`:
 
-- `ratatui` and `ratatui-core` are turned on for the widget itself, the `anstyle` feature is also turned on.
+- `ratatui` and `ratatui-core` are turned on for the widget itself, the `anstyle` feature is also
+  turned on.
 
 Both features turn on public interface with dependency types.
 
@@ -197,11 +229,14 @@ cargo run -p virtual-cube-timer -- --method roux --number 3
 
 ## LLM Policy
 
-Because one of the central purposes of the repo is my learning, I plan on reading and reviewing every contribution.
-This means "vibe coding", in its purest form, is disallowed here.
-This is not to mean you can't use LLMs code or help - but that you must understand every line you contribute yourself, even if you weren't the one that wrote it.
-If there's too much code for you to review, there's certainly too much code for me to review.
+Because one of the central purposes of the repo is my learning, I plan on reading and reviewing
+every contribution. This means "vibe coding", in its purest form, is disallowed here. This is not to
+mean you can't use LLMs code or help - but that you must understand every line you contribute
+yourself, even if you weren't the one that wrote it. If there's too much code for you to review,
+there's certainly too much code for me to review.
 
-This policy wasn't followed to the tee by me before it existed.
-I tried to keep LLM help I was fine not reviewing scoped to certain parts of the codebase, but with time it became clear how sometimes, certain pieces of the codebase become more important than predicted, and how high friction going back to understand it is.
-This is why this policy doesn't have the same exceptions I gave myself: I don't plan on having them going forward.
+This policy wasn't followed to the tee by me before it existed. I tried to keep LLM help I was fine
+not reviewing scoped to certain parts of the codebase. With time it became clear how sometimes,
+these pieces of the codebase become more important than predicted, and how high friction going back
+to understand it is. This is why this policy doesn't have the same exceptions I gave myself: I don't
+plan on having them going forward.

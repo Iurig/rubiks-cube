@@ -10,9 +10,9 @@ are planned.
 A cube state is a value of type `Cube3x3`. Moves are cube states too, and applying a move is just
 group multiplication. The move table is built on first use.
 
-> **Status: Initial Release** The core group structure and every move in standard notation
-> (faces, slices, rotations, wide moves) work and are tested against real reconstructions. The Roux,
-> ZZ, and Kociemba solvers work, and their public APIs are still changing. See
+> **Status: Initial Release** The core group structure and every move in standard notation (faces,
+> slices, rotations, wide moves) work and are tested against real reconstructions. The Roux, ZZ, and
+> Kociemba solvers work, and their public APIs are still changing. See
 > [Current state](#current-state).
 
 ## Quick example
@@ -114,8 +114,8 @@ U2 M' U M' U2 M U2 M' U' M' U2 M'    // LSE
 
 `Roux`'s builder methods pick how each stage is split. `first_block` and `second_block` choose
 between one search, a square plus a pair, or an edge, then a square, then a pair, `cmll` chooses
-between one algorithm and two, and lse only has eolr for now. With a split block the solver
-tries both the front and the back square and keeps the shorter:
+between one algorithm and two, and lse only has eolr for now. With a split block the solver tries
+both the front and the back square and keeps the shorter:
 
 ```rust
 use rubiks_cube::{Roux, roux};
@@ -130,7 +130,9 @@ A `Method` is a builder for a `Technique`, which is a list of steps. The crate h
 which keeps the shortest of several steps. Any type that implements the `Step` trait can join them.
 The [API documentation](#api-documentation) describes each type.
 
-`cargo bench --bench solves` times the solving time for a solve that fully builds all the heavy tables for each step (dominated by the builds, proxy for building tables time), as well as the time for a solve with a warm table.
+`cargo bench --bench solves` times the solving time for a solve that fully builds all the heavy
+tables for each step (dominated by the builds, proxy for building tables time), as well as the time
+for a solve with a warm table.
 
 ## Features
 
@@ -146,7 +148,8 @@ You can find more information about contributing in [CONTRIBUTING.md](CONTRIBUTI
 
 ## Current state
 
-All unit, integration, and doc tests pass; only one is `#[ignore]`d due to accessing an external file.
+All unit, integration, and doc tests pass; only one is `#[ignore]`d due to accessing an external
+file.
 
 What works today:
 
@@ -178,9 +181,10 @@ What works today:
 
 ## Roadmap
 
-- Color neutrality. Necessary for recognition of rotation independent steps, so its implementation is necessary for CFOP solves.
-- Fingertrick-aware output. A solution already prints as notation; this is why `2'` is kept distinct.
-  from `2` in the `Move` label even though they share a cube state.
+- Color neutrality. Necessary for recognition of rotation independent steps, so its implementation
+  is necessary for CFOP solves.
+- Fingertrick-aware output. A solution already prints as notation; this is why `2'` is kept
+  distinct. from `2` in the `Move` label even though they share a cube state.
 - More methods (CFOP, Petrus), and Kociemba in the command-line solver.
 - Reuse `PieceConfiguration` / `Piece` for other puzzles.
 

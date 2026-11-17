@@ -9,6 +9,7 @@ use crate::{
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct UntimedApp {
     pub cube: Cube3x3,
+    pub keybinds: Keybinds,
 }
 
 impl UntimedApp {
@@ -18,7 +19,7 @@ impl UntimedApp {
         }
     }
 
-    pub fn update_with_message(&mut self, event: KeyEvent, keybinds: &Keybinds) -> Option<Message> {
+    pub fn update_with_message(&mut self, event: KeyEvent) -> Option<Message> {
         let KeyEvent {
             code,
             modifiers,
@@ -28,7 +29,10 @@ impl UntimedApp {
 
         match (code, modifiers) {
             (KeyCode::Esc, _) => return Some(Message::ExitProgram),
-            _ if let Some(m) = keybinds.as_move(&KeyPress::with_modifiers(code, modifiers)) => {
+            _ if let Some(m) = self
+                .keybinds
+                .as_move(&KeyPress::with_modifiers(code, modifiers)) =>
+            {
                 self.update(&CubeMessage::Apply(m));
             }
             _ => (),

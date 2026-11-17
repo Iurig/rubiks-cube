@@ -2591,6 +2591,7 @@ dependencies = [
  "clap",
  "crossterm",
  "dirs",
+ "fastrand",
  "ratatui",
  "ratatui-core",
  "rubiks-cube",

@@ -202,4 +202,12 @@ mod tests {
         assert_eq!((top - Zn::ZERO).value(), 255);
         assert_eq!((top * top).value(), 1);
     }
+
+    #[test]
+    fn index_round_trips() {
+        for i in 0..9 {
+            let value = Zn::<9>::new(i);
+            assert_eq!(value, Zn::from_index(value.index()));
+        }
+    }
 }

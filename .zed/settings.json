@@ -1,0 +1,29 @@
+{
+  "languages": {
+    "TOML": {
+      "formatter": {
+        "external": {
+          "command": "cargo",
+          "arguments": ["bin", "dprint", "fmt", "--stdin", "{buffer_path}"],
+        },
+      },
+    },
+    "Markdown": {
+      "format_on_save": "on",
+      "formatter": {
+        "external": {
+          "command": "cargo",
+          "arguments": ["bin", "dprint", "fmt", "--stdin", "{buffer_path}"],
+        },
+      },
+    },
+    "JSONC": {
+      "formatter": {
+        "external": {
+          "command": "cargo",
+          "arguments": ["bin", "dprint", "fmt", "--stdin", "{buffer_path}"],
+        },
+      },
+    },
+  },
+}

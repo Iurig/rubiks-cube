@@ -1,9 +1,9 @@
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, Segment, Solution};
+use rubiks_cube::{Algorithm, Cube3x3, Solution, SolutionSegment};
 
 use crate::{
     message::{ListNavMessage, Message, NavigationMessage, SolveNavMessage},
-    solves::ReconWithScramble,
+    solves::{SolveList, TimedSolve},
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -16,7 +16,7 @@ pub struct SolveNavApp {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ListNavApp {
     pub solve_index: usize,
-    pub all_recons: Vec<ReconWithScramble>,
+    pub all_recons: SolveList,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -61,7 +61,7 @@ impl SolveNavApp {
         }
     }
 
-    pub fn step(&self) -> Option<&Segment<Cube3x3>> {
+    pub fn step(&self) -> Option<&SolutionSegment<Cube3x3>> {
         self.list_app.solution().iter().nth(self.step_index + 1)
     }
 
@@ -71,12 +71,16 @@ impl SolveNavApp {
 }
 
 impl ListNavApp {
-    pub fn solution(&self) -> &Solution<Cube3x3> {
+    pub fn timed_solve(&self) -> &TimedSolve {
         self.all_recons
             .get(self.solve_index)
             .expect("index doesn't match an existing reconstruction")
-            .solution()
     }
+
+    pub fn solution(&self) -> &Solution<Cube3x3> {
+        self.timed_solve().solution()
+    }
+
     pub fn scramble(&self) -> &Algorithm<Cube3x3> {
         self.all_recons
             .get(self.solve_index)
@@ -88,7 +92,7 @@ impl ListNavApp {
         self.solution().iter().count()
     }
 
-    pub fn solve_iter(&self) -> impl Iterator<Item = Segment<Cube3x3>> {
+    pub fn solve_iter(&self) -> impl Iterator<Item = SolutionSegment<Cube3x3>> {
         self.solution().iter().cloned()
     }
 }
@@ -165,5 +169,32 @@ impl NavigationApp {
             Self::List(list_app) => list_app,
             Self::Solve(solve_app) => &solve_app.list_app,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{path::PathBuf, str::FromStr};
+
+    use crossterm::event::KeyModifiers;
+
+    use super::*;
+
+    #[test]
+    fn navigation_app_message_testing() -> anyhow::Result<()> {
+        let mut app = NavigationApp::List(ListNavApp {
+            solve_index: 0,
+            all_recons: SolveList::from_solves_file(PathBuf::from_str(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/tests/fixtures/solves.txt",
+            ))?)?,
+        });
+
+        assert_eq!(
+            Some(Message::ExitProgram),
+            app.update_with_message(KeyEvent::new(KeyCode::Esc, KeyModifiers::empty()))
+        );
+
+        Ok(())
     }
 }

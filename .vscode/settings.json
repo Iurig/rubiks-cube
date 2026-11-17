@@ -1,0 +1,14 @@
+{
+  "[toml]": {
+    "editor.defaultFormatter": "dprint.dprint",
+    "editor.formatOnSave": true
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "dprint.dprint",
+    "editor.formatOnSave": true
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "dprint.dprint",
+    "editor.formatOnSave": true
+  }
+}

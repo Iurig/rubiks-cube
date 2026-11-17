@@ -14,7 +14,7 @@ use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
 pub struct Keybinds {
-    moves: BiHashMap<KeyPress, Move3x3>,
+    pub moves: BiHashMap<KeyPress, Move3x3>,
 }
 
 #[derive(Debug, Clone, Copy, SerializeDisplay, DeserializeFromStr, PartialEq, Eq, Hash)]
@@ -28,14 +28,24 @@ impl KeyPress {
     pub const fn with_modifiers(key: KeyCode, modifiers: KeyModifiers) -> Self {
         Self(key, modifiers)
     }
+
+    #[must_use]
+    pub const fn code(&self) -> KeyCode {
+        self.0
+    }
+
+    #[must_use]
+    pub const fn modifiers(&self) -> KeyModifiers {
+        self.1
+    }
 }
 
 impl Display for KeyPress {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.1 == KeyModifiers::empty() {
-            write!(f, "{}", self.0)?;
+        if self.modifiers() == KeyModifiers::empty() {
+            write!(f, "{}", self.code())?;
         } else {
-            write!(f, "{}+{}", self.1, self.0)?;
+            write!(f, "{}+{}", self.modifiers(), self.code())?;
         }
         Ok(())
     }
@@ -100,7 +110,13 @@ impl Default for Keybinds {
                 'd' => "L",
                 'e' => "L'",
                 's' => "D",
-                'l' => "D'"
+                'l' => "D'",
+                'u' => "r",
+                'm' => "r'",
+                'v' => "l",
+                'r' => "l",
+                '/' => "M",
+                '[' => "M'"
             )),
         }
     }
@@ -176,19 +192,20 @@ mod tests {
         let [ctrl, alt, shift, all] = [modif_fn(0), modif_fn(1), modif_fn(2), modif_fn(3)];
 
         let round_trip = |bind: Keybinds| -> Keybinds {
-            serde_json::from_str(
-                &serde_json::to_string_pretty(&bind)
-                    .map(|s| {
-                        println!("{s}");
-                        s
-                    })
-                    .unwrap_or_else(|e| panic!("{e}")),
+            serde_json::from_str(&serde_json::to_string_pretty(&bind).map_or_else(
+                |e| panic!("{e}"),
+                |s| {
+                    println!("{s}");
+                    s
+                },
+            ))
+            .map_or_else(
+                |e| panic!("{e}"),
+                |s| {
+                    dbg!(&s);
+                    s
+                },
             )
-            .map(|s| {
-                dbg!(&s);
-                s
-            })
-            .unwrap_or_else(|e| panic!("{e}"))
         };
 
         assert_eq!(ctrl.clone(), round_trip(ctrl));
