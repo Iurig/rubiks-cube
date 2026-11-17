@@ -20,7 +20,8 @@ jobs:
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo fmt -p twisty-puzzles-py --check
+      - run: rustup toolchain install nightly-2026-11-16 --profile minimal --component rustfmt --no-self-update
+      - run: cargo +nightly-2026-11-16 fmt -p twisty-puzzles-py -- --check --config wrap_comments=true,comment_width=100,format_code_in_doc_comments=true
       # Without `--no-deps`, clippy also lints the library, and its warnings would fail this job.
       - run: cargo clippy -p twisty-puzzles-py --all-targets --no-deps -- -D warnings
 
