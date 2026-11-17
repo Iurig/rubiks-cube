@@ -162,7 +162,32 @@ uv tool install pre-commit
 pre-commit install
 ```
 
-The pre-commit hook uses `committed`, `typos`, `pygrep`, and nightly `rustfmt`. They should install on first use if you don't have them, check [`.pre-commit-config.yaml`] for versions if it doesn't, or if you prefer installing manually.
+The pre-commit hook uses `committed`, `typos`, `pygrep`, and nightly `rustfmt`.
+They should install on first use if you don't have them, check [`.pre-commit-config.yaml`] for versions if it doesn't, or if you prefer installing manually.
+
+```bash
+rustup toolchain install nightly-with-date-goes-here --profile minimal --component rustfmt
+```
+
+To automatically apply `rustfmt` fixes, use:
+
+```bash
+cargo +nightly-2026-11-16 fmt --all
+```
+
+If you format on save, most editors pick up the `rustfmt` version and settings from [`rust-analyzer.toml`] and [`rustfmt.toml`].
+
+Known to support:
+
+- VS Code
+- Zed
+- Vim/Neovim
+- Helix
+- Emacs
+
+Known exceptions:
+
+- RustRover (set toolchain manually in settings)
 
 ### Required Dependencies
 
