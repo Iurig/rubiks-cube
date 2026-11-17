@@ -59,7 +59,7 @@ impl<T: Indexed> Permutation<T> {
         let to_vec = iter.into_iter().map(|v| T::index(&v)).collect::<Vec<_>>();
         if to_vec.len() != T::COUNT {
             Err(PermutationError::WrongSize)
-        } else if to_vec.iter().all_unique() {
+        } else if !to_vec.iter().all_unique() {
             Err(PermutationError::RepeatedElement)
         } else {
             Ok(Self(to_vec.into_iter().map(|i| T::from_index(i)).collect()))
@@ -165,7 +165,7 @@ mod tests {
     }
 
     #[test]
-    fn simple_cycles() {
+    fn simple_cycles() -> anyhow::Result<()> {
         let mut perm = Permutation::<Zn<8>>::new();
         assert_eq!(
             *perm.swap_cycle([0, 1, 4]),
@@ -174,9 +174,9 @@ mod tests {
                     .iter()
                     .map(|&i| Zn::<8>::new(i))
                     .collect::<Vec<_>>()
-            ))
-            .unwrap()
+            ))?
         );
+        Ok(())
     }
 
     #[test]
