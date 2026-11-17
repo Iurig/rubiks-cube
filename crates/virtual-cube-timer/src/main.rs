@@ -16,7 +16,7 @@ use anyhow::{Ok, ensure};
 use clap::{Parser, ValueEnum};
 use ratatui_core as _;
 use rubiks_cube::{
-    Algorithm, Cube3x3, Method, Puzzle, Roux, Solution, ZZ,
+    Cube3x3, Method, Puzzle, Roux, Solution, ZZ,
     roux::{FirstBlock, SecondBlock},
 };
 
@@ -97,10 +97,13 @@ fn main() -> anyhow::Result<()> {
             }),
             ModeArg::Normal => Mode::Timing(TimingApp {
                 cube: Cube3x3::default(),
-                method: args.method.clone(),
+                technique: args.method.to_technique(),
+                step_number: 0,
                 solves: Arc::new(Mutex::new(SolveList::from_solves_file()?)),
                 curr_solve_scramble: VecDeque::new(),
-                curr_solve_moves: Solution::single_segment(args.method.name(), Algorithm::new()),
+                curr_solve_moves: Solution::with_empty_steps(
+                    args.method.to_technique().steps().map(rubiks_cube::Step::name),
+                ),
                 starting_time: Instant::now(),
                 timer_number: Duration::ZERO,
                 timer_state: app::timing::TimerState::Solved,

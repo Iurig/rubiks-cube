@@ -9,7 +9,7 @@ use std::{
 };
 
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, Puzzle, Solution};
+use rubiks_cube::{Algorithm, Cube3x3, Puzzle, Solution, Technique};
 
 use crate::{
     event::Event,
@@ -21,7 +21,8 @@ use crate::{
 #[derive(Debug)]
 pub struct TimingApp {
     pub cube: Cube3x3,
-    pub method: crate::ValidMethods,
+    pub technique: Technique<Cube3x3>,
+    pub step_number: usize,
     pub solves: Arc<Mutex<SolveList>>,
     pub curr_solve_scramble: VecDeque<Receiver<Algorithm<Cube3x3>>>,
     pub curr_solve_moves: Solution<Cube3x3>,
@@ -103,7 +104,19 @@ impl TimingApp {
                     _ if let Some(m) =
                         keybinds.as_move(&KeyPress::with_modifiers(code, modifiers)) =>
                     {
+                        while self
+                            .technique
+                            .steps()
+                            .nth(self.step_number)
+                            .is_some_and(|s| s.is_done(&self.cube))
+                        {
+                            self.step_number += 1;
+                        }
+
                         self.update(&TimingMessage::Cube(CubeMessage::Apply(m)));
+
+                        self.curr_solve_moves[self.step_number].push(m);
+
                         if self.timer_state == TimerState::Scrambled {
                             self.update(&TimingMessage::Start);
                         }
