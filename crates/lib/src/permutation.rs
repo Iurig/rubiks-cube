@@ -49,6 +49,14 @@ impl<T: Indexed> Permutation<T> {
     }
 
     /// Constructor for [`Permutation<T>`] for iterators of `T` in order.
+    ///
+    /// # Errors
+    /// Errors if the iterator does not represent a permutation - i.e. if there are repeated
+    /// elements, or not all elements are present.
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "panics only happen on broken invariants, not user actionable"
+    )]
     pub fn try_from_iter(iter: impl IntoIterator<Item = T>) -> Result<Self, PermutationError> {
         let to_vec = iter.into_iter().collect::<Vec<_>>();
         let mut to_sorted_vec = to_vec.clone();
