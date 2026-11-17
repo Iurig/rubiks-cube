@@ -195,6 +195,14 @@ impl<P: Puzzle> IntoIterator for Technique<P> {
     }
 }
 
+impl<'a, P: Puzzle> IntoIterator for &'a Technique<P> {
+    type IntoIter = std::slice::Iter<'a, Arc<dyn Step<P>>>;
+    type Item = &'a Arc<dyn Step<P>>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.steps.iter()
+    }
+}
+
 impl<P: Puzzle> Technique<P> {
     /// Constructor for a technique: takes in any
     pub fn new(steps: impl IntoIterator<Item = Arc<dyn Step<P>>>) -> Self {

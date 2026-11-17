@@ -18,13 +18,13 @@ use crate::{Algorithm, Cube3x3, ParseSequenceError, puzzles::Puzzle};
 /// ```
 ///
 /// Build one with [`single_segment`](Self::single_segment), or collect solutions to join them.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
 pub struct Solution<P: Puzzle> {
     step_solutions: Vec<SolutionSegment<P>>,
 }
 
 /// Segment of a solution: includes a name and the moves that make the solution up.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SolutionSegment<P: Puzzle> {
     name: String,
     moves: Algorithm<P>,
@@ -45,7 +45,7 @@ impl Mul<SolutionSegment<Self>> for Cube3x3 {
     }
 }
 
-impl Display for SolutionSegment<Cube3x3> {
+impl<P: Puzzle> Display for SolutionSegment<P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{}    // {}", self.moves, self.name)?;
         Ok(())
