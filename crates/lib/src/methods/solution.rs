@@ -165,6 +165,16 @@ impl<P: Puzzle> Solution<P> {
                 .collect(),
         }
     }
+
+    /// How many steps the solution has.
+    pub fn len(&self) -> usize {
+        self.step_solutions.len()
+    }
+
+    /// If the solution is devoid of steps.
+    pub fn is_empty(&self) -> bool {
+        self.step_solutions.is_empty()
+    }
 }
 
 impl<P: Puzzle> Index<usize> for Solution<P> {

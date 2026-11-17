@@ -69,6 +69,16 @@ impl<P: Puzzle> AlgSet<P> {
         text.parse()
             .unwrap_or_else(|e| panic!("invalid algorithms {text:?}: {e:?}"))
     }
+
+    ///How many [`Algorithm`]s the [`AlgSet`] has.
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    /// If the [`AlgSet`] is empty.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 impl<P: Puzzle> FromIterator<Algorithm<P>> for AlgSet<P> {
