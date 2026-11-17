@@ -50,11 +50,12 @@ pub struct Technique<P: Puzzle> {
 ///
 /// # Examples
 ///
-/// ```ignore
-/// use rubiks_cube::{AlgSet, SearchStep, Technique, PieceSet, Cube3x3};
+/// ```
+/// use rubiks_cube::{AlgSet, Cube3x3, PieceSet, SearchStep, Technique};
 ///
 /// let eolr = SearchStep::builder("EOLR", AlgSet::from_static_parts("M U"))
-///     .goal(PieceSet::from_algset(&AlgSet::from_static("M\n U2")));
+///     .goal(PieceSet::from_algset(&AlgSet::from_static("M\n U2")))
+///     .clone();
 ///
 /// let advanced_roux = Technique::<Cube3x3>::start_with(SearchStep::builder(
 ///     "FB",
@@ -66,11 +67,12 @@ pub struct Technique<P: Puzzle> {
 /// ))
 /// .then(
 ///     SearchStep::builder(
-///        "CMLL",
-///         AlgSet::from_static_parts(concat!(include_str!("path/to/algs"))),
+///         "CMLL",
+///         AlgSet::from_static_parts(concat!(include_str!("cube3x3/algsets/cmll/one_look.txt"))),
 ///     )
 ///     .free_algs(AlgSet::from_static_parts("U"))
-///     .goal(PieceSet::from_algset(&AlgSet::from_static("U M' U' \n M"))),
+///     .goal(PieceSet::from_algset(&AlgSet::from_static("U M' U' \n M")))
+///     .clone(),
 /// )
 /// .then(eolr)
 /// .finish(SearchStep::builder("LSE", AlgSet::from_static("M U")));
