@@ -55,7 +55,7 @@ pub trait Step<P: Puzzle>: Send + Sync + Debug {
 /// A type that can build a [`Step`].
 ///
 /// This trait is also used to build techniques with [`TechniqueBuilder`](crate::TechniqueBuilder)
-/// on insufficient information that is deduceable in context of the build.
+/// on insufficient information that is deducible in context of the build.
 pub trait StepBuilder<P: Puzzle>: DynClone + Debug + Send + Sync {
     /// Used to read or write to a [`StepBuilder`]'s goal.
     ///
