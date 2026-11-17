@@ -117,7 +117,7 @@ impl<P: Puzzle> SolutionSegment<P> {
         &self.moves
     }
 
-    /// Iterates on the [`Segment`]s moves.
+    /// Iterates on the [`SolutionSegment`]s moves.
     pub fn iter(&self) -> impl Iterator<Item = &P::Move> {
         self.moves().iter()
     }
@@ -164,7 +164,7 @@ impl<P: Puzzle> Solution<P> {
             .sum()
     }
 
-    /// Constructor for [`Solution`] with named, but empty [`Segment`]s.
+    /// Constructor for [`Solution`] with named, but empty [`SolutionSegment`]s.
     pub fn with_empty_steps<'a>(steps: impl IntoIterator<Item = &'a str>) -> Self {
         Self {
             step_solutions: steps
@@ -202,7 +202,7 @@ impl<P: Puzzle> IndexMut<usize> for Solution<P> {
     }
 }
 
-/// Builds a solution from [`Segment`]s, in order.
+/// Builds a solution from [`SolutionSegment`]s, in order.
 impl<P: Puzzle> FromIterator<SolutionSegment<P>> for Solution<P> {
     fn from_iter<I: IntoIterator<Item = SolutionSegment<P>>>(iter: I) -> Self {
         Self {
