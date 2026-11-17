@@ -149,7 +149,7 @@ mod tests {
 
     use super::*;
 
-    pub fn move_to_key(binds: Keybinds, m: <Cube3x3 as Puzzle>::Move) -> Option<KeyPress> {
+    pub fn move_to_key(binds: &Keybinds, m: <Cube3x3 as Puzzle>::Move) -> Option<KeyPress> {
         binds.moves.get_by_right(&m).copied()
     }
 
@@ -207,7 +207,7 @@ mod tests {
             .collect::<Solution<Cube3x3>>();
 
         for m in expanded_cube_recon.moves() {
-            let key = move_to_key(Keybinds::default(), *m).unwrap_or_else(|| panic!("{m}"));
+            let key = move_to_key(&Keybinds::default(), *m).unwrap_or_else(|| panic!("{m}"));
             app.update_with_message(Event::Key(KeyEvent::new(key.code(), key.modifiers())));
         }
 
