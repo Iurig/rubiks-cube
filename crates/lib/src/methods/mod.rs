@@ -236,6 +236,18 @@ impl<P: Puzzle> Technique<P> {
         run_steps(self.steps.iter().cloned(), puzzle)
     }
 
+    /// How many steps the [`Technique`] has.
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.steps.len()
+    }
+
+    /// If the [`Technique`] is empty.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     // Constructs the [`Technique`] with a given neutrality.
     // #[must_use]
     // fn with_neutrality(
