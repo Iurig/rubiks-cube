@@ -99,6 +99,11 @@ impl<P: Puzzle> SolutionSegment<P> {
     pub fn iter(&self) -> impl Iterator<Item = &P::Move> {
         self.moves().iter()
     }
+
+    /// Append a move to the [`SolutionSegment`].
+    pub fn push(&mut self, m: P::Move) {
+        self.moves.extend([m]);
+    }
 }
 
 impl<P: Puzzle> Solution<P> {
