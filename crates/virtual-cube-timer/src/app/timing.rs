@@ -209,5 +209,20 @@ mod test {
 
         assert!(app.cube.is_solved());
         assert_eq!(expanded_cube_recon, app.curr_solve_moves);
+
+        app.update_with_message(Event::Key(KeyEvent::new(
+            KeyCode::Char(' '),
+            KeyModifiers::empty(),
+        )));
+
+        assert_eq!(app.timer_state, TimerState::Scrambled);
+
+        assert_eq!(
+            app.update_with_message(Event::Key(KeyEvent::new(
+                KeyCode::Esc,
+                KeyModifiers::empty(),
+            ))),
+            Some(Message::ExitProgram)
+        );
     }
 }
