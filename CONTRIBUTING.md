@@ -205,5 +205,6 @@ This is not to mean you can't use LLMs code or help - but that you must understa
 If there's too much code for you to review, there's certainly too much code for me to review.
 
 This policy wasn't followed to the tee by me before it existed.
-I tried to keep LLM help I was fine not reviewing scoped to certain parts of the codebase, but with time it became clear how sometimes, certain pieces of the codebase become more important than predicted, and how high friction going back to understand it is.
+I tried to keep LLM help I was fine not reviewing scoped to certain parts of the codebase.
+With time it became clear how sometimes, these pieces of the codebase become more important than predicted, and how high friction going back to understand it is.
 This is why this policy doesn't have the same exceptions I gave myself: I don't plan on having them going forward.
