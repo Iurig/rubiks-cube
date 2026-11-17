@@ -176,19 +176,20 @@ mod tests {
         let [ctrl, alt, shift, all] = [modif_fn(0), modif_fn(1), modif_fn(2), modif_fn(3)];
 
         let round_trip = |bind: Keybinds| -> Keybinds {
-            serde_json::from_str(
-                &serde_json::to_string_pretty(&bind)
-                    .map(|s| {
-                        println!("{s}");
-                        s
-                    })
-                    .unwrap_or_else(|e| panic!("{e}")),
+            serde_json::from_str(&serde_json::to_string_pretty(&bind).map_or_else(
+                |e| panic!("{e}"),
+                |s| {
+                    println!("{s}");
+                    s
+                },
+            ))
+            .map_or_else(
+                |e| panic!("{e}"),
+                |s| {
+                    dbg!(&s);
+                    s
+                },
             )
-            .map(|s| {
-                dbg!(&s);
-                s
-            })
-            .unwrap_or_else(|e| panic!("{e}"))
         };
 
         assert_eq!(ctrl.clone(), round_trip(ctrl));
