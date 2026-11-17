@@ -136,3 +136,77 @@ impl TimingApp {
         None
     }
 }
+
+#[cfg(test)]
+mod test {
+
+    use rubiks_cube::{Method, Move3x3, MoveModifier, Roux, SolutionSegment, Step};
+
+    use super::*;
+
+    #[test]
+    fn solution_is_constructed_with_messages() {
+        let scrambled_cube =
+            Cube3x3::from_moves("D' F' U2 D' R' F' B R B2 D' B2 D2 B2 R2 B2 U' R2 F2 B2 L")
+                .unwrap();
+
+        let (sender, receiver) = mpsc::channel();
+
+        sender
+            .send(Algorithm::from_static(
+                "D' F' U2 D' R' F' B R B2 D' B2 D2 B2 R2 B2 U' R2 F2 B2 L",
+            ))
+            .unwrap();
+
+        let mut app = TimingApp {
+            cube: scrambled_cube,
+            technique: Roux::default().to_technique(),
+            step_number: 0,
+            solves: Arc::new(Mutex::new(SolveList::new())),
+            curr_solve_scramble: VecDeque::from([receiver]),
+            curr_solve_moves: Solution::with_empty_steps(
+                Roux::default().to_technique().steps().map(Step::name),
+            ),
+            starting_time: Instant::now(),
+            timer_number: Duration::ZERO,
+            timer_state: TimerState::Solving,
+        };
+
+        let cube_recon = Roux::default()
+            .to_technique()
+            .solve(&mut scrambled_cube.clone())
+            .unwrap();
+
+        let expanded_cube_recon = cube_recon
+            .iter()
+            .map(|s| {
+                SolutionSegment::with_moves(
+                    s.name(),
+                    s.iter()
+                        .flat_map(|m| {
+                            if m.modifier() == MoveModifier::Double {
+                                let inner_move = Move3x3::new(m.part(), MoveModifier::Clockwise);
+                                vec![inner_move, inner_move].into_iter()
+                            } else {
+                                vec![*m].into_iter()
+                            }
+                        })
+                        .collect::<Algorithm<Cube3x3>>(),
+                )
+            })
+            .collect::<Solution<Cube3x3>>();
+
+        for m in expanded_cube_recon.moves() {
+            let key = Keybinds::default()
+                .move_to_key(*m)
+                .unwrap_or_else(|| panic!("{m}"));
+            app.update_with_message(
+                Event::Key(KeyEvent::new(key.code(), key.modifiers())),
+                &Keybinds::default(),
+            );
+        }
+
+        assert!(app.cube.is_solved());
+        assert_eq!(expanded_cube_recon, app.curr_solve_moves);
+    }
+}

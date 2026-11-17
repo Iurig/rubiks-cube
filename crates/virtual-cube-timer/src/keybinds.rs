@@ -8,7 +8,7 @@ use std::{
 use bimap::BiHashMap;
 use crossterm::event::{KeyCode, KeyModifiers};
 use dirs::config_dir;
-use rubiks_cube::Move3x3;
+use rubiks_cube::{Cube3x3, Move3x3, Puzzle};
 use serde::{Deserialize, Serialize};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
@@ -27,6 +27,16 @@ impl KeyPress {
 
     pub const fn with_modifiers(key: KeyCode, modifiers: KeyModifiers) -> Self {
         Self(key, modifiers)
+    }
+
+    #[must_use]
+    pub const fn code(&self) -> KeyCode {
+        self.0
+    }
+
+    #[must_use]
+    pub const fn modifiers(&self) -> KeyModifiers {
+        self.1
     }
 }
 
@@ -137,6 +147,10 @@ impl Keybinds {
             }
             Err(e) => Err(e.into()),
         }
+    }
+
+    pub fn move_to_key(&self, m: <Cube3x3 as Puzzle>::Move) -> Option<KeyPress> {
+        self.moves.get_by_right(&m).copied()
     }
 }
 
