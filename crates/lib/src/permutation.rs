@@ -55,7 +55,9 @@ impl<T: Indexed> Permutation<T> {
         to_sorted_vec.sort_by_key(<T as Indexed>::index);
         let mut repeats = false;
         for index in 0..(to_vec.len() - 1) {
-            if to_sorted_vec[index] == to_sorted_vec[index + 1] {
+            if to_sorted_vec.get(index).expect("index out of range")
+                == to_sorted_vec.get(index + 1).expect("index out of range")
+            {
                 repeats = true;
                 break;
             }
