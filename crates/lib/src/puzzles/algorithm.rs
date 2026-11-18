@@ -153,6 +153,11 @@ impl<P: Puzzle> Algorithm<P> {
         self.0.clone()
     }
 
+    /// Insert move at the end of [`Algorithm`].
+    pub fn push(&mut self, m: P::Move) {
+        self.0.push(m);
+    }
+
     /// The number of moves.
     #[must_use]
     pub const fn len(&self) -> usize {
