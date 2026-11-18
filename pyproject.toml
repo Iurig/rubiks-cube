@@ -6,3 +6,10 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "C4", "A", "N", "RUF"]
+
+[tool.basedpyright]
+reportUnusedClass = "warning"
+reportUnusedFunction = "warning"
+reportUnusedImport = "warning"
+reportUnusedVariable = "warning"
+typeCheckingMode = "recommended"
