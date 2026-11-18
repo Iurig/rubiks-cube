@@ -7,7 +7,7 @@ use virtual_cube_timer::{
     solves::{ReconWithScramble, SolveList, TimedSolve},
 };
 
-const SOLVES: usize = 10;
+const SOLVES: usize = 20;
 
 fn main() -> anyhow::Result<()> {
     let mut cube = Cube3x3::default();

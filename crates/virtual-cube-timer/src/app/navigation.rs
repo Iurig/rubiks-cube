@@ -30,7 +30,7 @@ impl ListNavApp {
         match message {
             ListNavMessage::PreviousSolve => self.solve_index = self.solve_index.saturating_sub(1),
             ListNavMessage::NextSolve => {
-                self.solve_index = std::cmp::min(self.solve_index + 1, self.all_recons.len());
+                self.solve_index = std::cmp::min(self.solve_index + 1, self.all_recons.len() - 1);
             }
         }
     }
@@ -39,7 +39,7 @@ impl ListNavApp {
 impl SolveNavApp {
     pub fn update(&mut self, message: &SolveNavMessage) {
         fn clamp_move(app: &mut SolveNavApp) {
-            let max_move_count = app.cur_step_move_count();
+            let max_move_count = app.cur_step_move_count() - 1;
             app.move_index = std::cmp::min(app.move_index, max_move_count);
         }
         match message {
@@ -47,7 +47,8 @@ impl SolveNavApp {
                 self.move_index = self.move_index.saturating_sub(1);
             }
             SolveNavMessage::NextMove => {
-                self.move_index = std::cmp::min(self.move_index + 1, self.cur_step_move_count());
+                self.move_index =
+                    std::cmp::min(self.move_index + 1, self.cur_step_move_count() - 1);
             }
             SolveNavMessage::PreviousStep => {
                 self.step_index = self.step_index.saturating_sub(1);
@@ -61,8 +62,13 @@ impl SolveNavApp {
         }
     }
 
-    pub fn step(&self) -> Option<&SolutionSegment<Cube3x3>> {
-        self.list_app.solution().iter().nth(self.step_index + 1)
+    #[must_use]
+    pub fn step(&self) -> &SolutionSegment<Cube3x3> {
+        self.list_app
+            .solution()
+            .iter()
+            .nth(self.step_index)
+            .expect("invalid step")
     }
 
     pub fn cur_step_move_count(&self) -> usize {
@@ -170,6 +176,13 @@ impl NavigationApp {
             Self::Solve(solve_app) => &solve_app.list_app,
         }
     }
+
+    pub fn as_solve_app(&self) -> Option<&SolveNavApp> {
+        match self {
+            NavigationApp::List(_) => None,
+            NavigationApp::Solve(solve_app) => Some(solve_app),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -190,7 +203,14 @@ mod tests {
             ))?)?,
         });
 
-        dbg!(&app);
+        for _ in 0..10 {
+            assert!(
+                app.update_with_message(key_press(KeyCode::Char('p')))
+                    .is_none()
+            );
+        }
+
+        assert_eq!(app.list_app().solve_index, 0, "{app:?}");
 
         for _ in 0..10 {
             assert!(
@@ -201,6 +221,33 @@ mod tests {
 
         assert_eq!(app.list_app().solve_index, 10, "{app:?}");
 
+        for _ in 0..100 {
+            assert!(
+                app.update_with_message(key_press(KeyCode::Char('n')))
+                    .is_none()
+            );
+        }
+
+        assert_eq!(app.list_app().solve_index, 19, "{app:?}");
+
+        assert!(app.update_with_message(key_press(KeyCode::Enter)).is_none());
+
+        let mut prev_move_index = -1isize;
+
+        while app.as_solve_app().unwrap().move_index != prev_move_index as usize {
+            prev_move_index += 1;
+            assert!(app.update_with_message(key_press(KeyCode::Right)).is_none());
+            dbg!(prev_move_index);
+        }
+
+        assert_eq!(
+            prev_move_index as usize + 1,
+            app.as_solve_app().unwrap().cur_step_move_count(),
+            "{}",
+            app.list_app().solution()
+        );
+
+        assert_eq!(None, app.update_with_message(key_press(KeyCode::Esc)));
         assert_eq!(
             Some(Message::ExitProgram),
             app.update_with_message(key_press(KeyCode::Esc))

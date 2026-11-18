@@ -135,7 +135,6 @@ fn view_solve(app: &SolveNavApp, frame: &mut Frame, mut cube: Cube3x3) {
     let cursor_position_in_recon = Offset::new(
         i32::try_from(
             app.step()
-                .expect("invalid step")
                 .to_string()
                 .char_indices()
                 .filter(|&(_, c)| c == ' ')
@@ -159,7 +158,6 @@ fn view_solve(app: &SolveNavApp, frame: &mut Frame, mut cube: Cube3x3) {
 
     cube = app
         .step()
-        .expect("step not found")
         .clone()
         .into_iter()
         .zip(0..cursor_position_in_recon.x)
@@ -180,8 +178,8 @@ fn view_solve(app: &SolveNavApp, frame: &mut Frame, mut cube: Cube3x3) {
     #[cfg(feature = "debug")]
     {
         let print_info = [
-            format!("Step: {}", app.step().unwrap()),
-            format!("Step: {}", app.step().unwrap()),
+            format!("Step: {}", app.step()),
+            format!("Current Move: {}", app.move_index),
             format!("Total moves: {}", app.cur_step_move_count()),
         ];
 
