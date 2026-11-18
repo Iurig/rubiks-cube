@@ -193,14 +193,17 @@ mod tests {
         dbg!(&app);
 
         for _ in 0..10 {
-            assert!(app.update_with_message(key_press!(Char('n'))).is_none());
+            assert!(
+                app.update_with_message(key_press(KeyCode::Char('n')))
+                    .is_none()
+            );
         }
 
         assert_eq!(app.list_app().solve_index, 10, "{app:?}");
 
         assert_eq!(
             Some(Message::ExitProgram),
-            app.update_with_message(key_press!(Esc))
+            app.update_with_message(key_press(KeyCode::Esc))
         );
 
         Ok(())

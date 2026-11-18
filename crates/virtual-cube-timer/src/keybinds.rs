@@ -6,7 +6,7 @@ use std::{
 };
 
 use bimap::BiHashMap;
-use crossterm::event::{KeyCode, KeyModifiers};
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use dirs::config_dir;
 use rubiks_cube::Move3x3;
 use serde::{Deserialize, Serialize};
@@ -150,15 +150,9 @@ impl Keybinds {
     }
 }
 
-macro_rules! key_press {
-    ($key:ident$(($val:expr))?) => {
-        crossterm::event::KeyEvent::new(
-            crossterm::event::KeyCode::$key$(($val))?,
-            crossterm::event::KeyModifiers::empty(),
-        )
-    };
+pub fn key_press(code: KeyCode) -> KeyEvent {
+    KeyEvent::new(code, KeyModifiers::empty())
 }
-pub(crate) use key_press;
 
 #[cfg(test)]
 mod tests {
