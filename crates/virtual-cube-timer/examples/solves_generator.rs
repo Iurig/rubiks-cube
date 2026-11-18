@@ -2,8 +2,12 @@ use std::{fs::File, io::Write, time::Duration};
 
 use anyhow::Ok;
 use rubiks_cube::{Cube3x3, Method, Puzzle, Roux};
+use virtual_cube_timer::{
+    ValidMethods,
+    solves::{ReconWithScramble, SolveList, TimedSolve},
+};
 
-const SOLVES: usize = 10;
+const SOLVES: usize = 20;
 
 fn main() -> anyhow::Result<()> {
     let mut cube = Cube3x3::default();
@@ -14,19 +18,22 @@ fn main() -> anyhow::Result<()> {
 
     file.set_len(0)?;
 
-    for index in 0..SOLVES {
+    let mut list = SolveList::new();
+
+    for _ in 0..SOLVES {
         let scramble = Cube3x3::scramble()?;
         cube = cube.apply(&scramble);
         let solution = Roux::default().to_technique().solve(&mut cube)?;
         let time = Duration::from_secs_f64(20.0 * fastrand::f64());
 
-        file.write_fmt(format_args!(
-            "{}. {:.3?} {}\n{}\n",
-            index + 1,
-            time.as_secs_f64(),
-            scramble,
-            solution
-        ))?;
+        list.push(TimedSolve::new(
+            ReconWithScramble::new(scramble, solution),
+            time,
+            ValidMethods::Roux,
+        ));
     }
+
+    file.write_fmt(format_args!("{list}"))?;
+
     Ok(())
 }

@@ -26,6 +26,7 @@ pub fn to_duration(text: &str) -> anyhow::Result<Duration> {
     }
 }
 
+#[must_use]
 pub fn to_text(duration: Duration) -> String {
     let integer_seconds = duration.as_secs();
     let hours = integer_seconds / 3600;

@@ -1,13 +1,5 @@
 #![warn(unused_crate_dependencies)]
 
-mod app;
-mod event;
-mod keybinds;
-mod message;
-mod solves;
-mod time;
-mod view;
-
 use std::{
     collections::VecDeque,
     sync::{Arc, Mutex},
@@ -15,16 +7,17 @@ use std::{
 };
 
 use anyhow::{Ok, ensure};
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 use ratatui_core as _;
 use rubiks_cube::{
-    Cube3x3, Method, Puzzle, Roux, Solution, ZZ,
+    Cube3x3, Method, Puzzle, Solution,
     roux::{FirstBlock, SecondBlock},
 };
 
-use crate::{
+use virtual_cube_timer::{
+    Args, ModeArg, ValidMethods,
     app::{
-        App, Mode,
+        self, App, Mode,
         navigation::{ListNavApp, NavigationApp},
         timing::TimingApp,
         untimed::UntimedApp,
@@ -35,57 +28,6 @@ use crate::{
     solves::{ReconWithScramble, SolveList, TimedSolve},
     view::{navigation::render_navigation, timing::render_timing, untimed::render_untimed},
 };
-
-#[derive(Debug, Parser, Clone)]
-#[command(version, about, long_about = None)]
-pub struct Args {
-    #[arg(value_enum)]
-    method: ValidMethods,
-
-    #[arg(value_enum)]
-    mode: ModeArg,
-
-    #[arg(short, long)]
-    number: Option<u32>,
-}
-
-#[derive(Debug, Clone, ValueEnum, Default)]
-enum ModeArg {
-    #[default]
-    Untimed,
-    Normal,
-    Demo,
-    Browse,
-}
-
-#[derive(Debug, Default, Clone, ValueEnum, PartialEq, Eq)]
-enum ValidMethods {
-    #[default]
-    Roux,
-    Zz,
-}
-
-impl Method<Cube3x3> for ValidMethods {
-    fn new() -> Self {
-        Self::default()
-    }
-
-    fn to_technique(&self) -> rubiks_cube::Technique<Cube3x3> {
-        match self {
-            Self::Roux => Roux::default().to_technique(),
-            Self::Zz => ZZ::default().to_technique(),
-        }
-    }
-}
-
-impl ValidMethods {
-    pub const fn name(&self) -> &str {
-        match self {
-            Self::Roux => "Roux",
-            Self::Zz => "ZZ",
-        }
-    }
-}
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
