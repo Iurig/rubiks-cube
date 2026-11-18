@@ -15,3 +15,5 @@ cargo-run-bin = { version = "1.7.5", features = ["cli"] }
 doc = false
 name = "cargo-bin"
 path = "src/main.rs"
+
+[lints]
