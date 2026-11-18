@@ -16,8 +16,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          cache: false
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - run: rustup toolchain install nightly-2026-11-16 --profile minimal --component rustfmt --no-self-update
@@ -35,7 +36,10 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
       - uses: astral-sh/setup-uv@v9.0.0
       - uses: Swatinem/rust-cache@v2
       - run: uv python install
@@ -48,6 +52,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
       - uses: Swatinem/rust-cache@v2
       - run: cargo doc -p twisty-puzzles-py --no-deps
