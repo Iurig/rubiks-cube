@@ -150,6 +150,16 @@ impl Keybinds {
     }
 }
 
+macro_rules! key_press {
+    ($key:ident$(($val:expr))?) => {
+        crossterm::event::KeyEvent::new(
+            crossterm::event::KeyCode::$key$(($val))?,
+            crossterm::event::KeyModifiers::empty(),
+        )
+    };
+}
+pub(crate) use key_press;
+
 #[cfg(test)]
 mod tests {
 

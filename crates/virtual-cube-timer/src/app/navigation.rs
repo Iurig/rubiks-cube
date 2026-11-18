@@ -176,7 +176,7 @@ impl NavigationApp {
 mod tests {
     use std::{path::PathBuf, str::FromStr};
 
-    use crossterm::event::KeyModifiers;
+    use crate::keybinds::key_press;
 
     use super::*;
 
@@ -190,9 +190,17 @@ mod tests {
             ))?)?,
         });
 
+        dbg!(&app);
+
+        for _ in 0..10 {
+            assert!(app.update_with_message(key_press!(Char('n'))).is_none());
+        }
+
+        assert_eq!(app.list_app().solve_index, 10, "{app:?}");
+
         assert_eq!(
             Some(Message::ExitProgram),
-            app.update_with_message(KeyEvent::new(KeyCode::Esc, KeyModifiers::empty()))
+            app.update_with_message(key_press!(Esc))
         );
 
         Ok(())

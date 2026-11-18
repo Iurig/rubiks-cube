@@ -144,8 +144,9 @@ impl TimingApp {
 #[cfg(test)]
 mod tests {
 
-    use crossterm::event::KeyModifiers;
     use rubiks_cube::{Method, Move3x3, MoveModifier, Roux, SolutionSegment, Step};
+
+    use crate::keybinds::key_press;
 
     use super::*;
 
@@ -214,18 +215,12 @@ mod tests {
         assert!(app.cube.is_solved());
         assert_eq!(expanded_cube_recon, app.curr_solve_moves);
 
-        app.update_with_message(Event::Key(KeyEvent::new(
-            KeyCode::Char(' '),
-            KeyModifiers::empty(),
-        )));
+        app.update_with_message(Event::Key(key_press!(Char(' '))));
 
         assert_eq!(app.timer_state, TimerState::Scrambled);
 
         assert_eq!(
-            app.update_with_message(Event::Key(KeyEvent::new(
-                KeyCode::Esc,
-                KeyModifiers::empty(),
-            ))),
+            app.update_with_message(Event::Key(key_press!(Esc))),
             Some(Message::ExitProgram)
         );
     }
