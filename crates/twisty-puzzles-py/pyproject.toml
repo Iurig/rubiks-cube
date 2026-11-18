@@ -26,4 +26,8 @@ cache-keys = [
 ]
 
 [dependency-groups]
-dev = ["pytest>=9.2.0"]
+dev = [
+  "basedpyright>=1.40.2",
+  "pytest>=9.2.0",
+  "ruff>=0.17.5",
+]

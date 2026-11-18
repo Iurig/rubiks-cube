@@ -1,4 +1,6 @@
 {
+  "python.languageServer": "None",
+  "dprint.path": "tools/dprint",
   "[toml]": {
     "editor.defaultFormatter": "dprint.dprint",
     "editor.formatOnSave": true
@@ -10,5 +12,24 @@
   "[jsonc]": {
     "editor.defaultFormatter": "dprint.dprint",
     "editor.formatOnSave": true
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "dprint.dprint",
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "dprint.dprint",
+    "editor.formatOnSave": true
+  },
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true
+  },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports.ruff": "explicit"
+    }
   }
 }

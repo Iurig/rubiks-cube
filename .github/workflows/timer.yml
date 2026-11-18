@@ -16,8 +16,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          cache: false
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - run: rustup toolchain install nightly-2026-11-16 --profile minimal --component rustfmt --no-self-update
@@ -35,7 +36,10 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
       - uses: Swatinem/rust-cache@v2
       - run: cargo build -p virtual-cube-timer --all-targets
       - run: cargo test -p virtual-cube-timer
@@ -46,6 +50,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache: false
+          rustflags: ""
       - uses: Swatinem/rust-cache@v2
       - run: cargo doc -p virtual-cube-timer --no-deps

@@ -7,6 +7,7 @@ edition.workspace = true
 keywords = ["CFOP", "Roux", "cube", "rubiks", "twisty-puzzle"]
 license.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 description = "A twisty puzzle library that supports human solving methods"
 
 [dependencies]
@@ -42,39 +43,5 @@ statrs = "0.19.1"
 harness = false
 name = "solves"
 
-[lints.clippy]
-allow_attributes_without_reason = "warn"
-assertions_on_result_states = "warn"
-cargo = { level = "warn", priority = -1 }
-dbg_macro = "warn"
-get_unwrap = "warn"
-indexing_slicing = "warn"
-let_underscore_must_use = "warn"
-map_err_ignore = "warn"
-mem_forget = "warn"
-multiple_crate_versions = "allow"
-multiple_unsafe_ops_per_block = "warn"
-nursery = { level = "warn", priority = -1 }
-panic = "warn"
-panic_in_result_fn = "warn"
-pedantic = { level = "warn", priority = -1 }
-print_stderr = "warn"
-print_stdout = "warn"
-rc_mutex = "warn"
-string_slice = "warn"
-todo = "warn"
-undocumented_unsafe_blocks = "warn"
-unimplemented = "warn"
-unnecessary_safety_comment = "warn"
-unnecessary_safety_doc = "warn"
-unreachable = "warn"
-unused_result_ok = "warn"
-unwrap_used = "warn"
-
-[lints.rust]
-missing_debug_implementations = "warn"
-missing_docs = "warn"
-unnameable_types = "warn"
-
-[lints.cargo]
-pedantic = "warn"
+[lints]
+workspace = true
