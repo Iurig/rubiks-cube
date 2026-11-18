@@ -1,3 +1,14 @@
+#![warn(missing_debug_implementations, missing_docs, unnameable_types)]
+#![warn(
+    clippy::cargo,
+    clippy::panic,
+    clippy::panic_in_result_fn,
+    clippy::print_stderr,
+    clippy::print_stdout,
+    clippy::unreachable
+)]
+#![allow(clippy::multiple_crate_versions, reason = "caused by dependencies")]
+
 //! A model of the 3×3×3 Rubik's Cube, and a solver that solves it the way a person would, one
 //! named step at a time.
 //!

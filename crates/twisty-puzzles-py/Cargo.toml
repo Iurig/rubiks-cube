@@ -17,5 +17,5 @@ name = "twisty_puzzles_py"
 pyo3 = "0.30.1"
 rubiks-cube = { version = "^0.1.1", path = "../lib" }
 
-[lints.cargo]
-pedantic = "warn"
+[lints]
+workspace = true
