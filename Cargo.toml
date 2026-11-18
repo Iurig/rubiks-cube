@@ -7,6 +7,7 @@ edition = "2024"
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Iurig/rubiks-cube"
+rust-version = "1.100"
 
 [workspace.metadata.bin]
 dprint = { version = "0.64.3", locked = true }

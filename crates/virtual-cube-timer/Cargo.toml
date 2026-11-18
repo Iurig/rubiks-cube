@@ -8,6 +8,7 @@ keywords = ["Rubik's", "timer", "virtual", "simulation"]
 license.workspace = true
 readme.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 description = "A simple, command line, interactive Rubik's Cube and timer"
 
 [dev-dependencies]
