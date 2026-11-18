@@ -3,7 +3,6 @@ PYO3_BUILD_EXTENSION_MODULE = "1"
 
 [alias]
 bin = ["run", "--package", "cargo-bin", "--"]
-binstall = ["bin", "cargo-binstall"]
 
 [registry]
 global-min-publish-age = "3 days"
