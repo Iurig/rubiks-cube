@@ -1,2 +1,8 @@
 [tool.uv.workspace]
 members = ["crates/twisty-puzzles-py"]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "C4", "A", "N", "RUF"]
