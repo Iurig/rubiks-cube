@@ -412,10 +412,18 @@ mod tests {
     }
 
     #[test]
+    fn empty_technique() {
+        let method: Technique<Cube3x3> = Technique::new([]);
+        assert!(method.is_empty());
+    }
+
+    #[test]
     fn a_method_step_that_returns_but_is_not_done_fails_the_solve_naming_it() {
         let never_done: Arc<dyn Step<Cube3x3>> =
             Arc::new(FixedStep::new("Never done", "", true, false));
         let method = Technique::new([never_done]);
+        assert!(!method.is_empty());
+        assert_eq!(method.len(), 1);
 
         let result = method.solve(&mut Cube3x3::default());
 
@@ -434,6 +442,8 @@ mod tests {
             Arc::new(FixedStep::new("Cannot start", "", false, true)) as Arc<dyn Step<Cube3x3>>,
             Arc::new(later.clone()),
         ]);
+        assert!(!method.is_empty());
+        assert_eq!(method.len(), 2);
         let mut cube = Cube3x3::default();
         let mut steps = method.solve_steps(&mut cube);
 
