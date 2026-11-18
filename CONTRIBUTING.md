@@ -157,20 +157,15 @@ tools/
 
 ## Building and Testing
 
-Requires a Rust toolchain with the 2024 edition.
+Requires a Rust toolchain version 1.100.
 
-To install the pre-commit hooks used, make sure you have [uv](https://docs.astral.sh/uv/#highlights)
-installed, then run
+For running rust tests (`lib` and `virtual-cube-timer`), use
 
 ```bash
-uv tool install pre-commit
-pre-commit install
+cargo test
 ```
 
-The pre-commit hook uses `committed`, `typos`, `pygrep` and `dprint`, and nightly `rustfmt`. They
-should install on first use if you don't have them.
-
-For working on `twisty-puzzles-py`, run, at the repo root
+For working on `twisty-puzzles-py`, run
 
 ```bash
 uv sync
@@ -182,14 +177,31 @@ Then, for testing
 uv run pytest
 ```
 
-## Formatting
+### Formatting
 
-Formatting is done by `dprint` and `rustfmt`. In case they don't install manually with the
-pre-commit hook:
+- Automatic (Recommended):
+
+To install the pre-commit hooks used for formatting, make sure you have
+[uv](https://docs.astral.sh/uv/#highlights) installed, then run
+
+```bash
+uv tool install pre-commit
+pre-commit install
+```
+
+The pre-commit hook uses `committed`, `typos`, `pygrep` and `dprint`, and nightly `rustfmt`. They
+should install on first use if you don't have them. Formatting on save will also be configured to
+use these tools on `Zed` and `VS Code`. Feel free to add config files to your editor in the repo.
+
+- Manual:
+
+Formatting is done by `dprint`, `rustfmt`, and `ruff`. They format on save on `Zed` and `VS Code`
+after installed. In case they don't install manually with the pre-commit hook:
 
 ```bash
 rustup toolchain install nightly-2020-11-16 --profile minimal --component rustfmt
 cargo bin --install
+uv tool install ruff@0.17.5
 ```
 
 To automatically apply formatting fixes, use:
@@ -197,10 +209,8 @@ To automatically apply formatting fixes, use:
 ```bash
 cargo +nightly-2026-11-16 fmt --all
 cargo bin dprint fmt
+uv run ruff format
 ```
-
-We include editor configurations for formatting on save on `Zed` and `VS Code`. Feel free to add
-your editor of choice too.
 
 To bump the `rustfmt` nightly version everywhere, use:
 
@@ -208,16 +218,22 @@ To bump the `rustfmt` nightly version everywhere, use:
 grep -rn "nightly-20" .pre-commit-config.yaml .github/workflows rust-analyzer.toml CONTRIBUTING.md
 ```
 
-### Required Dependencies
+### Dependencies
 
-The library depends on `fastrand` for random cube states. It also depends on `log`, through which
-the solver reports each step at the `debug` level. It never prints. `rayon` runs the searches and
-the prune-table builds in parallel. `thiserror` helps define errors. `itertools` makes some iterator
-method chains less verbose. `dyn-clone` allows for cloning `dyn` types internally.
+These will be downloaded by `cargo` and `uv` automatically.
+
+- Required:
+
+The main Rust library depends on `fastrand` for random cube states. It also depends on `log`,
+through which the solver reports each step at the `debug` level. It never prints. `rayon` runs the
+searches and the prune-table builds in parallel. `thiserror` helps define errors. `itertools` makes
+some iterator method chains less verbose. `dyn-clone` allows for cloning `dyn` types internally.
+
+The Python library depends on
 
 None of their types are returned.
 
-### Optional Dependencies
+- Optional:
 
 For feature `anstyle`:
 
@@ -238,6 +254,18 @@ cargo bench --bench solves
 RUST_LOG=rubiks_cube=debug cargo run --example main
 cargo run -p virtual-cube-timer -- --method roux --number 3
 ```
+
+### Before a PR
+
+To run the checks we make before making a PR, use
+
+```bash
+pre-commit run --hook-stage manual --all-files
+```
+
+They include fairly restricitive `clippy` and `ruff` lints, which get in the way of fast iteration,
+but should be satisfied before merging into main, as well as checking the docs build cleanly, and
+runs the repo's benchmarks.
 
 ## LLM Policy
 
