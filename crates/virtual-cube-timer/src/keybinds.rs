@@ -21,10 +21,12 @@ pub struct Keybinds {
 pub struct KeyPress(KeyCode, KeyModifiers);
 
 impl KeyPress {
+    #[must_use]
     pub const fn _new(key: KeyCode) -> Self {
         Self(key, KeyModifiers::empty())
     }
 
+    #[must_use]
     pub const fn with_modifiers(key: KeyCode, modifiers: KeyModifiers) -> Self {
         Self(key, modifiers)
     }
@@ -123,6 +125,7 @@ impl Default for Keybinds {
 }
 
 impl Keybinds {
+    #[must_use]
     pub fn as_move(&self, key_press: &KeyPress) -> Option<Move3x3> {
         self.moves.get_by_left(key_press).copied()
     }
@@ -150,7 +153,8 @@ impl Keybinds {
     }
 }
 
-pub fn key_press(code: KeyCode) -> KeyEvent {
+#[must_use]
+pub const fn key_press(code: KeyCode) -> KeyEvent {
     KeyEvent::new(code, KeyModifiers::empty())
 }
 

@@ -22,6 +22,7 @@ pub struct EventHandler {
 }
 
 impl EventHandler {
+    #[must_use]
     pub fn new(tick_length: Duration) -> Self {
         let (sender, receiver) = mpsc::channel();
         let handler = {

@@ -27,6 +27,7 @@ pub struct ReconWithScramble {
 }
 
 impl TimedSolve {
+    #[must_use]
     pub const fn new(moves: ReconWithScramble, time: Duration, method: ValidMethods) -> Self {
         Self {
             moves,
@@ -35,38 +36,46 @@ impl TimedSolve {
         }
     }
 
+    #[must_use]
     pub const fn scramble(&self) -> &Algorithm<Cube3x3> {
         self.moves.scramble()
     }
 
+    #[must_use]
     pub const fn solution(&self) -> &Solution<Cube3x3> {
         self.moves.solution()
     }
 
+    #[must_use]
     pub const fn time(&self) -> &Duration {
         &self.time
     }
 
+    #[must_use]
     pub const fn method(&self) -> &ValidMethods {
         &self.method
     }
 }
 
 impl ReconWithScramble {
+    #[must_use]
     pub const fn new(scramble: Algorithm<Cube3x3>, solution: Solution<Cube3x3>) -> Self {
         Self { scramble, solution }
     }
 
+    #[must_use]
     pub const fn scramble(&self) -> &Algorithm<Cube3x3> {
         &self.scramble
     }
 
+    #[must_use]
     pub const fn solution(&self) -> &Solution<Cube3x3> {
         &self.solution
     }
 }
 
 impl SolveList {
+    #[must_use]
     pub const fn new() -> Self {
         Self(Vec::new())
     }
@@ -106,12 +115,24 @@ impl SolveList {
         self.0.push((self.0.len(), solve));
     }
 
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+    #[must_use]
     pub const fn len(&self) -> usize {
         self.0.len()
     }
 
+    #[must_use]
     pub fn get(&self, index: usize) -> Option<&TimedSolve> {
         self.0.get(index).map(|s| &s.1)
+    }
+}
+
+impl Default for SolveList {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

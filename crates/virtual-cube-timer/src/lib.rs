@@ -1,3 +1,5 @@
+#![allow(clippy::missing_panics_doc, reason = "ok on CLI")]
+#![allow(clippy::missing_errors_doc, reason = "ok on CLI")]
 pub mod app;
 pub mod event;
 pub mod keybinds;
@@ -5,7 +7,6 @@ pub mod message;
 pub mod solves;
 pub mod time;
 pub mod view;
-
 use clap::{Parser, ValueEnum};
 use rubiks_cube::{Cube3x3, Method, Roux, ZZ};
 
@@ -52,6 +53,7 @@ impl Method<Cube3x3> for ValidMethods {
 }
 
 impl ValidMethods {
+    #[must_use]
     pub const fn name(&self) -> &str {
         match self {
             Self::Roux => "Roux",

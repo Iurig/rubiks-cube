@@ -63,6 +63,10 @@ impl SolveNavApp {
     }
 
     #[must_use]
+    #[expect(
+        clippy::missing_panics_doc,
+        reason = "panics on broken invariants only"
+    )]
     pub fn step(&self) -> &SolutionSegment<Cube3x3> {
         self.list_app
             .solution()
@@ -71,22 +75,26 @@ impl SolveNavApp {
             .expect("invalid step")
     }
 
+    #[must_use]
     pub fn cur_step_move_count(&self) -> usize {
         self.step().iter().count()
     }
 }
 
 impl ListNavApp {
+    #[must_use]
     pub fn timed_solve(&self) -> &TimedSolve {
         self.all_recons
             .get(self.solve_index)
             .expect("index doesn't match an existing reconstruction")
     }
 
+    #[must_use]
     pub fn solution(&self) -> &Solution<Cube3x3> {
         self.timed_solve().solution()
     }
 
+    #[must_use]
     pub fn scramble(&self) -> &Algorithm<Cube3x3> {
         self.all_recons
             .get(self.solve_index)
@@ -94,6 +102,7 @@ impl ListNavApp {
             .scramble()
     }
 
+    #[must_use]
     pub fn step_count(&self) -> usize {
         self.solution().iter().count()
     }
@@ -170,6 +179,7 @@ impl NavigationApp {
         }
     }
 
+    #[must_use]
     pub const fn list_app(&self) -> &ListNavApp {
         match self {
             Self::List(list_app) => list_app,
@@ -177,10 +187,11 @@ impl NavigationApp {
         }
     }
 
-    pub fn as_solve_app(&self) -> Option<&SolveNavApp> {
+    #[must_use]
+    pub const fn as_solve_app(&self) -> Option<&SolveNavApp> {
         match self {
-            NavigationApp::List(_) => None,
-            NavigationApp::Solve(solve_app) => Some(solve_app),
+            Self::List(_) => None,
+            Self::Solve(solve_app) => Some(solve_app),
         }
     }
 }
@@ -234,14 +245,14 @@ mod tests {
 
         let mut prev_move_index = -1isize;
 
-        while app.as_solve_app().unwrap().move_index != prev_move_index as usize {
+        while app.as_solve_app().unwrap().move_index != prev_move_index.cast_unsigned() {
             prev_move_index += 1;
             assert!(app.update_with_message(key_press(KeyCode::Right)).is_none());
             dbg!(prev_move_index);
         }
 
         assert_eq!(
-            prev_move_index as usize + 1,
+            prev_move_index.cast_unsigned() + 1,
             app.as_solve_app().unwrap().cur_step_move_count(),
             "{}",
             app.list_app().solution()
