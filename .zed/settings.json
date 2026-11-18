@@ -25,5 +25,21 @@
         },
       },
     },
+    "JSON": {
+      "formatter": {
+        "external": {
+          "command": "cargo",
+          "arguments": ["bin", "dprint", "fmt", "--stdin", "{buffer_path}"],
+        },
+      },
+    },
+    "yaml": {
+      "formatter": {
+        "external": {
+          "command": "cargo",
+          "arguments": ["bin", "dprint", "fmt", "--stdin", "{buffer_path}"],
+        },
+      },
+    },
   },
 }
