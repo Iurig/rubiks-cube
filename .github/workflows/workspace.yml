@@ -12,6 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v7.1.0
+      - uses: astral-sh/setup-uv@v9.0.0
       - run: rustup toolchain install nightly-2026-11-16 --profile minimal --component rustfmt --no-self-update
       - uses: cargo-bins/cargo-binstall@main
       - uses: pre-commit/action@v3.0.1
