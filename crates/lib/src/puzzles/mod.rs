@@ -117,7 +117,11 @@ impl MulAssign<Move3x3> for Cube3x3 {
         *self = *self * rhs;
     }
 }
+
+/// Conversion from [`Algorithm`] to [`Puzzle`], starting from the default puzzle state.
 pub trait FromAlg: Puzzle {
+    /// The conversion function.
+    #[must_use]
     fn from_alg(alg: Algorithm<Self>) -> Self {
         Self::default().apply(&alg)
     }
