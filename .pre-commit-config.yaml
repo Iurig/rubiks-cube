@@ -39,3 +39,31 @@ repos:
         types_or: [markdown, toml, json, yaml]
         pass_filenames: false
         stages: [pre-commit]
+      - id: ruff-format
+        name: ruff format
+        language: system
+        entry: uv run --only-dev ruff format --check
+        types_or: [python, pyi]
+        pass_filenames: false
+        stages: [pre-commit]
+      - id: clippy
+        name: clippy (as CI)
+        language: system
+        entry: cargo clippy --workspace --all-targets -- -D warnings
+        types_or: [rust, toml]
+        pass_filenames: false
+        stages: [manual]
+      - id: rustdoc
+        name: rustdoc (as CI)
+        language: system
+        entry: env "RUSTDOCFLAGS=-D warnings" cargo doc --workspace --no-deps
+        types_or: [rust, toml]
+        pass_filenames: false
+        stages: [manual]
+      - id: ruff-check
+        name: ruff check (as CI, once CI runs it)
+        language: system
+        entry: uv run --only-dev ruff check
+        types_or: [python, pyi]
+        pass_filenames: false
+        stages: [manual]
