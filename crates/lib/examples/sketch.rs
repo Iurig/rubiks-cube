@@ -39,10 +39,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     .then(eolr)
     .finish(SearchStep::builder("LSE", AlgSet::from_static_parts("M U")))?;
 
-    let mut cube = Cube3x3::scrambled_with_seed(3);
+    let scramble = Cube3x3::scramble()?;
 
-    advanced_roux.solve(&mut cube)?;
+    let mut cube = Cube3x3::from_alg(scramble);
+
+    let solution = advanced_roux.solve(&mut cube)?;
 
     assert!(cube.is_solved());
+
+    println!("{scramble}\n{solution}");
     Ok(())
 }

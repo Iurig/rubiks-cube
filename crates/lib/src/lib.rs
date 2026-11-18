@@ -120,7 +120,7 @@ pub use puzzles::cube3x3::{
     pieces::{Center, Corner, Edge, Face, Orientation3x3, Piece3x3},
 };
 pub use puzzles::{
-    Puzzle,
+    FromAlg, Puzzle,
     algorithm::Algorithm,
     algset::AlgSet,
     label::{ByIdentity, ByMembership, Labeled, Marker, Mask, PieceSet},

@@ -117,3 +117,10 @@ impl MulAssign<Move3x3> for Cube3x3 {
         *self = *self * rhs;
     }
 }
+pub trait FromAlg: Puzzle {
+    fn from_alg(alg: Algorithm<Self>) -> Self {
+        Self::default().apply(&alg)
+    }
+}
+
+impl<P: Puzzle> FromAlg for P {}
