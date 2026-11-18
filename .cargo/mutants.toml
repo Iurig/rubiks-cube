@@ -11,67 +11,36 @@ exclude_re = [
   "::moves",
   "replace FxHasher::step with ()",
   "FxHasher::step",
-  # Hang-only: pruning every path under the bound means the search never finishes.
   "replace > with < in <impl Step<P> for PrunedCombine<P>>::solve::search",
-  # Likely to become useful in the future, not useful now.
   "replace <impl Step<P> for PrunedCombine<P>>::can_solve -> bool with true",
-  # Precise prerequisite doesn't matter if it doesn't overstep in this step.
   'replace && with \|\| in phase_2',
-  # Hash quality, not correctness: a weaker hash is slower, never wrong. A constant hash is
-  # the extreme case: every `FxMap` collides on every key, so the solves crawl past the timeout.
   "replace <impl Hasher for FxHasher>::finish -> u64 with (0|1)",
   "replace >> with << in <impl Hasher for FxHasher>::write_u128",
   'replace <impl Hasher for FxHasher>::write_u64 with \(\)',
-  # Equivalent mutants: the mutated code computes the same result.
-  # `cycle_size - 1` and `cycle_size + 1` are equal mod 2.
   'replace - with \+ in PieceConfiguration<P, N, O>::parity',
-  # `par` is a `Zn<2>`, where subtracting a value is the same as adding it.
   'piece\.rs:140:\d+: replace \+= with -= in PieceConfiguration<P, N, O>::parity',
-  # Parities are `Zn<2>`s, where subtracting is the same as adding.
   'replace \+ with - in Cube3x3::parities_cancel',
-  # Edge orientation is a `Zn<2>` too. Line 77 does the same for corners, mod 3, so it stays.
   'cube3x3/mod\.rs:78:\d+: replace -= with \+= in <impl Puzzle for Cube3x3>::scrambled_with_seed',
-  # A flip is a `Zn<2>` as well. Line 159 adds twists, mod 3, so it stays.
   'pieces\.rs:160:\d+: replace \+ with - in <impl std::ops::Add for Orientation3x3>::add',
-  # Replacing a meeting with one of equal cost still returns a minimal cost, which is all
-  # the search promises.
   "replace < with <= in keep_cheaper",
-  # Flipping which order of a commuting pair is kept still loses no state.
   "replace < with > in may_follow",
-  # `Default for Labeled` calls `new`, which calls `from_fn`: replacing its body with
-  # `Default::default()` recurses forever.
   'replace Labeled<P, L>::from_fn -> Self with Default::default\(\)',
-  # `identity` already returns `Self::default()`.
   'replace <impl Pow for Cube3x3>::identity -> Self with Default::default\(\)',
-  # Goal masks store orientation 0, so the output is unchanged.
   'replace orientation_position -> Option<usize> with Some\(0\)',
-  # Weakened checks in `facelets.rs`'s `const _` block can't fail while `NET` is correct.
   "replace same_slot -> bool with false",
   "delete match arm .* in same_slot",
   "replace slot_has -> bool with true",
   'facelets\.rs:\d+:\d+: replace < with (==|>)$',
-  # The CLI's interface is not settled (plan topic 15). Remove these once it is.
   'rubiks-cube-cli/src/main\.rs:.*replace main -> anyhow::Result<\(\)> with Ok\(\(\)\)',
   'rubiks-cube-cli/src/main\.rs:.*replace reconstruct_n -> anyhow::Result<\(\)> with Ok\(\(\)\)',
   'rubiks-cube-cli/src/main\.rs:.*delete match arm "(roux|zz)" in main',
-  # Hang-only: the IDA* estimate never reaches 0, so every `PrunedCombine::solve` runs
-  # forever. Non-termination is the only way these can show.
   'replace <impl DistanceStep<P> for T>::distance_from_moves -> Option<u8> with Some\(1\)',
   'replace PruneTable<K>::get_distance -> Option<u8> with Some\(1\)',
   'replace <impl Step<P> for PrunedCombine<.*>>::solve::estimate -> Option<u8> with Some\(1\)',
   'replace Labeled<P, L>::composed_with -> Self with Default::default\(\)',
-  # Hang-only: a memo that never grows can give no answer, never a wrong one.
   'replace BfsMemo<P>::deepen with \(\)',
-  # Hang-only: `*self -= -rhs` calls `sub_assign` again, forever, and scrambling uses `-=`.
   'replace \+= with -= in <impl SubAssign for Zn<N>>::sub_assign',
-  # Hang-only: clearing a slot on equal conditions finds an equal pair on every pass, so
-  # `changed` never goes back to false.
   "replace != with == in PieceSet<P>::from_algset",
-  # Hang-only, as far as the runs show: following only the successors `may_follow` rules out
-  # keeps the search on redundant paths, and no test failed before the timeout.
   "replace != with == in <impl Step<P> for PrunedCombine<P>>::solve::search",
-  # Hang-only, mostly: phase 1 takes every slice and rotation move too, and the kociemba solves
-  # crawl past the timeout. When a random scramble finishes, `phase_2_solves_what_phase_1_leaves`
-  # catches it.
   'replace && with \|\| in face_turns',
 ]
