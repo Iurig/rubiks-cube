@@ -170,6 +170,18 @@ pre-commit install
 The pre-commit hook uses `committed`, `typos`, `pygrep` and `dprint`, and nightly `rustfmt`. They
 should install on first use if you don't have them.
 
+For working on `twisty-puzzles-py`, run, at the repo root
+
+```bash
+uv sync
+```
+
+Then, for testing
+
+```bash
+uv run pytest
+```
+
 ## Formatting
 
 Formatting is done by `dprint` and `rustfmt`. In case they don't install manually with the
