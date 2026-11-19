@@ -140,7 +140,10 @@ impl<T: Indexed> Indexed for Permutation<T> {
 #[cfg(test)]
 #[expect(clippy::panic_in_result_fn, reason = "tests")]
 mod tests {
-    use std::error::Error;
+    use std::{
+        error::Error,
+        hash::{DefaultHasher, Hasher},
+    };
 
     use crate::{
         indexed::{RangedInt, assert_round_trips},
@@ -188,6 +191,19 @@ mod tests {
             perm.clone(),
             Permutation::<Zn<8>>::try_from_iter(perm.into_iter())?
         );
+        Ok(())
+    }
+
+    #[test]
+    fn hashing_follows_index() -> Result<(), Box<dyn Error>> {
+        let perm = Permutation::<Zn<8>>::try_from_iter(
+            [4, 0, 2, 3, 1, 5, 6, 7].iter().map(|&i| Zn::<8>::new(i)),
+        )?;
+        let mut hasher1 = DefaultHasher::new();
+        let mut hasher2 = DefaultHasher::new();
+        perm.hash(&mut hasher1);
+        Indexed::index(&perm).hash(&mut hasher2);
+        assert_eq!(hasher1.finish(), hasher2.finish());
         Ok(())
     }
 }
