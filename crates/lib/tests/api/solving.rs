@@ -20,8 +20,8 @@ fn full_solve_and_checking_bfs() -> anyhow::Result<()> {
 #[test]
 fn technique_iterations_agree() -> anyhow::Result<()> {
     let mut scrambled1 = Cube3x3::scrambled();
-    let mut scrambled2 = scrambled1.clone();
-    let mut scrambled3 = scrambled1.clone();
+    let mut scrambled2 = scrambled1;
+    let mut scrambled3 = scrambled1;
     let roux1 = Roux::default().to_technique();
     let roux2 = roux1.clone();
     let roux3 = roux1.clone();
