@@ -232,6 +232,7 @@ mod tests {
     /// R, U, and F turns never touch the L center, DBL, BL, or DL, so the back square stays
     /// solved and costs nothing, while F breaks the front square.
     #[test]
+    #[ntest::timeout(200)]
     fn split_fb_builds_the_back_square_when_it_is_cheaper() -> anyhow::Result<()> {
         let roux = Roux {
             first_block: FirstBlock::SquarePair,

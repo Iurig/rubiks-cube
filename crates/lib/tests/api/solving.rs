@@ -43,6 +43,7 @@ fn technique_iterations_agree() -> anyhow::Result<()> {
 }
 
 #[test]
+#[ntest::timeout(7000)]
 fn every_roux_option_solves_on_multiple_seeds() -> anyhow::Result<()> {
     use rubiks_cube::roux::*;
     let seeds = 4;
@@ -82,6 +83,7 @@ fn every_roux_option_solves_on_multiple_seeds() -> anyhow::Result<()> {
 }
 
 #[test]
+#[ntest::timeout(2000)]
 fn manually_defined_roux_solves() -> anyhow::Result<()> {
     let eolr = SearchStep::builder("EOLR", AlgSet::from_static_parts("M U"))
         .goal(PieceSet::from_algset(&AlgSet::<Cube3x3>::from_static(
@@ -139,6 +141,7 @@ fn zz_solves_the_cube() -> anyhow::Result<()> {
 }
 
 #[test]
+#[ntest::timeout(2000)]
 fn every_zz_option_combination_solves() -> anyhow::Result<()> {
     use rubiks_cube::zz::{FirstLook, LL, SecondLook};
     let mut last_layers = vec![LL::OneLook];
