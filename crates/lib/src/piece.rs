@@ -213,6 +213,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(100)]
     fn cycle_is_a_permutation_and_moves_pieces_forward_and_leaves_rest() {
         use Corner::{Dbr, Dfr, Ubr, Ufr};
         let mut perm = CornerConfiguration::cycle([[Ufr, Ubr, Dbr, Dfr]]).permutation;

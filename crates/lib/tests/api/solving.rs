@@ -1,4 +1,5 @@
 use anyhow::Context;
+use itertools::Itertools;
 use rubiks_cube::*;
 
 #[test]
@@ -17,6 +18,32 @@ fn full_solve_and_checking_bfs() -> anyhow::Result<()> {
 }
 
 #[test]
+fn technique_iterations_agree() -> anyhow::Result<()> {
+    let mut scrambled1 = Cube3x3::scrambled();
+    let mut scrambled2 = scrambled1;
+    let mut scrambled3 = scrambled1;
+    let roux1 = Roux::default().to_technique();
+    let roux2 = roux1.clone();
+    let roux3 = roux1.clone();
+    // cache warm up
+    roux1.solve(&mut scrambled2)?;
+    scrambled2 = scrambled1;
+
+    let solution1 = roux1.into_iter().map(|s| s.solve(&mut scrambled1));
+    let solution2 = (&roux2).into_iter().map(|s| s.solve(&mut scrambled2));
+    let solution3 = roux3.iter().map(|s| s.solve(&mut scrambled3));
+
+    for step_solutions in solution1.zip_eq(solution2).zip_eq(solution3) {
+        let (sol1, sol2, sol3) = (step_solutions.0.0?, step_solutions.0.1?, step_solutions.1?);
+        assert_eq!(sol1, sol2);
+        assert_eq!(sol2, sol3);
+    }
+
+    Ok(())
+}
+
+#[test]
+#[ntest::timeout(7000)]
 fn every_roux_option_solves_on_multiple_seeds() -> anyhow::Result<()> {
     use rubiks_cube::roux::*;
     let seeds = 4;
@@ -56,6 +83,7 @@ fn every_roux_option_solves_on_multiple_seeds() -> anyhow::Result<()> {
 }
 
 #[test]
+#[ntest::timeout(2000)]
 fn manually_defined_roux_solves() -> anyhow::Result<()> {
     let eolr = SearchStep::builder("EOLR", AlgSet::from_static_parts("M U"))
         .goal(PieceSet::from_algset(&AlgSet::<Cube3x3>::from_static(
@@ -113,6 +141,7 @@ fn zz_solves_the_cube() -> anyhow::Result<()> {
 }
 
 #[test]
+#[ntest::timeout(8000)]
 fn every_zz_option_combination_solves() -> anyhow::Result<()> {
     use rubiks_cube::zz::{FirstLook, LL, SecondLook};
     let mut last_layers = vec![LL::OneLook];

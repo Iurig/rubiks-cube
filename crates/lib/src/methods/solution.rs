@@ -262,6 +262,7 @@ mod tests {
     #[test]
     fn move_count_counts_correctly() -> anyhow::Result<()> {
         let s: Solution<Cube3x3> = "y U2 r M' // Step 1".parse()?;
+        assert!(!s.is_empty());
 
         assert_eq!(s.move_count(), 4);
         Ok(())
@@ -270,6 +271,7 @@ mod tests {
     #[test]
     fn borrowed_and_owned_iteration_yield_the_same_segments_in_order() -> anyhow::Result<()> {
         let solution: Solution<Cube3x3> = "R U // First \n M' // Second".parse()?;
+        assert_eq!(solution.len(), 2);
 
         let mut borrowed = Vec::new();
         for segment in &solution {
@@ -288,9 +290,14 @@ mod tests {
 
     #[test]
     fn extend_appends_segments_after_the_existing_ones() -> anyhow::Result<()> {
-        let mut solution: Solution<Cube3x3> = "R // First".parse()?;
+        let mut solution: Solution<Cube3x3> = "".parse()?;
+        assert!(solution.is_empty());
+
+        solution.extend("R // First".parse::<Solution<Cube3x3>>()?);
+        assert_eq!(solution.len(), 1);
 
         solution.extend("U2 // Second\nF' L // Third".parse::<Solution<Cube3x3>>()?);
+        assert_eq!(solution.len(), 3);
 
         let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
         assert_eq!(names, ["First", "Second", "Third"]);

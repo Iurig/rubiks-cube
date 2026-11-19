@@ -112,6 +112,7 @@ mod tests {
         reason = "tests multiple types"
     )]
     #[test]
+    #[ntest::timeout(1000)]
     fn collisions_match_pre_defined_p_value_on_specific_writes() {
         test!(u8, write_u8);
         test!(u16, write_u16);
@@ -127,6 +128,7 @@ mod tests {
         reason = "tests multiple types"
     )]
     #[test]
+    #[ntest::timeout(1000)]
     fn collisions_match_pre_defined_p_value_on_generic_write() {
         fastrand::seed(7);
         let mut hasher = FxHasher { hash: 0 };
@@ -155,6 +157,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(100)]
     fn masks_built_from_pieces_in_any_order_find_each_other() {
         let forward = PieceSet::<Cube3x3>::from_pieces(FIRST_BLOCK);
         let mut reversed_pieces = FIRST_BLOCK;
@@ -169,6 +172,7 @@ mod tests {
 
     /// `U` and `R M'` leave the first block alone, so two different cubes filter to one key.
     #[test]
+    #[ntest::timeout(100)]
     fn different_cubes_with_the_same_masked_pieces_find_each_other() {
         let goal = PieceSet::<Cube3x3>::from_pieces(FIRST_BLOCK);
         let after_u = Cube3x3::from_moves("U").unwrap();
