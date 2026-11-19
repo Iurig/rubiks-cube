@@ -67,3 +67,12 @@ repos:
         types_or: [python, pyi]
         pass_filenames: false
         stages: [manual]
+      - id: lib-tests
+        name: lib tests per feature set (as CI)
+        language: system
+        entry: >-
+          bash -c 'for f in "" anstyle ratatui ratatui,anstyle; do
+          RUSTDOCFLAGS="-D warnings" cargo test -p rubiks-cube --features "$f" || exit 1; done'
+        types_or: [rust, toml, markdown]
+        pass_filenames: false
+        stages: [manual]
