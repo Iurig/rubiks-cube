@@ -141,6 +141,7 @@ for a solve with a warm table.
 ```rust
 use rubiks_cube::{Cube3x3};
 
+#[cfg(feature = "anstyle")]
 dbg!(Cube3x3::default().colored());
 ```
 
