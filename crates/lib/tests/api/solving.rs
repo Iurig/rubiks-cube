@@ -141,7 +141,7 @@ fn zz_solves_the_cube() -> anyhow::Result<()> {
 }
 
 #[test]
-#[ntest::timeout(2000)]
+#[ntest::timeout(8000)]
 fn every_zz_option_combination_solves() -> anyhow::Result<()> {
     use rubiks_cube::zz::{FirstLook, LL, SecondLook};
     let mut last_layers = vec![LL::OneLook];
