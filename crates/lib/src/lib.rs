@@ -142,5 +142,5 @@ pub mod cube3x3_method_helpers {
 /// Runs the Rust examples in `README.md` as doc tests, so they cannot drift from the code.
 /// This item exists only while doc tests run and never appears in the docs.
 #[cfg(doctest)]
-#[doc = include_str!("../../../README.md")]
+#[doc = include_str!("../README.md")]
 struct ReadmeDoctests;

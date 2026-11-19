@@ -77,22 +77,22 @@ makes the whole call return an `Err` naming that token.
 runs a method's steps in order and returns a `Solution`, with one segment per step:
 
 ```rust
-use rubiks_cube::{Cube3x3, Method, Puzzle, Roux};
+use rubiks_cube::{Cube3x3, Method, Puzzle, Roux, FromAlg, Algorithm};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let scramble = "D2 F2 R2 U L2 D R2 U' B2 L2 B L2 F' L D2 U R' B D2";
+    let scramble: Algorithm<Cube3x3> = "D2 F2 R2 U L2 D R2 U' B2 L2 B L2 F' L D2 U R' B D2".parse()?;
     let roux = Roux::default();
 
-    let mut cube = Cube3x3::from_moves(scramble)?;
+    let mut cube = Cube3x3::from_alg(&scramble);
     let solution = roux.solve(&mut cube)?;
     assert!(cube.is_solved());
 
     // A printed solution is notation, so the scramble followed by it replays to solved.
-    let replayed = Cube3x3::from_moves(scramble)?.apply_moves(&solution.to_string())?;
+    let replayed = Cube3x3::from_alg(&scramble).apply_moves(&solution.to_string())?;
     assert!(replayed.is_solved());
 
     // The same solve, one step per `next()`.
-    let mut cube = Cube3x3::from_moves(scramble)?;
+    let mut cube = Cube3x3::from_alg(&scramble);
     for segment in roux.solve_steps(&mut cube) {
         print!("{}", segment?);
     }
@@ -139,7 +139,9 @@ for a solve with a warm table.
 - `anstyle` for printing the 3x3 cube with color.
 
 ```rust
-Cube3x3::default().
+use rubiks_cube::{Cube3x3};
+
+dbg!(Cube3x3::default().colored());
 ```
 
 ## Contributing

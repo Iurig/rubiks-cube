@@ -122,8 +122,8 @@ impl MulAssign<Move3x3> for Cube3x3 {
 pub trait FromAlg: Puzzle {
     /// The conversion function.
     #[must_use]
-    fn from_alg(alg: Algorithm<Self>) -> Self {
-        Self::default().apply(&alg)
+    fn from_alg(alg: &Algorithm<Self>) -> Self {
+        Self::default().apply(alg)
     }
 }
 
