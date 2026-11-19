@@ -1,4 +1,5 @@
 use anyhow::Context;
+use itertools::Itertools;
 use rubiks_cube::*;
 
 #[test]
@@ -13,6 +14,31 @@ fn full_solve_and_checking_bfs() -> anyhow::Result<()> {
         Cube3x3::default(),
         "{recon}"
     );
+    Ok(())
+}
+
+#[test]
+fn technique_iterations_agree() -> anyhow::Result<()> {
+    let mut scrambled1 = Cube3x3::scrambled();
+    let mut scrambled2 = scrambled1.clone();
+    let mut scrambled3 = scrambled1.clone();
+    let roux1 = Roux::default().to_technique();
+    let roux2 = roux1.clone();
+    let roux3 = roux1.clone();
+    // cache warm up
+    roux1.solve(&mut scrambled2)?;
+    scrambled2 = scrambled1;
+
+    let solution1 = roux1.into_iter().map(|s| s.solve(&mut scrambled1));
+    let solution2 = (&roux2).into_iter().map(|s| s.solve(&mut scrambled2));
+    let solution3 = roux3.iter().map(|s| s.solve(&mut scrambled3));
+
+    for step_solutions in solution1.zip_eq(solution2).zip_eq(solution3) {
+        let (sol1, sol2, sol3) = (step_solutions.0.0?, step_solutions.0.1?, step_solutions.1?);
+        assert_eq!(sol1, sol2);
+        assert_eq!(sol2, sol3);
+    }
+
     Ok(())
 }
 
