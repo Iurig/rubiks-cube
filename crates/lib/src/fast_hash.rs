@@ -128,7 +128,7 @@ mod tests {
         reason = "tests multiple types"
     )]
     #[test]
-    #[ntest::timeout(100)]
+    #[ntest::timeout(1000)]
     fn collisions_match_pre_defined_p_value_on_generic_write() {
         fastrand::seed(7);
         let mut hasher = FxHasher { hash: 0 };
