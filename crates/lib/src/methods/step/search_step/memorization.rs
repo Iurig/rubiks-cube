@@ -223,6 +223,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(200)]
     fn memo_solution_undoes_one_move() {
         let (memo, goal) = r_u_memo(1);
         let r = Cube3x3::from_moves("R").unwrap();
@@ -233,6 +234,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(200)]
     fn memo_solution_undoes_the_whole_path() {
         let (memo, goal) = r_u_memo(2);
         let r_u = Cube3x3::from_moves("R U").unwrap();
@@ -275,6 +277,7 @@ mod tests {
     /// first. It still costs nothing, so what `R` reaches from it costs 1 and is in the memo after
     /// level 0 is expanded.
     #[test]
+    #[ntest::timeout(200)]
     fn free_sequences_are_closed_before_costly_ones_claim_their_states() {
         let goal = PieceSet::<Cube3x3>::from_pieces(Piece3x3::all());
         let allowed = AlgSet::from_moves("U R").unwrap();
@@ -300,6 +303,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(200)]
     fn free_sequences_are_memorized_at_depth_zero() {
         let goal = PieceSet::<Cube3x3>::from_pieces(Piece3x3::all());
         let allowed = AlgSet::from_moves("R").unwrap();

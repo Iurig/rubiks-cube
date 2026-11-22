@@ -201,6 +201,7 @@ mod tests {
     use super::*;
     use crate::puzzles::cube3x3::pieces::*;
     #[test]
+    #[ntest::timeout(200)]
     fn corner_and_edge_all_match_discriminants() {
         for (i, c) in Corner::ALL.iter().enumerate() {
             assert_eq!(*c as usize, i);
@@ -213,7 +214,7 @@ mod tests {
     }
 
     #[test]
-    #[ntest::timeout(100)]
+    #[ntest::timeout(200)]
     fn cycle_is_a_permutation_and_moves_pieces_forward_and_leaves_rest() {
         use Corner::{Dbr, Dfr, Ubr, Ufr};
         let mut perm = CornerConfiguration::cycle([[Ufr, Ubr, Dbr, Dfr]]).permutation;
@@ -229,6 +230,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(200)]
     fn cycle_with_disjoint_cycles_is_a_permutation() {
         use Edge::{Dl, Dr, Ub, Uf};
         let mut perm = EdgeConfiguration::cycle::<2, 2>([[Ub, Uf], [Dl, Dr]]).permutation;

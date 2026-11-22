@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let scramble = Cube3x3::scramble()?;
 
-    let mut cube = Cube3x3::from_alg(scramble);
+    let mut cube = Cube3x3::from_alg(&scramble);
 
     let solution = advanced_roux.solve(&mut cube)?;
 

@@ -155,6 +155,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(800)]
     fn solution_is_constructed_with_messages() {
         let scrambled_cube =
             Cube3x3::from_moves("D' F' U2 D' R' F' B R B2 D' B2 D2 B2 R2 B2 U' R2 F2 B2 L")

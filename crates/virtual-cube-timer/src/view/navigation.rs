@@ -190,13 +190,13 @@ fn view_solve(app: &SolveNavApp, frame: &mut Frame, mut cube: Cube3x3) {
             ))
             .into_iter();
 
-        print_info.into_iter().for_each(|info| {
+        for info in print_info {
             frame.render_widget(
                 Line::from(info),
                 dbg_rows
                     .next()
                     .expect("dbg_rows should have at least 3 rows"),
-            )
-        });
+            );
+        }
     }
 }
