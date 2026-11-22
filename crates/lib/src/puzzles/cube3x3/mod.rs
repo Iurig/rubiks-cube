@@ -300,6 +300,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(200)]
     fn center_3_cycle_isnt_reachable_even_if_respects_parity() {
         assert!(
             !Cube3x3 {
@@ -311,6 +312,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(200)]
     fn corner_twist_isnt_reachable() {
         assert!(
             !Cube3x3 {
@@ -325,6 +327,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(200)]
     fn edge_flip_isnt_reachable() {
         assert!(
             !Cube3x3 {

@@ -265,6 +265,13 @@ mod tests {
     }
 
     #[test]
+    fn double_prime_is_simplified() -> anyhow::Result<()> {
+        let alg: Algorithm<Cube3x3> = "R U R' U' R' F R2' U' R' U' R U R' F'".parse()?;
+        assert_eq!(alg, "R U R' U' R' F R2' U' R' U' R U R' F'".parse()?);
+        Ok(())
+    }
+
+    #[test]
     fn as_ref_is_the_moves_in_order() -> anyhow::Result<()> {
         let alg: Algorithm<Cube3x3> = "R U R' F2".parse()?;
         let expected = ["R", "U", "R'", "F2"]

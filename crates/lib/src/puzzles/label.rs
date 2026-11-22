@@ -374,6 +374,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(200)]
     fn the_key_keeps_every_orientation_the_goal_moveset_preserves_wherever_the_piece_sits() {
         // `U R L` flips no edge, so every edge's flip decides whether the goal is met, including
         // a stray edge parked in DF or DB, the two edge slots where the goal names a piece.
@@ -392,6 +393,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(200)]
     fn the_key_keeps_no_orientation_the_goal_moveset_changes() {
         // `U R M r` twists or flips every corner and edge it moves, so only the pieces it leaves
         // alone, which the key names, keep their orientation in it.
@@ -436,6 +438,7 @@ mod tests {
     }
 
     #[test]
+    #[ntest::timeout(200)]
     fn fb_or_sb_is_f2b() {
         let fb = PieceSet::from_algset(&AlgSet::from_static_parts("R U M"));
         let sb = PieceSet::from_algset(&AlgSet::from_static_parts("L U M"));

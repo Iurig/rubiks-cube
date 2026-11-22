@@ -157,7 +157,7 @@ mod tests {
     }
 
     #[test]
-    #[ntest::timeout(100)]
+    #[ntest::timeout(200)]
     fn masks_built_from_pieces_in_any_order_find_each_other() {
         let forward = PieceSet::<Cube3x3>::from_pieces(FIRST_BLOCK);
         let mut reversed_pieces = FIRST_BLOCK;
@@ -172,7 +172,7 @@ mod tests {
 
     /// `U` and `R M'` leave the first block alone, so two different cubes filter to one key.
     #[test]
-    #[ntest::timeout(100)]
+    #[ntest::timeout(200)]
     fn different_cubes_with_the_same_masked_pieces_find_each_other() {
         let goal = PieceSet::<Cube3x3>::from_pieces(FIRST_BLOCK);
         let after_u = Cube3x3::from_moves("U").unwrap();

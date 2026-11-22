@@ -185,6 +185,7 @@ mod tests {
     use crate::{Cube3x3, Inv};
 
     #[test]
+    #[ntest::timeout(200)]
     fn cmll_step_leaves_the_cube_with_cmll_solved() {
         let cmll = Roux::default()
             .to_technique()
@@ -205,6 +206,7 @@ mod tests {
     /// memo, and so does the one-look block with the pair that finishes it, because the pair's
     /// `before` lies inside its `after`.
     #[test]
+    #[ntest::timeout(200)]
     fn rebuilt_roux_steps_share_their_memos() {
         let fb_start = PieceSet::from_algset(&FB_MOVES);
         let fb_goal = PieceSet::from_algset(&SB_MOVES);
@@ -258,6 +260,7 @@ mod tests {
     /// neither R nor U touches the first block. So the second block's back square is solved
     /// and its front square is not.
     #[test]
+    #[ntest::timeout(200)]
     fn split_sb_builds_the_back_square_when_it_is_cheaper() -> anyhow::Result<()> {
         let roux = Roux {
             second_block: SecondBlock::SquarePair,
@@ -300,6 +303,7 @@ mod tests {
     /// `Method` relies on `is_done` to catch a step that returns without meeting its goal, so
     /// every step must tell its goal apart from a cube that misses it.
     #[test]
+    #[ntest::timeout(200)]
     fn every_roux_step_is_done_on_a_solved_cube_and_not_on_a_scrambled_one() -> anyhow::Result<()> {
         let scrambled = Cube3x3::from_moves("R U' F2 L D' B R2 U F' L2 D B' U2 R'")?;
 
@@ -321,6 +325,7 @@ mod tests {
     /// Each switch picks its own steps, independently of the others, and the steps stay in
     /// solving order.
     #[test]
+    #[ntest::timeout(200)]
     fn options_pick_the_steps_in_solving_order() {
         for options in every_options() {
             let names: Vec<String> = options

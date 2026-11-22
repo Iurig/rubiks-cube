@@ -431,6 +431,7 @@ mod tests {
     /// A memo grown until it has nothing left knows the true cost of every state, so the two-ended
     /// search must match it.
     #[test]
+    #[ntest::timeout(2000)]
     fn meeting_in_the_middle_finds_the_minimal_cost() {
         let last_slot = vec![
             Piece3x3::Edge(Edge::Uf),
