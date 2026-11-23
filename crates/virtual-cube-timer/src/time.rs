@@ -33,7 +33,13 @@ pub fn to_text(duration: Duration) -> String {
     let min = integer_seconds / 60 - 60 * hours;
     let secs = integer_seconds % 60;
     let sub_secs = duration.as_millis() % 1000;
-    format!("{hours}:{min:02?}:{secs:02?}.{sub_secs:03?}")
+    if hours != 0 {
+        format!("{hours}:{min:02?}:{secs:02?}.{sub_secs:03?}")
+    } else if min != 0 {
+        format!("{min:?}:{secs:02?}.{sub_secs:03?}")
+    } else {
+        format!("{secs:?}.{sub_secs:03?}")
+    }
 }
 
 #[cfg(test)]
