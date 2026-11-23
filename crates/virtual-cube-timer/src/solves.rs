@@ -109,6 +109,12 @@ impl SolveList {
         self.0.push((self.0.len(), solve));
     }
 
+    pub fn extend(&mut self, other: impl IntoIterator<Item = TimedSolve>) {
+        for solve in other {
+            self.push(solve);
+        }
+    }
+
     #[must_use]
     pub const fn is_empty(&self) -> bool {
         self.0.is_empty()
