@@ -81,13 +81,7 @@ impl SolveList {
     }
 
     pub fn from_solves(solves: impl IntoIterator<Item = TimedSolve>) -> Self {
-        Self(
-            solves
-                .into_iter()
-                .enumerate()
-                .map(|(index, value)| (index + 1, value))
-                .collect(),
-        )
+        Self(solves.into_iter().enumerate().collect())
     }
 
     pub fn solves_path() -> anyhow::Result<PathBuf> {
@@ -186,7 +180,7 @@ impl FromStr for TimedSolve {
 impl Display for SolveList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for (index, solve) in &self.0 {
-            writeln!(f, "{index}. {solve}")?;
+            writeln!(f, "{}. {solve}", index + 1)?;
         }
         Ok::<(), std::fmt::Error>(())
     }
@@ -201,7 +195,7 @@ impl FromStr for SolveList {
                     let (number, solve) = s
                         .split_once('.')
                         .ok_or_else(|| anyhow!("didn't have .: {s}"))?;
-                    Ok::<_, anyhow::Error>((number.parse::<usize>()?, solve.parse()?))
+                    Ok::<_, anyhow::Error>((number.parse::<usize>()? - 1, solve.parse()?))
                 })
                 .collect::<Vec<_>>(),
         ))
