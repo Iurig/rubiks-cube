@@ -187,6 +187,8 @@ mod tests {
     #[test]
     fn combined_with_reconstructs_an_algset() {
         let algset = AlgSet::from_static_parts("R U L F B D");
+        assert!(!algset.is_empty());
+        assert_eq!(algset.len(), 3 * 6, "{algset:?}");
 
         for splitpoint in 0..algset.algs().len() {
             let (first, second) = algset.algs().split_at(splitpoint);
@@ -200,7 +202,9 @@ mod tests {
 
     #[test]
     fn algsets_are_equal_when_they_hold_the_same_sequences() -> anyhow::Result<()> {
-        let algset = AlgSet::<Cube3x3>::from_str("R U\nF")?;
+        let mut algset = AlgSet::new();
+        assert!(algset.is_empty());
+        algset = algset.combined_with(&AlgSet::<Cube3x3>::from_str("R U\nF")?);
 
         // Order and repeats don't matter.
         for same in ["R U\nF", "F\nR U", "R U\nF\nR U"] {
