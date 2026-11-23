@@ -100,8 +100,8 @@ impl SolveList {
         Ok(dir.join("solves.txt"))
     }
 
-    pub fn from_solves_file(path: PathBuf) -> anyhow::Result<Self> {
-        match std::fs::read_to_string(&path) {
+    pub fn from_solves_file(path: &PathBuf) -> anyhow::Result<Self> {
+        match std::fs::read_to_string(path) {
             Ok(text) => text.parse::<Self>(),
             Err(e) if e.kind() == ErrorKind::NotFound => {
                 fs::write(path, Self::new().to_string())?;
