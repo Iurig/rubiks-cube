@@ -216,23 +216,24 @@ mod tests {
 
     use super::*;
 
+    const SCRAMBLES: [&str; 10] = [
+        "D2 U L2 U2 R2 F2 U L2 D' F2 R2 U2 B' D' F U2 L2 D' L' B'",
+        "B U F R B' D' F' D' L' B2 L2 F2 D2 R2 D2 R2 F L2 F2 L2",
+        "U2 B2 D2 B2 L' R2 U2 R' B2 L' U2 D F' R2 B2 R D U R' F",
+        "D2 F D R2 D2 F2 R' F2 R2 B2 U2 R' D2 L F' R' B R2 U2 L U'",
+        "D' F L U' R D2 F2 L' F' U B2 U' L2 D2 B2 D' R2 U F2 L2",
+        "R L2 D2 L' D2 F' U' F2 D F2 R' U2 L2 F2 B2 L B2 R F2 L",
+        "L D2 L2 U2 L U2 L' D2 U2 L U2 B2 U B L2 F L R' D U R",
+        "B D' L' F2 R F2 R U2 L D2 L F2 R U2 D' L2 F' D' L' U2 L2",
+        "L' F2 R2 B2 U' R2 D' L2 F2 R2 U2 B2 F2 L B' L2 D' B' D2 R' B'",
+        "L2 U2 R2 B2 U' B2 U2 R2 U L2 F2 L2 B' L U2 B' R' D' R' B",
+    ];
+
     #[test]
     fn roux_solve_round_trip() -> anyhow::Result<()> {
-        let scrambles = [
-            "D2 U L2 U2 R2 F2 U L2 D' F2 R2 U2 B' D' F U2 L2 D' L' B'",
-            "B U F R B' D' F' D' L' B2 L2 F2 D2 R2 D2 R2 F L2 F2 L2",
-            "U2 B2 D2 B2 L' R2 U2 R' B2 L' U2 D F' R2 B2 R D U R' F",
-            "D2 F D R2 D2 F2 R' F2 R2 B2 U2 R' D2 L F' R' B R2 U2 L U'",
-            "D' F L U' R D2 F2 L' F' U B2 U' L2 D2 B2 D' R2 U F2 L2",
-            "R L2 D2 L' D2 F' U' F2 D F2 R' U2 L2 F2 B2 L B2 R F2 L",
-            "L D2 L2 U2 L U2 L' D2 U2 L U2 B2 U B L2 F L R' D U R",
-            "B D' L' F2 R F2 R U2 L D2 L F2 R U2 D' L2 F' D' L' U2 L2",
-            "L' F2 R2 B2 U' R2 D' L2 F2 R2 U2 B2 F2 L B' L2 D' B' D2 R' B'",
-            "L2 U2 R2 B2 U' B2 U2 R2 U L2 F2 L2 B' L U2 B' R' D' R' B",
-        ];
         let solves = (0..10)
             .map(|i| -> anyhow::Result<TimedSolve> {
-                let scramble = Algorithm::from_static(scrambles[i]);
+                let scramble = Algorithm::from_static(SCRAMBLES[i]);
                 Ok(TimedSolve::new(
                     ReconWithScramble::new(
                         scramble.clone(),
@@ -250,13 +251,84 @@ mod tests {
             .collect::<anyhow::Result<Vec<_>>>()?;
         let list = SolveList::from_solves(solves);
 
-        dbg!(list.to_string());
-
         assert_eq!(
             list,
             SolveList::from_str(&list.to_string())
                 .with_context(|| format!("{:?}", list.to_string()))?
         );
+        Ok(())
+    }
+
+    #[test]
+    fn solves_path_pin() {
+        assert_eq!(
+            SolveList::solves_path().unwrap(),
+            config_dir().unwrap().join("virtual_cube_timer/solves.txt")
+        );
+    }
+
+    #[test]
+    fn from_solves_and_from_solves_path_agree() -> anyhow::Result<()> {
+        let path = PathBuf::from_str(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/tests/fixtures/solves.txt",
+        ))?;
+
+        let mut solves = SolveList::new();
+        assert!(solves.is_empty());
+        solves.extend(
+            std::fs::read_to_string(&path)?
+                .split_terminator("\n\n")
+                .map(|solve| {
+                    let (_number, no_number) =
+                        solve.split_once('.').unwrap_or_else(|| panic!("{solve}"));
+                    str::parse::<TimedSolve>(no_number)
+                })
+                .collect::<Result<Vec<_>, _>>()?,
+        );
+        assert!(!solves.is_empty());
+        let indirect = SolveList::from_solves(solves.0.iter().map(|v| v.1.clone()));
+        let direct = SolveList::from_solves_file(&path)?;
+        assert_eq!(
+            direct, indirect,
+            "direct = \n{direct}\nindirect = \n{indirect}"
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn from_solves_file_errors_correctly() -> anyhow::Result<()> {
+        let bad_path = PathBuf::from_str(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/tests/fixtures/error.txt"
+        ))?;
+        assert!(
+            !bad_path.exists(),
+            "this test is designed to start from a state where {} does not exist.\nDelete it to run the test, or ignore the test if it cannot be deleted.",
+            bad_path.to_str().unwrap()
+        );
+
+        let error = SolveList::from_solves_file(&bad_path);
+        assert_eq!(error?, SolveList::new());
+        assert!(bad_path.exists());
+
+        #[cfg(unix)]
+        {
+            use std::assert_matches;
+            use std::fs::File;
+            use std::os::unix::fs::PermissionsExt;
+
+            let file = File::open(&bad_path)?;
+            let mut mode = file.metadata()?.permissions();
+            mode.set_mode(0o200);
+            file.set_permissions(mode)?;
+            drop(file);
+
+            let error = SolveList::from_solves_file(&bad_path);
+            assert_matches!(error, Err(_));
+        }
+
+        fs::remove_file(bad_path)?;
         Ok(())
     }
 }
