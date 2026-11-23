@@ -208,7 +208,7 @@ mod tests {
     fn navigation_app_message_testing() -> anyhow::Result<()> {
         let mut app = NavigationApp::List(ListNavApp {
             solve_index: 0,
-            all_recons: SolveList::from_solves_file(PathBuf::from_str(concat!(
+            all_recons: SolveList::from_solves_file(&PathBuf::from_str(concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/tests/fixtures/solves.txt",
             ))?)?,

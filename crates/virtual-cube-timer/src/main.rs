@@ -34,7 +34,7 @@ fn main() -> anyhow::Result<()> {
 
     let keybinds = Keybinds::from_config()?;
 
-    let solves = SolveList::from_solves_file(SolveList::solves_path()?)?;
+    let solves = SolveList::from_solves_file(&SolveList::solves_path()?)?;
 
     let mut app = App {
         mode: match args.mode {

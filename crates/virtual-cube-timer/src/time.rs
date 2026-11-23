@@ -33,7 +33,13 @@ pub fn to_text(duration: Duration) -> String {
     let min = integer_seconds / 60 - 60 * hours;
     let secs = integer_seconds % 60;
     let sub_secs = duration.as_millis() % 1000;
-    format!("{hours}:{min:02?}:{secs:02?}.{sub_secs:03?}")
+    if hours != 0 {
+        format!("{hours}:{min:02?}:{secs:02?}.{sub_secs:03?}")
+    } else if min != 0 {
+        format!("{min:?}:{secs:02?}.{sub_secs:03?}")
+    } else {
+        format!("{secs:?}.{sub_secs:03?}")
+    }
 }
 
 #[cfg(test)]
@@ -46,7 +52,7 @@ mod tests {
             Duration::from_millis(140),
             Duration::from_mins(3) + Duration::from_secs(40),
             Duration::ZERO,
-            Duration::from_secs_f64(314.1315),
+            Duration::from_secs_f64(314.1316),
             Duration::from_secs_f64(4523.4324),
             Duration::from_secs_f64(7.8),
         ];
@@ -59,6 +65,32 @@ mod tests {
             );
         }
         Ok(())
+    }
+
+    #[test]
+    fn duration_prints_format_pin() {
+        let durations = [
+            Duration::from_millis(140),
+            Duration::from_mins(3) + Duration::from_secs(40),
+            Duration::ZERO,
+            Duration::from_secs_f64(314.1316),
+            Duration::from_secs_f64(4523.4324),
+            Duration::from_secs_f64(7.8),
+        ];
+
+        let durations_display = durations.map(to_text);
+
+        assert_eq!(
+            durations_display,
+            [
+                "0.140",
+                "3:40.000",
+                "0.000",
+                "5:14.131",
+                "1:15:23.432",
+                "7.800"
+            ]
+        );
     }
 
     #[test]
