@@ -167,6 +167,11 @@ impl Keybinds {
             Err(e) => Err(e.into()),
         }
     }
+
+    #[must_use]
+    pub fn from_config() -> Self {
+        Self::try_from_config().unwrap_or_default()
+    }
 }
 
 #[must_use]
