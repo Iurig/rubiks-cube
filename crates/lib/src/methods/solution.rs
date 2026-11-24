@@ -124,7 +124,7 @@ impl<P: Puzzle> SolutionSegment<P> {
 
     /// Append a move to the [`SolutionSegment`].
     pub fn push(&mut self, m: P::Move) {
-        self.moves.extend([m]);
+        self.moves.push(m);
     }
 }
 
