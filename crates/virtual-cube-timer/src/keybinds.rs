@@ -146,7 +146,7 @@ impl Keybinds {
         self.moves.get_by_left(key_press).copied()
     }
 
-    pub fn from_config() -> anyhow::Result<Self> {
+    pub fn try_from_config() -> anyhow::Result<Self> {
         let dir = config_dir()
             .map(|dir| dir.join("virtual_cube_timer"))
             .expect("manually written");

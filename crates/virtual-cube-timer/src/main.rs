@@ -32,7 +32,7 @@ use virtual_cube_timer::{
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    let keybinds = Keybinds::from_config()?;
+    let keybinds = Keybinds::try_from_config()?;
 
     let solves = SolveList::from_solves_file(&SolveList::solves_path()?)?;
 
