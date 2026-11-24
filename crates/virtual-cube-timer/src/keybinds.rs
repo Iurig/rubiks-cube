@@ -6,7 +6,7 @@ use std::{
 };
 
 use bimap::BiHashMap;
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers};
 use dirs::config_dir;
 use rubiks_cube::Move3x3;
 use serde::{Deserialize, Serialize};
@@ -39,6 +39,11 @@ impl KeyPress {
     #[must_use]
     pub const fn modifiers(&self) -> KeyModifiers {
         self.1
+    }
+
+    #[must_use]
+    pub fn try_from_move(m: Move3x3, keybinds: &Keybinds) -> Option<Self> {
+        keybinds.moves.get_by_right(&m).copied()
     }
 }
 
