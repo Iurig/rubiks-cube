@@ -1,10 +1,5 @@
 # `tools/` only wraps other crates' binaries; there's no behaviour of ours to test.
-exclude_globs = [
-  "crates/twisty-puzzles-py/**",
-  "tools/**",
-  "crates/lib/src/puzzles/cube3x3/widget.rs",
-  "crates/virtual-cube-timer/src/view/**",
-]
+exclude_globs = ["crates/twisty-puzzles-py/**", "tools/**", "crates/virtual-cube-timer/src/view/**"]
 exclude_re = [
   "impl Debug",
   "impl Display",
@@ -46,4 +41,5 @@ exclude_re = [
   "replace != with == in PieceSet<P>::from_algset",
   "replace != with == in <impl Step<P> for PrunedCombine<P>>::solve::search",
   'replace && with \|\| in face_turns',
+  "crates/lib/src/puzzles/cube3x3/widget.rs",
 ]
