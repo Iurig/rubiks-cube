@@ -58,6 +58,17 @@ impl Display for KeyPress {
     }
 }
 
+impl From<KeyPress> for KeyEvent {
+    fn from(value: KeyPress) -> Self {
+        Self {
+            code: value.code(),
+            modifiers: value.modifiers(),
+            kind: KeyEventKind::Press,
+            state: KeyEventState::NONE,
+        }
+    }
+}
+
 impl FromStr for KeyPress {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
