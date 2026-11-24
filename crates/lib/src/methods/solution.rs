@@ -255,6 +255,8 @@ mod tests {
         reason = "`?` reports setup failures; `assert!` reports the property under test failing"
     )]
 
+    use itertools::Itertools;
+
     use crate::Cube3x3;
 
     use super::*;
@@ -263,8 +265,16 @@ mod tests {
     fn move_count_counts_correctly() -> anyhow::Result<()> {
         let s: Solution<Cube3x3> = "y U2 r M' // Step 1".parse()?;
         assert!(!s.is_empty());
-
         assert_eq!(s.move_count(), 4);
+
+        let algorithm = Algorithm::<Cube3x3>::from_static("y U2 r M'");
+        let section = s[0].clone();
+        for (m1, m2) in (&section).into_iter().zip_eq(&algorithm) {
+            assert_eq!(m1, m2);
+        }
+        for (m1, m2) in section.into_iter().zip_eq(algorithm) {
+            assert_eq!(m1, m2);
+        }
         Ok(())
     }
 
@@ -296,7 +306,17 @@ mod tests {
         solution.extend("R // First".parse::<Solution<Cube3x3>>()?);
         assert_eq!(solution.len(), 1);
 
-        solution.extend("U2 // Second\nF' L // Third".parse::<Solution<Cube3x3>>()?);
+        let cube1 = Cube3x3::default() * "R // First".parse::<SolutionSegment<Cube3x3>>()?;
+        let extension = "U2 // Second\nF' L // Third".parse::<Solution<Cube3x3>>()?;
+        solution.extend(extension.clone());
+        assert_eq!(
+            cube1 * extension[0].clone() * extension[1].clone(),
+            Cube3x3::default() * solution[0].clone() * solution[1].clone() * solution[2].clone()
+        );
+        assert_ne!(
+            cube1 * extension[0].clone(),
+            Cube3x3::default() * solution[0].clone() * solution[1].clone() * solution[2].clone()
+        );
         assert_eq!(solution.len(), 3);
 
         let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
