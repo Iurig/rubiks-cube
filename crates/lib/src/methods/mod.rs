@@ -1,6 +1,7 @@
 pub mod cube3x3;
 //pub mod neutrality;
 pub mod context;
+pub mod recon;
 mod solution;
 pub mod step;
 #[cfg(test)]
