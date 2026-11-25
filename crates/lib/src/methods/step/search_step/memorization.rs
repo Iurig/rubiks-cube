@@ -48,6 +48,7 @@ pub struct BfsMemo<P: Puzzle> {
 }
 
 impl<P: Puzzle> BfsMemo<P> {
+    #[must_use]
     pub fn new(goal: PieceSet<P>) -> Self {
         let mask = Mask::filter_by_piece(&P::default(), &goal);
         Self {
