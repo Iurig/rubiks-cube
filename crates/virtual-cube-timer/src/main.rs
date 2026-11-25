@@ -44,9 +44,7 @@ fn main() -> anyhow::Result<()> {
             }),
             ModeArg::Normal => Mode::Timing(TimingApp {
                 cube: Cube3x3::default(),
-                technique: args.method.to_technique(),
                 keybinds,
-                step_number: 0,
                 solves: Arc::new(Mutex::new(solves)),
                 curr_solve_scramble: VecDeque::new(),
                 curr_solve_moves: Algorithm::new(),

@@ -9,7 +9,7 @@ use std::{
 };
 
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, Puzzle, Reconstruction, Technique};
+use rubiks_cube::{Algorithm, Cube3x3, Puzzle, Reconstruction};
 
 use crate::{
     ValidMethods,
@@ -22,9 +22,7 @@ use crate::{
 #[derive(Debug)]
 pub struct TimingApp {
     pub cube: Cube3x3,
-    pub technique: Technique<Cube3x3>,
     pub keybinds: Keybinds,
-    pub step_number: usize,
     pub solves: Arc<Mutex<SolveList>>,
     pub curr_solve_scramble: VecDeque<Receiver<Algorithm<Cube3x3>>>,
     pub curr_solve_moves: Algorithm<Cube3x3>,
@@ -107,15 +105,6 @@ impl TimingApp {
                         .keybinds
                         .as_move(&KeyPress::with_modifiers(code, modifiers)) =>
                     {
-                        while self
-                            .technique
-                            .steps()
-                            .nth(self.step_number)
-                            .is_some_and(|s| s.is_done(&self.cube))
-                        {
-                            self.step_number += 1;
-                        }
-
                         self.update(&TimingMessage::Cube(CubeMessage::Apply(m)));
 
                         self.curr_solve_moves.push(m);
@@ -170,9 +159,7 @@ mod tests {
 
         let mut app = TimingApp {
             cube: scrambled_cube,
-            technique: Roux::default().to_technique(),
             keybinds: Keybinds::default(),
-            step_number: 0,
             solves: Arc::new(Mutex::new(SolveList::new())),
             curr_solve_scramble: VecDeque::from([receiver]),
             curr_solve_moves: Algorithm::new(),
