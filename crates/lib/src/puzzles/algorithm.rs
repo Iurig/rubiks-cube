@@ -7,7 +7,7 @@ use std::{
 
 use itertools::Itertools;
 
-use crate::{Cube3x3, Inv, Move3x3, MoveModifier, ParseSequenceError, Puzzle};
+use crate::{Cube3x3, Inv, Move3x3, MoveModifier, ParseSequenceError, Puzzle, StepSolution};
 
 /// A sequence of moves applied in order, such as an algorithm or a step's solution.
 ///
@@ -132,6 +132,12 @@ impl<P: Puzzle> Index<usize> for Algorithm<P> {
     )]
     fn index(&self, index: usize) -> &Self::Output {
         &self.0[index]
+    }
+}
+
+impl<P: Puzzle> From<StepSolution<P>> for Algorithm<P> {
+    fn from(value: StepSolution<P>) -> Self {
+        value.moves().clone()
     }
 }
 

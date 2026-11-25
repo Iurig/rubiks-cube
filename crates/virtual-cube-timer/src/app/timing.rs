@@ -9,14 +9,14 @@ use std::{
 };
 
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, MethodSolution, Puzzle, Technique};
+use rubiks_cube::{Algorithm, Cube3x3, Puzzle, Reconstruction, Technique};
 
 use crate::{
     ValidMethods,
     event::Event,
     keybinds::{KeyPress, Keybinds},
     message::{CubeMessage, Message, TimingMessage},
-    solves::{ReconWithScramble, SolveList, TimedSolve},
+    solves::{SolveList, TimedSolve},
 };
 
 #[derive(Debug)]
@@ -27,7 +27,7 @@ pub struct TimingApp {
     pub step_number: usize,
     pub solves: Arc<Mutex<SolveList>>,
     pub curr_solve_scramble: VecDeque<Receiver<Algorithm<Cube3x3>>>,
-    pub curr_solve_moves: MethodSolution<Cube3x3>,
+    pub curr_solve_moves: Algorithm<Cube3x3>,
     pub starting_time: Instant,
     pub timer_number: Duration,
     pub timer_state: TimerState,
@@ -60,14 +60,13 @@ impl TimingApp {
                 let solve_time = self.timer_number;
                 thread::spawn(move || {
                     let mut unlocked_solves = solves_to_send.lock().expect("mutex should be clean");
-                    let solve = TimedSolve::new(
-                        ReconWithScramble::new(
-                            scramble_receiver.recv().expect("failed to save solve"),
-                            solve_moves,
-                        ),
-                        solve_time,
+                    let mut recon = Reconstruction::new(
+                        scramble_receiver.recv().expect("failed to save solve"),
                         ValidMethods::Roux,
                     );
+                    recon.extend(solve_moves);
+
+                    let solve = TimedSolve::new(recon, solve_time);
                     unlocked_solves.push(solve);
                 });
             }
@@ -119,7 +118,7 @@ impl TimingApp {
 
                         self.update(&TimingMessage::Cube(CubeMessage::Apply(m)));
 
-                        self.curr_solve_moves[self.step_number].push(m);
+                        self.curr_solve_moves.push(m);
 
                         if self.timer_state == TimerState::Scrambled {
                             self.update(&TimingMessage::Start);
@@ -144,7 +143,7 @@ impl TimingApp {
 #[cfg(test)]
 mod tests {
 
-    use rubiks_cube::{Method, Move3x3, MoveModifier, Roux, Step, StepSolution};
+    use rubiks_cube::{Method, MethodSolution, Move3x3, MoveModifier, Roux, StepSolution};
 
     use crate::keybinds::key_press;
 
@@ -176,9 +175,7 @@ mod tests {
             step_number: 0,
             solves: Arc::new(Mutex::new(SolveList::new())),
             curr_solve_scramble: VecDeque::from([receiver]),
-            curr_solve_moves: MethodSolution::with_empty_steps(
-                Roux::default().to_technique().steps().map(Step::name),
-            ),
+            curr_solve_moves: Algorithm::new(),
             starting_time: Instant::now(),
             timer_number: Duration::ZERO,
             timer_state: TimerState::Scrambled,
@@ -214,7 +211,13 @@ mod tests {
         }
 
         assert!(app.cube.is_solved());
-        assert_eq!(expanded_cube_recon, app.curr_solve_moves);
+        assert_eq!(
+            expanded_cube_recon
+                .moves()
+                .copied()
+                .collect::<Algorithm<_>>(),
+            app.curr_solve_moves
+        );
 
         app.update_with_message(Event::Key(key_press(KeyCode::Char(' '))));
 

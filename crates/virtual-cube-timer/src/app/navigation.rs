@@ -47,16 +47,20 @@ impl SolveNavApp {
                 self.move_index = self.move_index.saturating_sub(1);
             }
             SolveNavMessage::NextMove => {
-                self.move_index =
-                    std::cmp::min(self.move_index + 1, self.cur_step_move_count() - 1);
+                self.move_index = std::cmp::min(
+                    self.move_index + 1,
+                    self.cur_step_move_count().saturating_sub(1),
+                );
             }
             SolveNavMessage::PreviousStep => {
                 self.step_index = self.step_index.saturating_sub(1);
                 clamp_move(self);
             }
             SolveNavMessage::NextStep => {
-                self.step_index =
-                    std::cmp::min(self.step_index + 1, self.list_app.step_count() - 1);
+                self.step_index = std::cmp::min(
+                    self.step_index + 1,
+                    self.list_app.step_count().saturating_sub(1),
+                );
                 clamp_move(self);
             }
         }
@@ -241,6 +245,8 @@ mod tests {
 
         assert_eq!(app.list_app().solve_index, 19, "{app:?}");
 
+        dbg!(&app);
+
         assert!(app.update_with_message(key_press(KeyCode::Enter)).is_none());
 
         let mut prev_move_index = -1isize;
@@ -252,9 +258,10 @@ mod tests {
         }
 
         assert_eq!(
-            prev_move_index.cast_unsigned() + 1,
+            (prev_move_index + 1).cast_unsigned(),
             app.as_solve_app().unwrap().cur_step_move_count(),
-            "{}",
+            "{}:{}",
+            app.list_app().solve_index,
             app.list_app().solution()
         );
 
