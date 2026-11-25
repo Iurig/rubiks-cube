@@ -10,7 +10,7 @@ use anyhow::{Ok, ensure};
 use clap::Parser;
 use ratatui_core as _;
 use rubiks_cube::{
-    Cube3x3, Method, Puzzle, Solution,
+    Cube3x3, Method, MethodSolution, Puzzle,
     roux::{FirstBlock, SecondBlock},
 };
 
@@ -49,7 +49,7 @@ fn main() -> anyhow::Result<()> {
                 step_number: 0,
                 solves: Arc::new(Mutex::new(solves)),
                 curr_solve_scramble: VecDeque::new(),
-                curr_solve_moves: Solution::with_empty_steps(
+                curr_solve_moves: MethodSolution::with_empty_steps(
                     args.method
                         .to_technique()
                         .steps()

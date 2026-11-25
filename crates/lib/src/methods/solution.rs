@@ -19,18 +19,18 @@ use crate::{Algorithm, Cube3x3, ParseSequenceError, Technique, puzzles::Puzzle};
 ///
 /// Build one with [`single_segment`](Self::single_segment), or collect solutions to join them.
 #[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
-pub struct Solution<P: Puzzle> {
-    step_solutions: Vec<SolutionSegment<P>>,
+pub struct MethodSolution<P: Puzzle> {
+    step_solutions: Vec<StepSolution<P>>,
 }
 
 /// Segment of a solution: includes a name and the moves that make the solution up.
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
-pub struct SolutionSegment<P: Puzzle> {
+pub struct StepSolution<P: Puzzle> {
     name: String,
     moves: Algorithm<P>,
 }
 
-impl<'a, P: Puzzle> IntoIterator for &'a SolutionSegment<P> {
+impl<'a, P: Puzzle> IntoIterator for &'a StepSolution<P> {
     type Item = &'a <P as Puzzle>::Move;
     type IntoIter = <&'a Algorithm<P> as IntoIterator>::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
@@ -38,7 +38,7 @@ impl<'a, P: Puzzle> IntoIterator for &'a SolutionSegment<P> {
     }
 }
 
-impl<P: Puzzle> IntoIterator for SolutionSegment<P> {
+impl<P: Puzzle> IntoIterator for StepSolution<P> {
     type Item = <P as Puzzle>::Move;
     type IntoIter = <Algorithm<P> as IntoIterator>::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
@@ -46,28 +46,28 @@ impl<P: Puzzle> IntoIterator for SolutionSegment<P> {
     }
 }
 
-impl Mul<SolutionSegment<Self>> for Cube3x3 {
+impl Mul<StepSolution<Self>> for Cube3x3 {
     type Output = Self;
-    fn mul(self, rhs: SolutionSegment<Self>) -> Self::Output {
+    fn mul(self, rhs: StepSolution<Self>) -> Self::Output {
         rhs.into_iter().fold(self, |p, m| p * m)
     }
 }
 
-impl<P: Puzzle> Display for SolutionSegment<P> {
+impl<P: Puzzle> Display for StepSolution<P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{}    // {}", self.moves, self.name)?;
         Ok(())
     }
 }
 
-impl<P: Puzzle> FromStr for Solution<P> {
+impl<P: Puzzle> FromStr for MethodSolution<P> {
     type Err = ParseSequenceError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         s.lines()
             .enumerate()
             .filter_map(|(count, line)| {
                 (!line.trim().is_empty()).then_some(
-                    line.parse::<SolutionSegment<P>>()
+                    line.parse::<StepSolution<P>>()
                         .map_err(|e| e.on_line(count + 1)),
                 )
             })
@@ -75,7 +75,7 @@ impl<P: Puzzle> FromStr for Solution<P> {
     }
 }
 
-impl<P: Puzzle> FromStr for SolutionSegment<P> {
+impl<P: Puzzle> FromStr for StepSolution<P> {
     type Err = ParseSequenceError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let split_comment = s.split_once("//").unwrap_or((s, ""));
@@ -86,7 +86,7 @@ impl<P: Puzzle> FromStr for SolutionSegment<P> {
     }
 }
 
-impl<P: Puzzle> SolutionSegment<P> {
+impl<P: Puzzle> StepSolution<P> {
     /// Constructor for an empty [`SolutionSegment`] with a name.
     #[must_use]
     pub fn new(name: &str) -> Self {
@@ -128,7 +128,7 @@ impl<P: Puzzle> SolutionSegment<P> {
     }
 }
 
-impl<P: Puzzle> Solution<P> {
+impl<P: Puzzle> MethodSolution<P> {
     /// A solution with no segments.
     #[must_use]
     pub fn new() -> Self {
@@ -138,20 +138,20 @@ impl<P: Puzzle> Solution<P> {
     /// Constructs a solution with only one segment.
     #[must_use]
     pub fn single_segment(name: impl Into<String>, moves: Algorithm<P>) -> Self {
-        Self::from_iter([SolutionSegment {
+        Self::from_iter([StepSolution {
             name: name.into(),
             moves,
         }])
     }
 
     /// Each segment's moves and step name, in solving order.
-    pub fn iter(&self) -> std::slice::Iter<'_, SolutionSegment<P>> {
+    pub fn iter(&self) -> std::slice::Iter<'_, StepSolution<P>> {
         self.step_solutions.iter()
     }
 
     /// Returns an [`Iterator`] overall moves in the [`Solution`].
     pub fn moves(&self) -> impl Iterator<Item = &P::Move> {
-        self.step_solutions.iter().flat_map(SolutionSegment::iter)
+        self.step_solutions.iter().flat_map(StepSolution::iter)
     }
 
     /// The number of moves in every segment, each move counting one whatever its part or
@@ -169,7 +169,7 @@ impl<P: Puzzle> Solution<P> {
         Self {
             step_solutions: steps
                 .into_iter()
-                .map(|name| SolutionSegment::new(name))
+                .map(|name| StepSolution::new(name))
                 .collect(),
         }
     }
@@ -187,15 +187,15 @@ impl<P: Puzzle> Solution<P> {
     }
 }
 
-impl<P: Puzzle> Index<usize> for Solution<P> {
-    type Output = SolutionSegment<P>;
+impl<P: Puzzle> Index<usize> for MethodSolution<P> {
+    type Output = StepSolution<P>;
     #[expect(clippy::indexing_slicing, reason = "it defines the indexing API")]
     fn index(&self, index: usize) -> &Self::Output {
         &self.step_solutions[index]
     }
 }
 
-impl<P: Puzzle> IndexMut<usize> for Solution<P> {
+impl<P: Puzzle> IndexMut<usize> for MethodSolution<P> {
     #[expect(clippy::indexing_slicing, reason = "it defines the indexing API")]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         &mut self.step_solutions[index]
@@ -203,8 +203,8 @@ impl<P: Puzzle> IndexMut<usize> for Solution<P> {
 }
 
 /// Builds a solution from [`SolutionSegment`]s, in order.
-impl<P: Puzzle> FromIterator<SolutionSegment<P>> for Solution<P> {
-    fn from_iter<I: IntoIterator<Item = SolutionSegment<P>>>(iter: I) -> Self {
+impl<P: Puzzle> FromIterator<StepSolution<P>> for MethodSolution<P> {
+    fn from_iter<I: IntoIterator<Item = StepSolution<P>>>(iter: I) -> Self {
         Self {
             step_solutions: iter.into_iter().collect(),
         }
@@ -212,7 +212,7 @@ impl<P: Puzzle> FromIterator<SolutionSegment<P>> for Solution<P> {
 }
 
 /// Joins solutions into one, keeping every segment in order.
-impl<P: Puzzle> FromIterator<Self> for Solution<P> {
+impl<P: Puzzle> FromIterator<Self> for MethodSolution<P> {
     fn from_iter<I: IntoIterator<Item = Self>>(iter: I) -> Self {
         Self {
             step_solutions: iter.into_iter().flatten().collect(),
@@ -220,26 +220,26 @@ impl<P: Puzzle> FromIterator<Self> for Solution<P> {
     }
 }
 
-impl<'a, P: Puzzle> IntoIterator for &'a Solution<P> {
-    type Item = &'a SolutionSegment<P>;
-    type IntoIter = std::slice::Iter<'a, SolutionSegment<P>>;
+impl<'a, P: Puzzle> IntoIterator for &'a MethodSolution<P> {
+    type Item = &'a StepSolution<P>;
+    type IntoIter = std::slice::Iter<'a, StepSolution<P>>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
-impl<P: Puzzle> Extend<SolutionSegment<P>> for Solution<P> {
-    fn extend<T: IntoIterator<Item = SolutionSegment<P>>>(&mut self, iter: T) {
+impl<P: Puzzle> Extend<StepSolution<P>> for MethodSolution<P> {
+    fn extend<T: IntoIterator<Item = StepSolution<P>>>(&mut self, iter: T) {
         self.step_solutions.extend(iter);
     }
 }
-impl<P: Puzzle> IntoIterator for Solution<P> {
-    type Item = SolutionSegment<P>;
+impl<P: Puzzle> IntoIterator for MethodSolution<P> {
+    type Item = StepSolution<P>;
     type IntoIter = <Vec<Self::Item> as IntoIterator>::IntoIter;
     fn into_iter(self) -> Self::IntoIter {
         self.step_solutions.into_iter()
     }
 }
-impl<P: Puzzle> Display for Solution<P> {
+impl<P: Puzzle> Display for MethodSolution<P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for alg in self {
             writeln!(f, "{}    // {}", alg.moves, alg.name)?;
@@ -263,7 +263,7 @@ mod tests {
 
     #[test]
     fn move_count_counts_correctly() -> anyhow::Result<()> {
-        let s: Solution<Cube3x3> = "y U2 r M' // Step 1".parse()?;
+        let s: MethodSolution<Cube3x3> = "y U2 r M' // Step 1".parse()?;
         assert!(!s.is_empty());
         assert_eq!(s.move_count(), 4);
 
@@ -280,7 +280,7 @@ mod tests {
 
     #[test]
     fn borrowed_and_owned_iteration_yield_the_same_segments_in_order() -> anyhow::Result<()> {
-        let solution: Solution<Cube3x3> = "R U // First \n M' // Second".parse()?;
+        let solution: MethodSolution<Cube3x3> = "R U // First \n M' // Second".parse()?;
         assert_eq!(solution.len(), 2);
 
         let mut borrowed = Vec::new();
@@ -300,14 +300,14 @@ mod tests {
 
     #[test]
     fn extend_appends_segments_after_the_existing_ones() -> anyhow::Result<()> {
-        let mut solution: Solution<Cube3x3> = "".parse()?;
+        let mut solution: MethodSolution<Cube3x3> = "".parse()?;
         assert!(solution.is_empty());
 
-        solution.extend("R // First".parse::<Solution<Cube3x3>>()?);
+        solution.extend("R // First".parse::<MethodSolution<Cube3x3>>()?);
         assert_eq!(solution.len(), 1);
 
-        let cube1 = Cube3x3::default() * "R // First".parse::<SolutionSegment<Cube3x3>>()?;
-        let extension = "U2 // Second\nF' L // Third".parse::<Solution<Cube3x3>>()?;
+        let cube1 = Cube3x3::default() * "R // First".parse::<StepSolution<Cube3x3>>()?;
+        let extension = "U2 // Second\nF' L // Third".parse::<MethodSolution<Cube3x3>>()?;
         solution.extend(extension.clone());
         assert_eq!(
             cube1 * extension[0].clone() * extension[1].clone(),
@@ -319,7 +319,7 @@ mod tests {
         );
         assert_eq!(solution.len(), 3);
 
-        let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
+        let names: Vec<&str> = solution.iter().map(StepSolution::name).collect();
         assert_eq!(names, ["First", "Second", "Third"]);
         assert_eq!(solution.move_count(), 4);
         Ok(())
@@ -332,7 +332,7 @@ mod tests {
             ("R // First\nM Q2 // Second", (2, 2)),
             ("R // First\n\nM Q2 // Second", (3, 2)),
         ] {
-            let Err(error) = text.parse::<Solution<Cube3x3>>() else {
+            let Err(error) = text.parse::<MethodSolution<Cube3x3>>() else {
                 panic!("`Q2` should not parse in {text:?}");
             };
             assert_eq!((error.line(), error.position()), expected, "{text:?}");

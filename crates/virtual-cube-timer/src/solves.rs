@@ -2,7 +2,7 @@ use std::{fmt::Display, fs, io::ErrorKind, path::PathBuf, str::FromStr, time::Du
 
 use anyhow::anyhow;
 use dirs::config_dir;
-use rubiks_cube::{Algorithm, Cube3x3, ParseSequenceError, Solution, SolutionSegment};
+use rubiks_cube::{Algorithm, Cube3x3, MethodSolution, ParseSequenceError, StepSolution};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 use crate::{
@@ -23,7 +23,7 @@ pub struct TimedSolve {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReconWithScramble {
     scramble: Algorithm<Cube3x3>,
-    solution: Solution<Cube3x3>,
+    solution: MethodSolution<Cube3x3>,
 }
 
 impl TimedSolve {
@@ -42,7 +42,7 @@ impl TimedSolve {
     }
 
     #[must_use]
-    pub const fn solution(&self) -> &Solution<Cube3x3> {
+    pub const fn solution(&self) -> &MethodSolution<Cube3x3> {
         self.moves.solution()
     }
 
@@ -59,7 +59,7 @@ impl TimedSolve {
 
 impl ReconWithScramble {
     #[must_use]
-    pub const fn new(scramble: Algorithm<Cube3x3>, solution: Solution<Cube3x3>) -> Self {
+    pub const fn new(scramble: Algorithm<Cube3x3>, solution: MethodSolution<Cube3x3>) -> Self {
         Self { scramble, solution }
     }
 
@@ -69,7 +69,7 @@ impl ReconWithScramble {
     }
 
     #[must_use]
-    pub const fn solution(&self) -> &Solution<Cube3x3> {
+    pub const fn solution(&self) -> &MethodSolution<Cube3x3> {
         &self.solution
     }
 }
@@ -160,7 +160,7 @@ impl FromStr for ReconWithScramble {
             solution: s
                 .lines()
                 .skip(1)
-                .map(str::parse::<SolutionSegment<Cube3x3>>)
+                .map(str::parse::<StepSolution<Cube3x3>>)
                 .collect::<Result<Vec<_>, ParseSequenceError>>()?
                 .into_iter()
                 .collect(),

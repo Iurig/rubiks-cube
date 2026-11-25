@@ -1,6 +1,6 @@
 use std::{borrow::Cow, sync::Arc};
 
-use crate::{Puzzle, SolutionSegment, Step, StepError};
+use crate::{Puzzle, Step, StepError, StepSolution};
 
 /// A step that tries several steps and keeps the shortest working solution.
 ///
@@ -72,7 +72,7 @@ impl<P: Puzzle> Step<P> for Shortest<P> {
         self.steps.iter().any(|s| s.can_solve(puzzle))
     }
 
-    fn solve(&self, puzzle: &mut P) -> Result<SolutionSegment<P>, StepError> {
+    fn solve(&self, puzzle: &mut P) -> Result<StepSolution<P>, StepError> {
         let best = self
             .steps
             .iter()
@@ -83,7 +83,7 @@ impl<P: Puzzle> Step<P> for Shortest<P> {
             })
             .try_fold(
                 None,
-                |best: Option<(SolutionSegment<P>, P)>, candidate| match candidate {
+                |best: Option<(StepSolution<P>, P)>, candidate| match candidate {
                     Err(StepError::InvalidStartingState { .. }) => Ok(best),
                     Err(e @ (StepError::UnreachableGoal | StepError::Custom(_))) => Err(e),
                     // On a tie the earlier alternative stays.
@@ -113,7 +113,7 @@ mod tests {
     )]
 
     use super::*;
-    use crate::{Cube3x3, SolutionSegment, Technique, methods::test_steps::FixedStep};
+    use crate::{Cube3x3, Technique, methods::test_steps::FixedStep};
 
     fn cannot_start() -> StepError {
         StepError::InvalidStartingState {

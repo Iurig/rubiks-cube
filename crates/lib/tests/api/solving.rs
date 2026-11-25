@@ -139,7 +139,7 @@ fn zz_solves_the_cube() -> anyhow::Result<()> {
 
     let _ = ZZ::default()
         .solve_steps(&mut cube)
-        .collect::<Result<Solution<Cube3x3>, _>>()?;
+        .collect::<Result<MethodSolution<Cube3x3>, _>>()?;
     assert!(cube.is_solved());
     Ok(())
 }

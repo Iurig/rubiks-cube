@@ -1,5 +1,5 @@
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, Solution, SolutionSegment};
+use rubiks_cube::{Algorithm, Cube3x3, MethodSolution, StepSolution};
 
 use crate::{
     message::{ListNavMessage, Message, NavigationMessage, SolveNavMessage},
@@ -67,7 +67,7 @@ impl SolveNavApp {
         clippy::missing_panics_doc,
         reason = "panics on broken invariants only"
     )]
-    pub fn step(&self) -> &SolutionSegment<Cube3x3> {
+    pub fn step(&self) -> &StepSolution<Cube3x3> {
         self.list_app
             .solution()
             .iter()
@@ -90,7 +90,7 @@ impl ListNavApp {
     }
 
     #[must_use]
-    pub fn solution(&self) -> &Solution<Cube3x3> {
+    pub fn solution(&self) -> &MethodSolution<Cube3x3> {
         self.timed_solve().solution()
     }
 
@@ -107,7 +107,7 @@ impl ListNavApp {
         self.solution().iter().count()
     }
 
-    pub fn solve_iter(&self) -> impl Iterator<Item = SolutionSegment<Cube3x3>> {
+    pub fn solve_iter(&self) -> impl Iterator<Item = StepSolution<Cube3x3>> {
         self.solution().iter().cloned()
     }
 }

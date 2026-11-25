@@ -1,5 +1,5 @@
 use crate::{
-    AlgSet, PieceSet, Puzzle, SolutionSegment, StepError,
+    AlgSet, PieceSet, Puzzle, StepError, StepSolution,
     error::BuildStepError,
     methods::context::{BuildContext, GLOBAL},
 };
@@ -39,7 +39,7 @@ pub trait Step<P: Puzzle>: Send + Sync + Debug {
     /// # Errors
     /// A [`StepError`] when the step cannot start on `puzzle` or cannot reach its goal. The
     /// step may leave `puzzle` changed when it fails.
-    fn solve(&self, puzzle: &mut P) -> Result<SolutionSegment<P>, StepError>;
+    fn solve(&self, puzzle: &mut P) -> Result<StepSolution<P>, StepError>;
 
     /// Whether `puzzle` meets this step's pre-requisites. Expensive for expensive-to-solve steps -
     /// override recommended for those.
@@ -106,7 +106,7 @@ mod tests {
         fn is_done(&self, puzzle: &Cube3x3) -> bool {
             self.0.is_done(puzzle)
         }
-        fn solve(&self, puzzle: &mut Cube3x3) -> Result<SolutionSegment<Cube3x3>, StepError> {
+        fn solve(&self, puzzle: &mut Cube3x3) -> Result<StepSolution<Cube3x3>, StepError> {
             self.0.solve(puzzle)
         }
     }

@@ -9,7 +9,7 @@ use std::{
 };
 
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, Puzzle, Solution, Technique};
+use rubiks_cube::{Algorithm, Cube3x3, MethodSolution, Puzzle, Technique};
 
 use crate::{
     ValidMethods,
@@ -27,7 +27,7 @@ pub struct TimingApp {
     pub step_number: usize,
     pub solves: Arc<Mutex<SolveList>>,
     pub curr_solve_scramble: VecDeque<Receiver<Algorithm<Cube3x3>>>,
-    pub curr_solve_moves: Solution<Cube3x3>,
+    pub curr_solve_moves: MethodSolution<Cube3x3>,
     pub starting_time: Instant,
     pub timer_number: Duration,
     pub timer_state: TimerState,
@@ -144,7 +144,7 @@ impl TimingApp {
 #[cfg(test)]
 mod tests {
 
-    use rubiks_cube::{Method, Move3x3, MoveModifier, Roux, SolutionSegment, Step};
+    use rubiks_cube::{Method, Move3x3, MoveModifier, Roux, Step, StepSolution};
 
     use crate::keybinds::key_press;
 
@@ -176,7 +176,7 @@ mod tests {
             step_number: 0,
             solves: Arc::new(Mutex::new(SolveList::new())),
             curr_solve_scramble: VecDeque::from([receiver]),
-            curr_solve_moves: Solution::with_empty_steps(
+            curr_solve_moves: MethodSolution::with_empty_steps(
                 Roux::default().to_technique().steps().map(Step::name),
             ),
             starting_time: Instant::now(),
@@ -192,7 +192,7 @@ mod tests {
         let expanded_cube_recon = cube_recon
             .iter()
             .map(|s| {
-                SolutionSegment::with_moves(
+                StepSolution::with_moves(
                     s.name(),
                     s.iter()
                         .flat_map(|m| {
@@ -206,7 +206,7 @@ mod tests {
                         .collect::<Algorithm<Cube3x3>>(),
                 )
             })
-            .collect::<Solution<Cube3x3>>();
+            .collect::<MethodSolution<Cube3x3>>();
 
         for m in expanded_cube_recon.moves() {
             let key = move_to_key(&Keybinds::default(), *m).unwrap_or_else(|| panic!("{m}"));
