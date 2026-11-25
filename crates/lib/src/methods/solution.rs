@@ -126,6 +126,18 @@ impl<P: Puzzle> StepSolution<P> {
     pub fn push(&mut self, m: P::Move) {
         self.moves.push(m);
     }
+
+    /// How many moves the segment has.
+    #[must_use]
+    pub const fn len(&self) -> usize {
+        self.moves.len()
+    }
+
+    /// If the segment has any moves.
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 impl<P: Puzzle> MethodSolution<P> {
