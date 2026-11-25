@@ -13,6 +13,7 @@ pub struct UntimedApp {
 }
 
 impl UntimedApp {
+    #[must_use]
     pub fn new(cube: Cube3x3) -> Self {
         Self {
             cube,
