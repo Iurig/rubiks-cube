@@ -57,26 +57,14 @@ impl<P: Puzzle, M: Method<P>> Reconstruction<P, M> {
 
     /// Pushes a [`Puzzle`]s move at the end of the reconstruction, checking which step that applies
     /// to automatically using [`Reconstruction::method`].
-    #[expect(
-        clippy::indexing_slicing,
-        clippy::missing_panics_doc,
-        reason = "panics on broken invariant only"
-    )]
+    #[expect(clippy::indexing_slicing, reason = "panics on broken invariant only")]
     pub fn push(&mut self, m: P::Move) {
         let mut candidate_step_index = self.solution.len();
         let cubes = (0..self.solution().len())
             .map(|index| {
                 let mut cube = P::default().apply(&self.scramble);
                 for i in 0..index {
-                    cube = cube.apply(
-                        &self
-                            .solution()
-                            .iter()
-                            .nth(i)
-                            .expect("solution doesn't have enough steps")
-                            .clone()
-                            .into(),
-                    );
+                    cube = cube.apply(self.solution()[i].moves());
                 }
                 cube
             })
