@@ -117,13 +117,13 @@ impl Method<Cube3x3> for Roux {
             ),
             SecondBlock::SquarePair => chain_steps!(
                 moves: &SB_MOVES, goal: &CMLL_ALGS,
-                "SB Square" => (AlgSet::from_static("r U r'"), AlgSet::from_static("r' U r")),
+                "SB Square" => (AlgSet::from_static("r U r'\nM"), AlgSet::from_static("r' U r\nM")),
                 "SB Pair"
             ),
             SecondBlock::EdgePairPair => chain_steps!(
                 moves: &SB_MOVES, goal: &CMLL_ALGS,
-                "DR" => (AlgSet::from_static("r U r'\n r' U r")),
-                "SB Square" => (AlgSet::from_static("r U r'"), AlgSet::from_static("r' U r")),
+                "DR" => (AlgSet::from_static("r U r'\nr' U r\nM")),
+                "SB Square" => (AlgSet::from_static("r U r'\nM"), AlgSet::from_static("r' U r\nM")),
                 "SB Pair",
             ),
         };
