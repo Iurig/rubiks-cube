@@ -6,8 +6,8 @@ use std::{
 use itertools::iproduct;
 
 use crate::{
-    AlgSet, Algorithm, ByIdentity, Cube3x3, Mask, Piece3x3, PieceSet, Puzzle, Solution, Step,
-    StepError,
+    AlgSet, Algorithm, ByIdentity, Cube3x3, Mask, Piece3x3, PieceSet, Puzzle, SolutionSegment,
+    Step, StepError,
     methods::step::combine_pruned::{PruneTable, PrunedCombine, PrunedGoal},
 };
 
@@ -273,7 +273,7 @@ impl Step<Cube3x3> for LastLayer {
         self.oriented.applies_to(puzzle) && self.post_auf(puzzle).is_some()
     }
 
-    fn solve(&self, puzzle: &mut Cube3x3) -> Result<Solution<Cube3x3>, StepError> {
+    fn solve(&self, puzzle: &mut Cube3x3) -> Result<SolutionSegment<Cube3x3>, StepError> {
         let (pre, alg) = iproduct!(aufs(), self.algs.iter())
             .find(|(pre, alg)| self.is_done(&puzzle.apply(pre).apply(alg)))
             .ok_or(StepError::UnreachableGoal)?;
@@ -281,7 +281,7 @@ impl Step<Cube3x3> for LastLayer {
         let post = self.post_auf(&solved).ok_or(StepError::UnreachableGoal)?;
         *puzzle = solved.apply(&post);
 
-        Ok(Solution::single_segment(
+        Ok(SolutionSegment::with_moves(
             self.name(),
             pre.iter()
                 .chain(alg.iter())

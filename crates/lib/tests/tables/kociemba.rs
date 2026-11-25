@@ -55,7 +55,7 @@ fn phase_2_leaves_a_solved_cube_alone() {
     let solution = phase(&Kociemba.to_technique(), "Phase 2")
         .solve(&mut cube)
         .unwrap();
-    assert_eq!(solution.move_count(), 0);
+    assert_eq!(solution.len(), 0);
     assert_eq!(cube, Cube3x3::default());
 }
 

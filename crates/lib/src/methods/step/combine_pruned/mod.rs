@@ -3,7 +3,7 @@ mod prune_table;
 pub use prune_table::PruneTable;
 use rayon::prelude::*;
 
-use crate::{AlgSet, Algorithm, Labeled, Marker, Puzzle, Solution, Step, StepError};
+use crate::{AlgSet, Algorithm, Labeled, Marker, Puzzle, SolutionSegment, Step, StepError};
 
 use std::{
     borrow::Cow,
@@ -142,7 +142,7 @@ impl<P: Puzzle> Step<P> for PrunedCombine<P> {
         clippy::panic_in_result_fn,
         reason = "panics only on a broken invariant, errors only on unsolvable input"
     )]
-    fn solve(&self, puzzle: &mut P) -> Result<crate::Solution<P>, crate::StepError> {
+    fn solve(&self, puzzle: &mut P) -> Result<crate::SolutionSegment<P>, crate::StepError> {
         /// The largest distance any step reports: a lower bound on the moves left, because
         /// every step must be done at the end. `None` when some step cannot reach its goal.
         fn estimate<P: Puzzle>(steps: &[Box<dyn DistanceStep<P>>], puzzle: &P) -> Option<u8> {
@@ -221,7 +221,7 @@ impl<P: Puzzle> Step<P> for PrunedCombine<P> {
             }
         };
         *puzzle = puzzle.apply(&path);
-        Ok(Solution::single_segment(self.name(), path))
+        Ok(SolutionSegment::with_moves(self.name(), path))
     }
 }
 

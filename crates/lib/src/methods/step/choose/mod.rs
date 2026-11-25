@@ -1,6 +1,6 @@
 use std::{borrow::Cow, sync::Arc};
 
-use crate::{Puzzle, Solution, Step, StepError};
+use crate::{Puzzle, SolutionSegment, Step, StepError};
 
 /// A step that tries several steps and keeps the shortest working solution.
 ///
@@ -72,7 +72,7 @@ impl<P: Puzzle> Step<P> for Shortest<P> {
         self.steps.iter().any(|s| s.can_solve(puzzle))
     }
 
-    fn solve(&self, puzzle: &mut P) -> Result<Solution<P>, StepError> {
+    fn solve(&self, puzzle: &mut P) -> Result<SolutionSegment<P>, StepError> {
         let best = self
             .steps
             .iter()
@@ -83,12 +83,12 @@ impl<P: Puzzle> Step<P> for Shortest<P> {
             })
             .try_fold(
                 None,
-                |best: Option<(Solution<P>, P)>, candidate| match candidate {
+                |best: Option<(SolutionSegment<P>, P)>, candidate| match candidate {
                     Err(StepError::InvalidStartingState { .. }) => Ok(best),
                     Err(e @ (StepError::UnreachableGoal | StepError::Custom(_))) => Err(e),
                     // On a tie the earlier alternative stays.
                     Ok(candidate) => Ok(match best {
-                        Some(best) if best.0.move_count() <= candidate.0.move_count() => Some(best),
+                        Some(best) if best.0.len() <= candidate.0.len() => Some(best),
                         _ => Some(candidate),
                     }),
                 },
@@ -142,8 +142,8 @@ mod tests {
             Cube3x3::from_moves("R")?,
             "only the short moves are applied"
         );
-        assert_eq!(solution.move_count(), 1);
-        let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
+        assert_eq!(solution.len(), 1);
+        let names: Vec<&str> = vec![solution.name()];
         assert_eq!(
             names,
             ["Short"],
@@ -164,7 +164,7 @@ mod tests {
         let solution = choose.solve(&mut cube)?;
 
         assert_eq!(cube, Cube3x3::from_moves("U")?);
-        let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
+        let names: Vec<&str> = vec![solution.name()];
         assert_eq!(names, ["Runs"]);
         Ok(())
     }
@@ -237,7 +237,7 @@ mod tests {
 
             let solution = choose.solve(&mut cube)?;
 
-            let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
+            let names: Vec<&str> = vec![solution.name()];
             assert_eq!(names, ["Short"], "short first: {short_first}");
             assert_eq!(
                 cube,
@@ -259,7 +259,7 @@ mod tests {
 
         let solution = choose.solve(&mut cube)?;
 
-        let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
+        let names: Vec<&str> = vec![solution.name()];
         assert_eq!(names, ["First"]);
         assert_eq!(cube, Cube3x3::from_moves("R")?);
         Ok(())

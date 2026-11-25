@@ -242,7 +242,7 @@ impl<P: Puzzle> Technique<P> {
     pub fn solve_steps(
         &self,
         puzzle: &mut P,
-    ) -> impl Iterator<Item = Result<Solution<P>, SolveError>> {
+    ) -> impl Iterator<Item = Result<SolutionSegment<P>, SolveError>> {
         run_steps(self.steps.iter().cloned(), puzzle)
     }
 
@@ -289,7 +289,7 @@ impl<P: Puzzle> Technique<P> {
 fn run_steps<P: Puzzle>(
     steps: impl IntoIterator<Item = Arc<dyn Step<P>>>,
     puzzle: &mut P,
-) -> impl Iterator<Item = Result<Solution<P>, SolveError>> {
+) -> impl Iterator<Item = Result<SolutionSegment<P>, SolveError>> {
     let mut failed = false;
 
     steps.into_iter().map_while(move |step| {
@@ -314,19 +314,13 @@ fn run_steps<P: Puzzle>(
             Ok(solution) => debug!(
                 "{}: {} moves in {:.0?}: {}",
                 step.name(),
-                solution.move_count(),
+                solution.len(),
                 start.elapsed(),
                 solution
                     .iter()
-                    .map(|segment| segment
-                        .moves()
-                        .clone()
-                        .iter()
-                        .map(ToString::to_string)
-                        .collect::<Vec<_>>()
-                        .join(" "))
-                    .next()
-                    .expect("solution has no segments")
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(" ")
             ),
             Err(e) => debug!("{}: {}", step.name(), e),
         }
@@ -386,7 +380,10 @@ pub trait Method<P: Puzzle>: Debug + Default {
     /// # Ok(())
     /// # }
     /// ```
-    fn solve_steps(&self, puzzle: &mut P) -> impl Iterator<Item = Result<Solution<P>, SolveError>>
+    fn solve_steps(
+        &self,
+        puzzle: &mut P,
+    ) -> impl Iterator<Item = Result<SolutionSegment<P>, SolveError>>
     where
         Self: Sized,
     {

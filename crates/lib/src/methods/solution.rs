@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{Algorithm, Cube3x3, ParseSequenceError, puzzles::Puzzle};
+use crate::{Algorithm, Cube3x3, ParseSequenceError, Technique, puzzles::Puzzle};
 
 /// The moves a method found, as one segment per step, in solving order.
 ///
