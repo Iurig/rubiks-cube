@@ -98,7 +98,7 @@ impl<P: Puzzle> StepSolution<P> {
 
     /// Constructor for an empty [`StepSolution`] with a name.
     #[must_use]
-    pub fn empty(name: &str) -> Self {
+    pub(crate) fn empty(name: &str) -> Self {
         Self {
             name: String::from(name),
             moves: Algorithm::new(),
@@ -123,7 +123,7 @@ impl<P: Puzzle> StepSolution<P> {
     }
 
     /// Append a move to the [`StepSolution`].
-    pub fn push(&mut self, m: P::Move) {
+    pub(crate) fn push(&mut self, m: P::Move) {
         self.moves.push(m);
     }
 
@@ -177,7 +177,7 @@ impl<P: Puzzle> MethodSolution<P> {
     }
 
     /// Constructor for [`MethodSolution`] with named, but empty [`StepSolution`]s.
-    pub fn with_empty_steps<'a>(steps: impl IntoIterator<Item = &'a str>) -> Self {
+    pub(crate) fn with_empty_steps<'a>(steps: impl IntoIterator<Item = &'a str>) -> Self {
         Self {
             step_solutions: steps
                 .into_iter()
