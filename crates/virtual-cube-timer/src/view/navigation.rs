@@ -54,10 +54,7 @@ fn draw_base(
     let scramble_widget =
         Paragraph::new(scramble_text.clone()).block(Block::bordered().title("Scramble"));
 
-    let solve_title = format!(
-        "Solve ({} Method)",
-        app.list_app().timed_solve().method().name()
-    );
+    let solve_title = format!("Solve ({} Method)", app.list_app().timed_solve().method());
 
     let solve_widget = Paragraph::new(solve_text).block(Block::bordered().title(solve_title));
 
@@ -160,7 +157,7 @@ fn view_solve(app: &SolveNavApp, frame: &mut Frame, mut cube: Cube3x3) {
         .step()
         .clone()
         .into_iter()
-        .zip(0..cursor_position_in_recon.x)
+        .zip(0..=app.move_index)
         .fold(cube, |c, (m, _)| c * m);
 
     let (_cube_area, _, solve_area) =
