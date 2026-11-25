@@ -7,6 +7,8 @@ pub mod message;
 pub mod solves;
 pub mod time;
 pub mod view;
+use std::{fmt::Display, str::FromStr};
+
 use clap::{Parser, ValueEnum};
 use rubiks_cube::{Cube3x3, Method, Roux, ZZ};
 
@@ -52,12 +54,22 @@ impl Method<Cube3x3> for ValidMethods {
     }
 }
 
-impl ValidMethods {
-    #[must_use]
-    pub const fn name(&self) -> &str {
+impl FromStr for ValidMethods {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "Roux" => Self::Roux,
+            "ZZ" => Self::Zz,
+            s => return Err(anyhow::format_err!("invalid string {s}")),
+        })
+    }
+}
+
+impl Display for ValidMethods {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Roux => "Roux",
-            Self::Zz => "ZZ",
+            Self::Roux => write!(f, "Roux"),
+            Self::Zz => write!(f, "ZZ"),
         }
     }
 }
