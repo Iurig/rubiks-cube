@@ -79,8 +79,15 @@ fn phase_2_solves_a_domino_state_in_at_most_its_length() {
         "{solution}
 {cube}"
     );
-    assert!(solution.move_count() <= 10, "{solution}");
-    assert!(replay(&start, &solution).is_solved(), "{solution}");
+    assert!(solution.len() <= 10, "{solution}");
+    assert!(
+        replay(
+            &start,
+            &MethodSolution::single_segment("", solution.moves().clone())
+        )
+        .is_solved(),
+        "{solution}"
+    );
 }
 
 #[test]
