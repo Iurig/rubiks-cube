@@ -64,7 +64,7 @@ fn every_roux_option_solves_on_multiple_seeds() -> anyhow::Result<()> {
             SecondBlock::EdgePairPair,
         ] {
             for cmll in [Cmll::OneLook, Cmll::TwoLook] {
-                let roux = Roux::default()
+                let roux = Roux::new()
                     .first_block(fb.clone())
                     .second_block(sb.clone())
                     .cmll(cmll);
