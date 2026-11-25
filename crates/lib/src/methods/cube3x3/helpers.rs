@@ -281,7 +281,7 @@ impl Step<Cube3x3> for LastLayer {
         let post = self.post_auf(&solved).ok_or(StepError::UnreachableGoal)?;
         *puzzle = solved.apply(&post);
 
-        Ok(StepSolution::with_moves(
+        Ok(StepSolution::new(
             self.name(),
             pre.iter()
                 .chain(alg.iter())

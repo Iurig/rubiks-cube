@@ -192,7 +192,7 @@ mod tests {
         let expanded_cube_recon = cube_recon
             .iter()
             .map(|s| {
-                StepSolution::with_moves(
+                StepSolution::new(
                     s.name(),
                     s.iter()
                         .flat_map(|m| {

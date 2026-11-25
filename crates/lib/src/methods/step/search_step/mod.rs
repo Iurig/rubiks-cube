@@ -419,7 +419,7 @@ impl<P: Puzzle> Step<P> for SearchStep<P> {
                 state: p.to_string(),
             });
         }
-        Ok(StepSolution::with_moves(self.name(), self.solve_bfs(p)?))
+        Ok(StepSolution::new(self.name(), self.solve_bfs(p)?))
     }
 }
 

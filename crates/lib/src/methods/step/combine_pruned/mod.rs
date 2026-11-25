@@ -221,7 +221,7 @@ impl<P: Puzzle> Step<P> for PrunedCombine<P> {
             }
         };
         *puzzle = puzzle.apply(&path);
-        Ok(StepSolution::with_moves(self.name(), path))
+        Ok(StepSolution::new(self.name(), path))
     }
 }
 

@@ -87,21 +87,21 @@ impl<P: Puzzle> FromStr for StepSolution<P> {
 }
 
 impl<P: Puzzle> StepSolution<P> {
-    /// Constructor for an empty [`SolutionSegment`] with a name.
-    #[must_use]
-    pub fn new(name: &str) -> Self {
-        Self {
-            name: String::from(name),
-            moves: Algorithm::new(),
-        }
-    }
-
     /// Constructor for a [`SolutionSegment`] with moves.
     #[must_use]
-    pub fn with_moves(name: &str, moves: Algorithm<P>) -> Self {
+    pub fn new(name: &str, moves: Algorithm<P>) -> Self {
         Self {
             name: String::from(name),
             moves,
+        }
+    }
+
+    /// Constructor for an empty [`SolutionSegment`] with a name.
+    #[must_use]
+    pub fn empty(name: &str) -> Self {
+        Self {
+            name: String::from(name),
+            moves: Algorithm::new(),
         }
     }
 
@@ -169,7 +169,7 @@ impl<P: Puzzle> MethodSolution<P> {
         Self {
             step_solutions: steps
                 .into_iter()
-                .map(|name| StepSolution::new(name))
+                .map(|name| StepSolution::empty(name))
                 .collect(),
         }
     }
