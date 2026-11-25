@@ -17,11 +17,11 @@ use crate::{Cube3x3, Inv, Move3x3, MoveModifier, ParseSequenceError, Puzzle};
 /// carrying line number and position along the line, 1 indexed.
 ///
 /// ```no_run
-/// use rubiks_cube::{Algorithm, Cube3x3, Inv, Solution};
+/// use rubiks_cube::{Algorithm, Cube3x3, Inv, MethodSolution};
 /// use rubiks_cube::{Kociemba, Method};
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// let mut cube = Cube3x3::from_moves("R U R' F2")?;
-/// let solution: Solution<Cube3x3> = Kociemba.solve(&mut cube)?;
+/// let solution: MethodSolution<Cube3x3> = Kociemba.solve(&mut cube)?;
 /// let moves: Algorithm<Cube3x3> = solution.moves().copied().collect();
 /// // The inverse of a solution is a scramble that gives back the state it solved.
 /// assert_eq!(

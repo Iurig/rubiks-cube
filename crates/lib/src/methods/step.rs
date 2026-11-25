@@ -25,7 +25,8 @@ pub mod search_step;
 /// this trait to write another kind, such as a step that follows hand-written rules. A step is
 /// `Send + Sync` so that one built step can be shared by many methods through an `Arc`.
 pub trait Step<P: Puzzle>: Send + Sync + Debug {
-    /// The step's name, as it appears in errors and in the [`Solution`] it returns.
+    /// The step's name, as it appears in errors and in the
+    /// [`MethodSolution`](crate::MethodSolution) it returns.
     fn name(&self) -> &str;
 
     /// Whether `puzzle` meets this step's goal.
@@ -34,7 +35,8 @@ pub trait Step<P: Puzzle>: Send + Sync + Debug {
     /// Moves `puzzle` to a state that meets this step's goal and returns the moves it applied.
     ///
     /// The returned moves, applied to `puzzle` as it was, must give `puzzle` as this function
-    /// leaves it. A printed [`Solution`] replays only if every step keeps this promise.
+    /// leaves it. A printed [`MethodSolution`](crate::MethodSolution) replays only if every step
+    /// keeps this promise.
     ///
     /// # Errors
     /// A [`StepError`] when the step cannot start on `puzzle` or cannot reach its goal. The

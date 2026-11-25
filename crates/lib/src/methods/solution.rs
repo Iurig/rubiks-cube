@@ -87,7 +87,7 @@ impl<P: Puzzle> FromStr for StepSolution<P> {
 }
 
 impl<P: Puzzle> StepSolution<P> {
-    /// Constructor for a [`SolutionSegment`] with moves.
+    /// Constructor for a [`StepSolution`] with moves.
     #[must_use]
     pub fn new(name: &str, moves: Algorithm<P>) -> Self {
         Self {
@@ -96,7 +96,7 @@ impl<P: Puzzle> StepSolution<P> {
         }
     }
 
-    /// Constructor for an empty [`SolutionSegment`] with a name.
+    /// Constructor for an empty [`StepSolution`] with a name.
     #[must_use]
     pub fn empty(name: &str) -> Self {
         Self {
@@ -117,12 +117,12 @@ impl<P: Puzzle> StepSolution<P> {
         &self.moves
     }
 
-    /// Iterates on the [`SolutionSegment`]s moves.
+    /// Iterates on the [`StepSolution`]s moves.
     pub fn iter(&self) -> impl Iterator<Item = &P::Move> {
         self.moves().iter()
     }
 
-    /// Append a move to the [`SolutionSegment`].
+    /// Append a move to the [`StepSolution`].
     pub fn push(&mut self, m: P::Move) {
         self.moves.push(m);
     }
@@ -161,7 +161,7 @@ impl<P: Puzzle> MethodSolution<P> {
         self.step_solutions.iter()
     }
 
-    /// Returns an [`Iterator`] overall moves in the [`Solution`].
+    /// Returns an [`Iterator`] overall moves in the [`MethodSolution`].
     pub fn moves(&self) -> impl Iterator<Item = &P::Move> {
         self.step_solutions.iter().flat_map(StepSolution::iter)
     }
@@ -176,7 +176,7 @@ impl<P: Puzzle> MethodSolution<P> {
             .sum()
     }
 
-    /// Constructor for [`Solution`] with named, but empty [`SolutionSegment`]s.
+    /// Constructor for [`MethodSolution`] with named, but empty [`StepSolution`]s.
     pub fn with_empty_steps<'a>(steps: impl IntoIterator<Item = &'a str>) -> Self {
         Self {
             step_solutions: steps
@@ -214,7 +214,7 @@ impl<P: Puzzle> IndexMut<usize> for MethodSolution<P> {
     }
 }
 
-/// Builds a solution from [`SolutionSegment`]s, in order.
+/// Builds a solution from [`StepSolution`]s, in order.
 impl<P: Puzzle> FromIterator<StepSolution<P>> for MethodSolution<P> {
     fn from_iter<I: IntoIterator<Item = StepSolution<P>>>(iter: I) -> Self {
         Self {

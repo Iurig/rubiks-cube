@@ -41,7 +41,7 @@
 //!
 //! A [`Method`], such as [`Roux`] or [`Kociemba`], turns its options into a [`Technique`]: an
 //! ordered list of [`Step`]s. Roux's builder methods, such as [`Roux::first_block`], choose
-//! between its step variants. Solving returns a [`Solution`], which prints as notation with
+//! between its step variants. Solving returns a [`MethodSolution`], which prints as notation with
 //! one line per step:
 //!
 //! ```rust
@@ -105,6 +105,7 @@ pub use methods::{
     Method, MethodSolution, StepSolution, Technique, TechniqueBuilder,
     context::BuildContext,
     cube3x3::{kociemba::Kociemba, roux, roux::Roux, zz, zz::ZZ},
+    recon::Reconstruction,
     step::{
         Step, StepBuilder,
         choose::Shortest,
