@@ -2,9 +2,7 @@ use std::{fmt::Display, fs, io::ErrorKind, path::PathBuf, str::FromStr, time::Du
 
 use anyhow::{Result, anyhow};
 use dirs::config_dir;
-use rubiks_cube::{
-    Algorithm, Cube3x3, MethodSolution, ParseSequenceError, Reconstruction, StepSolution,
-};
+use rubiks_cube::{Algorithm, Cube3x3, MethodSolution, Reconstruction};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 use crate::{
@@ -19,21 +17,6 @@ pub struct SolveList(Vec<(usize, TimedSolve)>);
 pub struct TimedSolve {
     recon: Reconstruction<Cube3x3, ValidMethods>,
     time: Duration,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ReconWithScramble {
-    scramble: Algorithm<Cube3x3>,
-    solution: MethodSolution<Cube3x3>,
-}
-
-impl From<Reconstruction<Cube3x3, ValidMethods>> for ReconWithScramble {
-    fn from(value: Reconstruction<Cube3x3, ValidMethods>) -> Self {
-        Self {
-            scramble: value.scramble().clone(),
-            solution: value.solution().clone(),
-        }
-    }
 }
 
 impl TimedSolve {
@@ -60,23 +43,6 @@ impl TimedSolve {
     #[must_use]
     pub const fn method(&self) -> &ValidMethods {
         self.recon.method()
-    }
-}
-
-impl ReconWithScramble {
-    #[must_use]
-    pub const fn new(scramble: Algorithm<Cube3x3>, solution: MethodSolution<Cube3x3>) -> Self {
-        Self { scramble, solution }
-    }
-
-    #[must_use]
-    pub const fn scramble(&self) -> &Algorithm<Cube3x3> {
-        &self.scramble
-    }
-
-    #[must_use]
-    pub const fn solution(&self) -> &MethodSolution<Cube3x3> {
-        &self.solution
     }
 }
 
@@ -152,26 +118,6 @@ impl Display for TimedSolve {
             self.scramble(),
             self.solution()
         )
-    }
-}
-
-impl FromStr for ReconWithScramble {
-    type Err = anyhow::Error;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self {
-            scramble: s
-                .lines()
-                .next()
-                .ok_or_else(|| anyhow::format_err!("reconstruction has no first line"))?
-                .parse()?,
-            solution: s
-                .lines()
-                .skip(1)
-                .map(str::parse::<StepSolution<Cube3x3>>)
-                .collect::<Result<Vec<_>, ParseSequenceError>>()?
-                .into_iter()
-                .collect(),
-        })
     }
 }
 
