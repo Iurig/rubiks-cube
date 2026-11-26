@@ -32,6 +32,10 @@ use crate::{Cube3x3, Inv, Move3x3, MoveModifier, ParseSequenceError, Puzzle};
 /// # }
 /// ```
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_with::SerializeDisplay, serde_with::DeserializeFromStr)
+)]
 pub struct Algorithm<P: Puzzle>(Vec<P::Move>);
 
 /// The moves in reverse order, each inverted: applying an algorithm and then its inverse leaves
