@@ -1,17 +1,36 @@
 use crate::{Algorithm, FromAlg, Method, MethodSolution, Puzzle, Step, Technique};
 
-use std::fmt::Display;
+use std::{fmt::Display, hash::Hash};
 
 /// A (possibly incomplete) reconstruction of a solve.
 ///
 /// Designed so, once a method has been specified, moves can be pushed into it using
 /// [`push`](Reconstruction::push), and step separation is done automatically.
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug)]
 pub struct Reconstruction<P: Puzzle, M: Method<P>> {
     scramble: Algorithm<P>,
     solution: MethodSolution<P>,
     method: M,
     puzzle: P,
+    technique: Technique<P>,
+}
+
+impl<P: Puzzle, M: Method<P> + PartialEq> PartialEq for Reconstruction<P, M> {
+    fn eq(&self, other: &Self) -> bool {
+        self.scramble.eq(&other.scramble)
+            && self.solution.eq(&other.solution)
+            && self.method.eq(&other.method)
+    }
+}
+
+impl<P: Puzzle, M: Method<P> + Eq> Eq for Reconstruction<P, M> {}
+
+impl<P: Puzzle, M: Method<P> + Hash> Hash for Reconstruction<P, M> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.scramble.hash(state);
+        self.solution.hash(state);
+        self.method.hash(state);
+    }
 }
 
 impl<P: Puzzle, M: Method<P> + Clone> Clone for Reconstruction<P, M> {
@@ -21,6 +40,7 @@ impl<P: Puzzle, M: Method<P> + Clone> Clone for Reconstruction<P, M> {
             solution: self.solution().clone(),
             method: self.method.clone(),
             puzzle: self.puzzle.clone(),
+            technique: self.technique.clone(),
         }
     }
 }
@@ -39,13 +59,10 @@ impl<P: Puzzle, M: Method<P>> Display for Reconstruction<P, M> {
 
 /// Pushes all moves in the given iterator on the [`Reconstruction`], checking the appropriate
 /// step for each one.
-///
-/// More performant than repeated [`push`](Reconstruction::push)ing.
 impl<P: Puzzle, M: Method<P>> Extend<P::Move> for Reconstruction<P, M> {
     fn extend<I: IntoIterator<Item = P::Move>>(&mut self, iter: I) {
-        let technique = self.method.to_technique();
         for m in iter {
-            self.push_with_technique(m, &technique);
+            self.push(m);
         }
     }
 }
@@ -54,13 +71,13 @@ impl<P: Puzzle, M: Method<P>> Reconstruction<P, M> {
     /// Creates a new [`Reconstruction`].
     #[must_use]
     pub fn new(scramble: Algorithm<P>, method: M) -> Self {
+        let technique = method.to_technique();
         Self {
             puzzle: P::from_alg(&scramble),
             scramble,
-            solution: MethodSolution::with_empty_steps(
-                method.to_technique().steps().map(Step::name),
-            ),
+            solution: MethodSolution::with_empty_steps(technique.steps().map(Step::name)),
             method,
+            technique,
         }
     }
 
@@ -82,11 +99,6 @@ impl<P: Puzzle, M: Method<P>> Reconstruction<P, M> {
     /// Pushes a [`Puzzle`]s move at the end of the reconstruction, checking which step that applies
     /// to automatically using [`Reconstruction::method`].
     pub fn push(&mut self, m: P::Move) {
-        let technique = self.method.to_technique();
-        self.push_with_technique(m, &technique);
-    }
-
-    fn push_with_technique(&mut self, m: P::Move, technique: &Technique<P>) {
         let mut candidate_step_index = self
             .solution
             .iter()
@@ -95,7 +107,7 @@ impl<P: Puzzle, M: Method<P>> Reconstruction<P, M> {
             .find(|(_, s)| !s.is_empty())
             .map_or(0, |(i, _)| i);
 
-        while technique[candidate_step_index].is_done(&self.puzzle) {
+        while self.technique[candidate_step_index].is_done(&self.puzzle) {
             candidate_step_index += 1;
         }
 
