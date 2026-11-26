@@ -270,12 +270,12 @@ impl<P: Puzzle> Technique<P> {
         self.solve_steps(puzzle).collect()
     }
 
-    /// Returns the steps of the Technique as an [`Iterator`](core::iter::Iterator).
+    /// Returns the steps of the Technique as an [`Iterator`].
     pub fn steps(&self) -> impl Iterator<Item = &dyn Step<P>> {
         self.steps.iter().map(|s| &**s)
     }
 
-    /// Returns an [`Iterator`](core::iter::Iterator) over the solutions of every step which
+    /// Returns an [`Iterator`] over the solutions of every step which
     /// iterating over solves the [`puzzle`](crate::Puzzle).
     pub fn solve_steps(
         &self,
