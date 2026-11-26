@@ -53,10 +53,7 @@ mod tests {
 
     use super::*;
     use crate::{Center, Corner, Cube3x3, Edge, Piece3x3, PieceSet};
-    use statrs::{
-        distribution::{Binomial, DiscreteCDF},
-        statistics::Distribution,
-    };
+    use statrs::distribution::{Binomial, DiscreteCDF};
 
     const FIRST_BLOCK: [Piece3x3; 6] = [
         Piece3x3::Center(Center::L),
@@ -92,13 +89,6 @@ mod tests {
                 )
                 .unwrap();
                 let rarity = distr.cdf(key_set.iter().len() as u64);
-                dbg!(
-                    1.0 - (1.0 - 1.0 / ($u_n::MAX as f64)).powi(runs as i32),
-                    runs,
-                    key_set.iter().len() as u64,
-                    rarity,
-                    distr.mean()
-                );
                 assert!(rarity > P_VALUE);
                 assert!(key_set.iter().len() > (runs / 3) as usize);
             };
@@ -146,12 +136,6 @@ mod tests {
             )
             .unwrap();
             let rarity = distr.cdf(key_set.iter().len() as u64);
-            dbg!(
-                1.0 - (1.0 - 1.0 / (u32::MAX as f64)).powi(runs as i32),
-                key_set.iter().len() as u32,
-                rarity,
-                distr.mean()
-            );
             assert!(rarity > P_VALUE);
         };
     }

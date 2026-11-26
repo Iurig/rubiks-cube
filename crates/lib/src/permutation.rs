@@ -172,12 +172,9 @@ mod tests {
         let mut perm = Permutation::<Zn<8>>::new();
         assert_eq!(
             *perm.swap_cycle([0, 1, 4]),
-            Permutation::<Zn<8>>::try_from_iter(dbg!(
-                [4, 0, 2, 3, 1, 5, 6, 7]
-                    .iter()
-                    .map(|&i| Zn::<8>::new(i))
-                    .collect::<Vec<_>>()
-            ))?
+            Permutation::<Zn<8>>::try_from_iter(
+                [4, 0, 2, 3, 1, 5, 6, 7].iter().map(|&i| Zn::<8>::new(i))
+            )?
         );
         Ok(())
     }

@@ -85,7 +85,7 @@
 mod error;
 mod fast_hash;
 pub mod indexed;
-mod methods;
+pub mod methods;
 mod ops;
 mod ordinal;
 pub mod permutation;

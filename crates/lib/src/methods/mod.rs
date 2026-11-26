@@ -1,9 +1,10 @@
-pub mod cube3x3;
+//! Utilities for [`Method`], [`Technique`], and [`Step`].
+pub(crate) mod cube3x3;
 //pub mod neutrality;
-pub mod context;
-pub mod recon;
+pub(crate) mod context;
+pub(crate) mod recon;
 mod solution;
-pub mod step;
+pub(crate) mod step;
 #[cfg(test)]
 mod test_steps;
 
@@ -11,7 +12,13 @@ use dyn_clone::arc_make_mut;
 use log::debug;
 pub use solution::{MethodSolution, StepSolution};
 
-use std::{fmt::Debug, ops::Index, sync::Arc, time::Instant};
+use std::{
+    fmt::Debug,
+    iter::{FusedIterator, Map},
+    ops::Index,
+    sync::Arc,
+    time::Instant,
+};
 
 use crate::{
     PieceSet, SolveError, TechniqueError,
@@ -196,11 +203,41 @@ impl<P: Puzzle> IntoIterator for Technique<P> {
     }
 }
 
+/// Iterator over [Step] references.
+#[derive(Debug, Clone)]
+pub struct Steps<'a, P>(
+    #[expect(
+        clippy::type_complexity,
+        reason = "inherently complex, but grey-boxed type"
+    )]
+    Map<std::slice::Iter<'a, Arc<dyn Step<P>>>, fn(&'a Arc<dyn Step<P>>) -> &'a dyn Step<P>>,
+);
+
+impl<'a, P: Puzzle> Iterator for Steps<'a, P> {
+    type Item = &'a dyn Step<P>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.next()
+    }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
+    }
+}
+
+impl<P: Puzzle> ExactSizeIterator for Steps<'_, P> {}
+
+impl<P: Puzzle> DoubleEndedIterator for Steps<'_, P> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.0.next_back()
+    }
+}
+
+impl<P: Puzzle> FusedIterator for Steps<'_, P> {}
+
 impl<'a, P: Puzzle> IntoIterator for &'a Technique<P> {
-    type IntoIter = std::slice::Iter<'a, Arc<dyn Step<P>>>;
-    type Item = &'a Arc<dyn Step<P>>;
+    type IntoIter = Steps<'a, P>;
+    type Item = &'a dyn Step<P>;
     fn into_iter(self) -> Self::IntoIter {
-        self.steps.iter()
+        Steps(self.steps.iter().map(|s| &**s))
     }
 }
 
@@ -233,12 +270,12 @@ impl<P: Puzzle> Technique<P> {
         self.solve_steps(puzzle).collect()
     }
 
-    /// Returns the steps of the Technique as an [`Iterator`](core::iter::Iterator).
+    /// Returns the steps of the Technique as an [`Iterator`].
     pub fn steps(&self) -> impl Iterator<Item = &dyn Step<P>> {
         self.steps.iter().map(|s| &**s)
     }
 
-    /// Returns an [`Iterator`](core::iter::Iterator) over the solutions of every step which
+    /// Returns an [`Iterator`] over the solutions of every step which
     /// iterating over solves the [`puzzle`](crate::Puzzle).
     pub fn solve_steps(
         &self,
@@ -248,7 +285,7 @@ impl<P: Puzzle> Technique<P> {
     }
 
     /// Iterate over the steps of the technique by reference.
-    pub fn iter(&self) -> impl Iterator<Item = &Arc<dyn Step<P>>> {
+    pub fn iter(&self) -> impl Iterator<Item = &dyn Step<P>> {
         self.into_iter()
     }
 

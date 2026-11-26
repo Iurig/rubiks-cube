@@ -46,7 +46,10 @@ pub enum MoveModifier {
 
 /// A move on [`Cube3x3`].
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_with::SerializeDisplay, serde_with::DeserializeFromStr)
+)]
 pub struct Move3x3 {
     part: MovablePart,
     modifier: MoveModifier,

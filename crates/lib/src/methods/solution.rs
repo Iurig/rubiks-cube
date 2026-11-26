@@ -1,6 +1,6 @@
 use std::{
     fmt::Display,
-    ops::{Index, IndexMut, Mul},
+    ops::{Index, Mul},
     str::FromStr,
 };
 
@@ -19,12 +19,20 @@ use crate::{Algorithm, Cube3x3, ParseSequenceError, puzzles::Puzzle};
 ///
 /// Build one with [`single_segment`](Self::single_segment), or collect solutions to join them.
 #[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_with::SerializeDisplay, serde_with::DeserializeFromStr)
+)]
 pub struct MethodSolution<P: Puzzle> {
     step_solutions: Vec<StepSolution<P>>,
 }
 
 /// Segment of a solution: includes a name and the moves that make the solution up.
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_with::SerializeDisplay, serde_with::DeserializeFromStr)
+)]
 pub struct StepSolution<P: Puzzle> {
     name: String,
     moves: Algorithm<P>,
@@ -207,9 +215,9 @@ impl<P: Puzzle> Index<usize> for MethodSolution<P> {
     }
 }
 
-impl<P: Puzzle> IndexMut<usize> for MethodSolution<P> {
+impl<P: Puzzle> MethodSolution<P> {
     #[expect(clippy::indexing_slicing, reason = "it defines the indexing API")]
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+    pub(crate) fn index_mut(&mut self, index: usize) -> &mut StepSolution<P> {
         &mut self.step_solutions[index]
     }
 }
