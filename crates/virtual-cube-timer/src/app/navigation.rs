@@ -67,21 +67,13 @@ impl SolveNavApp {
     }
 
     #[must_use]
-    #[expect(
-        clippy::missing_panics_doc,
-        reason = "panics on broken invariants only"
-    )]
     pub fn step(&self) -> &StepSolution<Cube3x3> {
-        self.list_app
-            .solution()
-            .iter()
-            .nth(self.step_index)
-            .expect("invalid step")
+        &self.list_app.solution()[self.step_index]
     }
 
     #[must_use]
     pub fn cur_step_move_count(&self) -> usize {
-        self.step().iter().count()
+        self.step().len()
     }
 }
 
@@ -108,7 +100,7 @@ impl ListNavApp {
 
     #[must_use]
     pub fn step_count(&self) -> usize {
-        self.solution().iter().count()
+        self.solution().len()
     }
 
     pub fn solve_iter(&self) -> impl Iterator<Item = StepSolution<Cube3x3>> {
