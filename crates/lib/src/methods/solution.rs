@@ -1,6 +1,6 @@
 use std::{
     fmt::Display,
-    ops::{Index, IndexMut, Mul},
+    ops::{Index, Mul},
     str::FromStr,
 };
 
@@ -207,9 +207,9 @@ impl<P: Puzzle> Index<usize> for MethodSolution<P> {
     }
 }
 
-impl<P: Puzzle> IndexMut<usize> for MethodSolution<P> {
+impl<P: Puzzle> MethodSolution<P> {
     #[expect(clippy::indexing_slicing, reason = "it defines the indexing API")]
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+    pub(crate) fn index_mut(&mut self, index: usize) -> &mut StepSolution<P> {
         &mut self.step_solutions[index]
     }
 }

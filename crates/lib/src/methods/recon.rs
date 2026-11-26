@@ -1,5 +1,7 @@
 use crate::{Algorithm, FromAlg, Method, MethodSolution, Puzzle, Step, Technique};
 
+use std::fmt::Display;
+
 /// A (possibly incomplete) reconstruction of a solve.
 ///
 /// Designed so, once a method has been specified, moves can be pushed into it using
@@ -26,6 +28,12 @@ impl<P: Puzzle, M: Method<P> + Clone> Clone for Reconstruction<P, M> {
 impl<P: Puzzle, M: Method<P>> From<Reconstruction<P, M>> for MethodSolution<P> {
     fn from(value: Reconstruction<P, M>) -> Self {
         value.solution
+    }
+}
+
+impl<P: Puzzle, M: Method<P>> Display for Reconstruction<P, M> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}\n{}", self.scramble(), self.solution())
     }
 }
 
@@ -78,7 +86,7 @@ impl<P: Puzzle, M: Method<P>> Reconstruction<P, M> {
             candidate_step_index += 1;
         }
 
-        self.solution[candidate_step_index].push(m);
+        self.solution.index_mut(candidate_step_index).push(m);
         self.puzzle = self.puzzle.clone() * m;
     }
 
