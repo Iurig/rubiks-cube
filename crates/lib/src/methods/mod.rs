@@ -1,6 +1,7 @@
 pub mod cube3x3;
 //pub mod neutrality;
 pub mod context;
+pub mod recon;
 mod solution;
 pub mod step;
 #[cfg(test)]
@@ -8,7 +9,7 @@ mod test_steps;
 
 use dyn_clone::arc_make_mut;
 use log::debug;
-pub use solution::{Solution, SolutionSegment};
+pub use solution::{MethodSolution, StepSolution};
 
 use std::{fmt::Debug, ops::Index, sync::Arc, time::Instant};
 
@@ -228,7 +229,7 @@ impl<P: Puzzle> Technique<P> {
     /// # Errors
     /// Errors if any step fails to start, to complete, or if it completes but isn't solved at the
     /// end.
-    pub fn solve(&self, puzzle: &mut P) -> Result<Solution<P>, SolveError> {
+    pub fn solve(&self, puzzle: &mut P) -> Result<MethodSolution<P>, SolveError> {
         self.solve_steps(puzzle).collect()
     }
 
@@ -242,7 +243,7 @@ impl<P: Puzzle> Technique<P> {
     pub fn solve_steps(
         &self,
         puzzle: &mut P,
-    ) -> impl Iterator<Item = Result<Solution<P>, SolveError>> {
+    ) -> impl Iterator<Item = Result<StepSolution<P>, SolveError>> {
         run_steps(self.steps.iter().cloned(), puzzle)
     }
 
@@ -289,7 +290,7 @@ impl<P: Puzzle> Technique<P> {
 fn run_steps<P: Puzzle>(
     steps: impl IntoIterator<Item = Arc<dyn Step<P>>>,
     puzzle: &mut P,
-) -> impl Iterator<Item = Result<Solution<P>, SolveError>> {
+) -> impl Iterator<Item = Result<StepSolution<P>, SolveError>> {
     let mut failed = false;
 
     steps.into_iter().map_while(move |step| {
@@ -314,19 +315,13 @@ fn run_steps<P: Puzzle>(
             Ok(solution) => debug!(
                 "{}: {} moves in {:.0?}: {}",
                 step.name(),
-                solution.move_count(),
+                solution.len(),
                 start.elapsed(),
                 solution
                     .iter()
-                    .map(|segment| segment
-                        .moves()
-                        .clone()
-                        .iter()
-                        .map(ToString::to_string)
-                        .collect::<Vec<_>>()
-                        .join(" "))
-                    .next()
-                    .expect("solution has no segments")
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(" ")
             ),
             Err(e) => debug!("{}: {}", step.name(), e),
         }
@@ -360,7 +355,7 @@ pub trait Method<P: Puzzle>: Debug + Default {
     /// # Errors
     /// The first [`SolveError`]. No later step runs, and `puzzle` is left as the failing step
     /// left it.
-    fn solve(&self, puzzle: &mut P) -> Result<Solution<P>, SolveError>
+    fn solve(&self, puzzle: &mut P) -> Result<MethodSolution<P>, SolveError>
     where
         Self: Sized,
     {
@@ -386,7 +381,10 @@ pub trait Method<P: Puzzle>: Debug + Default {
     /// # Ok(())
     /// # }
     /// ```
-    fn solve_steps(&self, puzzle: &mut P) -> impl Iterator<Item = Result<Solution<P>, SolveError>>
+    fn solve_steps(
+        &self,
+        puzzle: &mut P,
+    ) -> impl Iterator<Item = Result<StepSolution<P>, SolveError>>
     where
         Self: Sized,
     {

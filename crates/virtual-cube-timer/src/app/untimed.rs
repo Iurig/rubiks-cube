@@ -13,6 +13,14 @@ pub struct UntimedApp {
 }
 
 impl UntimedApp {
+    #[must_use]
+    pub fn new(cube: Cube3x3) -> Self {
+        Self {
+            cube,
+            keybinds: Keybinds::try_from_config().unwrap_or_default(),
+        }
+    }
+
     pub fn update(&mut self, message: &CubeMessage) {
         match message {
             CubeMessage::Apply(m) => self.cube *= *m,
@@ -38,5 +46,36 @@ impl UntimedApp {
             _ => (),
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crossterm::event::KeyModifiers;
+    use rubiks_cube::{Algorithm, FromAlg};
+
+    use super::*;
+
+    #[test]
+    fn keybinds_test() {
+        let mut app = UntimedApp::new(Cube3x3::default());
+
+        let sexy = Algorithm::<Cube3x3>::from_static("R U R' U'");
+
+        for m in &sexy {
+            assert_eq!(
+                app.update_with_message(KeyEvent::from(
+                    KeyPress::try_from_move(*m, &Keybinds::from_config()).unwrap(),
+                )),
+                None
+            );
+        }
+
+        assert_eq!(app.cube, Cube3x3::from_alg(&sexy));
+
+        assert_eq!(
+            app.update_with_message(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE)),
+            Some(Message::ExitProgram)
+        );
     }
 }

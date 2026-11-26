@@ -5,7 +5,7 @@ use std::sync::{
     atomic::{AtomicUsize, Ordering},
 };
 
-use crate::{Algorithm, Cube3x3, Puzzle, Solution, Step, StepError};
+use crate::{Algorithm, Cube3x3, Puzzle, Step, StepError, StepSolution};
 
 /// A step whose result is fixed in advance. `solve` either returns the error from `error`,
 /// or applies `moves` to the cube and returns them as one segment named after the step.
@@ -65,7 +65,7 @@ impl Step<Cube3x3> for FixedStep {
         self.done
     }
 
-    fn solve(&self, puzzle: &mut Cube3x3) -> Result<Solution<Cube3x3>, StepError> {
+    fn solve(&self, puzzle: &mut Cube3x3) -> Result<StepSolution<Cube3x3>, StepError> {
         self.runs.fetch_add(1, Ordering::Relaxed);
         if let Some(error) = self.error {
             return Err(error());
@@ -75,6 +75,6 @@ impl Step<Cube3x3> for FixedStep {
             .parse::<Algorithm<Cube3x3>>()
             .map_err(|e| StepError::Custom(Box::new(e)))?;
         *puzzle = puzzle.apply(&moves);
-        Ok(Solution::single_segment(self.name, moves))
+        Ok(StepSolution::new(self.name, moves))
     }
 }

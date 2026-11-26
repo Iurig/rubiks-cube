@@ -6,7 +6,7 @@ use std::{
 };
 
 use bimap::BiHashMap;
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers};
 use dirs::config_dir;
 use rubiks_cube::Move3x3;
 use serde::{Deserialize, Serialize};
@@ -40,6 +40,11 @@ impl KeyPress {
     pub const fn modifiers(&self) -> KeyModifiers {
         self.1
     }
+
+    #[must_use]
+    pub fn try_from_move(m: Move3x3, keybinds: &Keybinds) -> Option<Self> {
+        keybinds.moves.get_by_right(&m).copied()
+    }
 }
 
 impl Display for KeyPress {
@@ -50,6 +55,17 @@ impl Display for KeyPress {
             write!(f, "{}+{}", self.modifiers(), self.code())?;
         }
         Ok(())
+    }
+}
+
+impl From<KeyPress> for KeyEvent {
+    fn from(value: KeyPress) -> Self {
+        Self {
+            code: value.code(),
+            modifiers: value.modifiers(),
+            kind: KeyEventKind::Press,
+            state: KeyEventState::NONE,
+        }
     }
 }
 
@@ -130,7 +146,7 @@ impl Keybinds {
         self.moves.get_by_left(key_press).copied()
     }
 
-    pub fn from_config() -> anyhow::Result<Self> {
+    pub fn try_from_config() -> anyhow::Result<Self> {
         let dir = config_dir()
             .map(|dir| dir.join("virtual_cube_timer"))
             .expect("manually written");
@@ -150,6 +166,11 @@ impl Keybinds {
             }
             Err(e) => Err(e.into()),
         }
+    }
+
+    #[must_use]
+    pub fn from_config() -> Self {
+        Self::try_from_config().unwrap_or_default()
     }
 }
 

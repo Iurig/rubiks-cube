@@ -1,5 +1,5 @@
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, Solution, SolutionSegment};
+use rubiks_cube::{Algorithm, Cube3x3, MethodSolution, StepSolution};
 
 use crate::{
     message::{ListNavMessage, Message, NavigationMessage, SolveNavMessage},
@@ -47,16 +47,20 @@ impl SolveNavApp {
                 self.move_index = self.move_index.saturating_sub(1);
             }
             SolveNavMessage::NextMove => {
-                self.move_index =
-                    std::cmp::min(self.move_index + 1, self.cur_step_move_count() - 1);
+                self.move_index = std::cmp::min(
+                    self.move_index + 1,
+                    self.cur_step_move_count().saturating_sub(1),
+                );
             }
             SolveNavMessage::PreviousStep => {
                 self.step_index = self.step_index.saturating_sub(1);
                 clamp_move(self);
             }
             SolveNavMessage::NextStep => {
-                self.step_index =
-                    std::cmp::min(self.step_index + 1, self.list_app.step_count() - 1);
+                self.step_index = std::cmp::min(
+                    self.step_index + 1,
+                    self.list_app.step_count().saturating_sub(1),
+                );
                 clamp_move(self);
             }
         }
@@ -67,7 +71,7 @@ impl SolveNavApp {
         clippy::missing_panics_doc,
         reason = "panics on broken invariants only"
     )]
-    pub fn step(&self) -> &SolutionSegment<Cube3x3> {
+    pub fn step(&self) -> &StepSolution<Cube3x3> {
         self.list_app
             .solution()
             .iter()
@@ -90,7 +94,7 @@ impl ListNavApp {
     }
 
     #[must_use]
-    pub fn solution(&self) -> &Solution<Cube3x3> {
+    pub fn solution(&self) -> &MethodSolution<Cube3x3> {
         self.timed_solve().solution()
     }
 
@@ -107,7 +111,7 @@ impl ListNavApp {
         self.solution().iter().count()
     }
 
-    pub fn solve_iter(&self) -> impl Iterator<Item = SolutionSegment<Cube3x3>> {
+    pub fn solve_iter(&self) -> impl Iterator<Item = StepSolution<Cube3x3>> {
         self.solution().iter().cloned()
     }
 }
@@ -241,6 +245,8 @@ mod tests {
 
         assert_eq!(app.list_app().solve_index, 19, "{app:?}");
 
+        dbg!(&app);
+
         assert!(app.update_with_message(key_press(KeyCode::Enter)).is_none());
 
         let mut prev_move_index = -1isize;
@@ -252,9 +258,10 @@ mod tests {
         }
 
         assert_eq!(
-            prev_move_index.cast_unsigned() + 1,
+            (prev_move_index + 1).cast_unsigned(),
             app.as_solve_app().unwrap().cur_step_move_count(),
-            "{}",
+            "{}:{}",
+            app.list_app().solve_index,
             app.list_app().solution()
         );
 

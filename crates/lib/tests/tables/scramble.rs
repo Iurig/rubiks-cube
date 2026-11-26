@@ -1,6 +1,8 @@
 use rubiks_cube::*;
+use rubiks_cube::{Cube3x3, FromAlg, Method, Puzzle, Reconstruction};
 
 #[test]
+#[ntest::timeout(20000)]
 fn scramble_and_solve_with_parsing_round_trip() -> anyhow::Result<()> {
     let scramble = Cube3x3::scramble_with_seed(0)?;
     let solution = Roux::default()
@@ -18,5 +20,42 @@ fn a_random_scramble_algorithm_leaves_the_cube_unsolved() -> anyhow::Result<()> 
         !Cube3x3::default().apply(&scramble).is_solved(),
         "{scramble}"
     );
+    Ok(())
+}
+
+#[test]
+#[ntest::timeout(15000)]
+fn every_roux_option_agrees_with_recon() -> anyhow::Result<()> {
+    use rubiks_cube::roux::*;
+    let seeds = 4;
+    let scrambles = (206..206 + seeds)
+        .map(Cube3x3::scramble_with_seed)
+        .collect::<Result<Vec<_>, _>>()?;
+    for fb in [
+        FirstBlock::OneLook,
+        FirstBlock::SquarePair,
+        FirstBlock::EdgePairPair,
+    ] {
+        for sb in [
+            SecondBlock::OneLook,
+            SecondBlock::SquarePair,
+            SecondBlock::EdgePairPair,
+        ] {
+            for cmll in [Cmll::OneLook, Cmll::TwoLook] {
+                let roux = Roux::new()
+                    .first_block(fb.clone())
+                    .second_block(sb.clone())
+                    .cmll(cmll);
+                for scramble in &scrambles {
+                    let mut scrambled_cube = Cube3x3::from_alg(scramble);
+                    let expected = roux.clone().solve(&mut scrambled_cube).unwrap();
+                    let mut recon = Reconstruction::new(scramble.clone(), roux.clone());
+                    recon.extend(expected.moves().copied());
+                    assert_eq!(expected, recon.into());
+                    assert!(scrambled_cube.is_solved());
+                }
+            }
+        }
+    }
     Ok(())
 }

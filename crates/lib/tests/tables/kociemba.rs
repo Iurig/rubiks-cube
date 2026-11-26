@@ -35,7 +35,7 @@ fn in_domino_subgroup(puzzle: &Cube3x3) -> bool {
 }
 
 /// The moves of `solution`, all segments in order, applied to `start`.
-fn replay(start: &Cube3x3, solution: &Solution<Cube3x3>) -> Cube3x3 {
+fn replay(start: &Cube3x3, solution: &MethodSolution<Cube3x3>) -> Cube3x3 {
     solution.moves().fold(*start, |cube, &m| cube * m)
 }
 
@@ -55,7 +55,7 @@ fn phase_2_leaves_a_solved_cube_alone() {
     let solution = phase(&Kociemba.to_technique(), "Phase 2")
         .solve(&mut cube)
         .unwrap();
-    assert_eq!(solution.move_count(), 0);
+    assert_eq!(solution.len(), 0);
     assert_eq!(cube, Cube3x3::default());
 }
 
@@ -79,8 +79,15 @@ fn phase_2_solves_a_domino_state_in_at_most_its_length() {
         "{solution}
 {cube}"
     );
-    assert!(solution.move_count() <= 10, "{solution}");
-    assert!(replay(&start, &solution).is_solved(), "{solution}");
+    assert!(solution.len() <= 10, "{solution}");
+    assert!(
+        replay(
+            &start,
+            &MethodSolution::single_segment("", solution.moves().clone())
+        )
+        .is_solved(),
+        "{solution}"
+    );
 }
 
 #[test]
@@ -112,7 +119,7 @@ fn kociemba_solves_a_scramble() {
     let start = Cube3x3::scrambled_with_seed(0);
     let mut cube = start;
     let solution = Kociemba.solve(&mut cube).unwrap();
-    let names: Vec<&str> = solution.iter().map(SolutionSegment::name).collect();
+    let names: Vec<&str> = solution.iter().map(StepSolution::name).collect();
     assert_eq!(names, ["Phase 1", "Phase 2"]);
     assert!(
         cube.is_solved(),

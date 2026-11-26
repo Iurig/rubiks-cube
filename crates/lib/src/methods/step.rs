@@ -1,5 +1,5 @@
 use crate::{
-    AlgSet, PieceSet, Puzzle, Solution, StepError,
+    AlgSet, PieceSet, Puzzle, StepError, StepSolution,
     error::BuildStepError,
     methods::context::{BuildContext, GLOBAL},
 };
@@ -25,7 +25,8 @@ pub mod search_step;
 /// this trait to write another kind, such as a step that follows hand-written rules. A step is
 /// `Send + Sync` so that one built step can be shared by many methods through an `Arc`.
 pub trait Step<P: Puzzle>: Send + Sync + Debug {
-    /// The step's name, as it appears in errors and in the [`Solution`] it returns.
+    /// The step's name, as it appears in errors and in the
+    /// [`MethodSolution`](crate::MethodSolution) it returns.
     fn name(&self) -> &str;
 
     /// Whether `puzzle` meets this step's goal.
@@ -34,12 +35,13 @@ pub trait Step<P: Puzzle>: Send + Sync + Debug {
     /// Moves `puzzle` to a state that meets this step's goal and returns the moves it applied.
     ///
     /// The returned moves, applied to `puzzle` as it was, must give `puzzle` as this function
-    /// leaves it. A printed [`Solution`] replays only if every step keeps this promise.
+    /// leaves it. A printed [`MethodSolution`](crate::MethodSolution) replays only if every step
+    /// keeps this promise.
     ///
     /// # Errors
     /// A [`StepError`] when the step cannot start on `puzzle` or cannot reach its goal. The
     /// step may leave `puzzle` changed when it fails.
-    fn solve(&self, puzzle: &mut P) -> Result<Solution<P>, StepError>;
+    fn solve(&self, puzzle: &mut P) -> Result<StepSolution<P>, StepError>;
 
     /// Whether `puzzle` meets this step's pre-requisites. Expensive for expensive-to-solve steps -
     /// override recommended for those.
@@ -106,7 +108,7 @@ mod tests {
         fn is_done(&self, puzzle: &Cube3x3) -> bool {
             self.0.is_done(puzzle)
         }
-        fn solve(&self, puzzle: &mut Cube3x3) -> Result<Solution<Cube3x3>, StepError> {
+        fn solve(&self, puzzle: &mut Cube3x3) -> Result<StepSolution<Cube3x3>, StepError> {
             self.0.solve(puzzle)
         }
     }

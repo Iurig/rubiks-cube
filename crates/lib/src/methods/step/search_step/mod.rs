@@ -8,8 +8,8 @@ use std::{
 use rayon::prelude::*;
 
 use crate::{
-    AlgSet, Algorithm, BuildContext, BuildStepError, Inv, Mask, PieceSet, Solution, Step,
-    StepError,
+    AlgSet, Algorithm, BuildContext, BuildStepError, Inv, Mask, PieceSet, Step, StepError,
+    StepSolution,
     error::SearchStepError,
     fast_hash::FxMap,
     methods::{
@@ -413,13 +413,13 @@ impl<P: Puzzle> Step<P> for SearchStep<P> {
         self.before.applies_to(puzzle) && self.after.applies_to(puzzle)
     }
 
-    fn solve(&self, p: &mut P) -> Result<Solution<P>, StepError> {
+    fn solve(&self, p: &mut P) -> Result<StepSolution<P>, StepError> {
         if !self.can_solve(p) {
             return Err(StepError::InvalidStartingState {
                 state: p.to_string(),
             });
         }
-        Ok(Solution::single_segment(self.name(), self.solve_bfs(p)?))
+        Ok(StepSolution::new(self.name(), self.solve_bfs(p)?))
     }
 }
 

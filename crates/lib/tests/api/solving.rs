@@ -64,7 +64,7 @@ fn every_roux_option_solves_on_multiple_seeds() -> anyhow::Result<()> {
             SecondBlock::EdgePairPair,
         ] {
             for cmll in [Cmll::OneLook, Cmll::TwoLook] {
-                let roux = Roux::default()
+                let roux = Roux::new()
                     .first_block(fb.clone())
                     .second_block(sb.clone())
                     .cmll(cmll);
@@ -139,7 +139,7 @@ fn zz_solves_the_cube() -> anyhow::Result<()> {
 
     let _ = ZZ::default()
         .solve_steps(&mut cube)
-        .collect::<Result<Solution<Cube3x3>, _>>()?;
+        .collect::<Result<MethodSolution<Cube3x3>, _>>()?;
     assert!(cube.is_solved());
     Ok(())
 }

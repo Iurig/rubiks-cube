@@ -10,7 +10,7 @@ use anyhow::{Ok, ensure};
 use clap::Parser;
 use ratatui_core as _;
 use rubiks_cube::{
-    Cube3x3, Method, Puzzle, Solution,
+    Algorithm, Cube3x3, Method, Puzzle, Reconstruction,
     roux::{FirstBlock, SecondBlock},
 };
 
@@ -25,14 +25,14 @@ use virtual_cube_timer::{
     event::EventHandler,
     keybinds::Keybinds,
     message::Message,
-    solves::{ReconWithScramble, SolveList, TimedSolve},
+    solves::{SolveList, TimedSolve},
     view::{navigation::render_navigation, timing::render_timing, untimed::render_untimed},
 };
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    let keybinds = Keybinds::from_config()?;
+    let keybinds = Keybinds::try_from_config()?;
 
     let solves = SolveList::from_solves_file(&SolveList::solves_path()?)?;
 
@@ -44,17 +44,10 @@ fn main() -> anyhow::Result<()> {
             }),
             ModeArg::Normal => Mode::Timing(TimingApp {
                 cube: Cube3x3::default(),
-                technique: args.method.to_technique(),
                 keybinds,
-                step_number: 0,
                 solves: Arc::new(Mutex::new(solves)),
                 curr_solve_scramble: VecDeque::new(),
-                curr_solve_moves: Solution::with_empty_steps(
-                    args.method
-                        .to_technique()
-                        .steps()
-                        .map(rubiks_cube::Step::name),
-                ),
+                curr_solve_moves: Algorithm::new(),
                 starting_time: Instant::now(),
                 timer_number: Duration::ZERO,
                 timer_state: app::timing::TimerState::Solved,
@@ -125,11 +118,9 @@ fn reconstruct_n(n: u32, method: &ValidMethods) -> anyhow::Result<SolveList> {
             puzzle.is_solved(),
             "scramble:\n {scramble} \n and solve:\n {solution} \n did not solve the cube"
         );
-        recons.push(TimedSolve::new(
-            ReconWithScramble::new(scramble, solution),
-            Duration::ZERO,
-            method.clone(),
-        ));
+        let mut curr_recon = Reconstruction::new(scramble, method.clone());
+        curr_recon.extend(solution.moves().copied());
+        recons.push(TimedSolve::new(curr_recon, Duration::ZERO));
     }
     Ok(SolveList::from_solves(recons))
 }

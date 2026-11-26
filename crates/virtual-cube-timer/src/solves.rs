@@ -1,8 +1,8 @@
 use std::{fmt::Display, fs, io::ErrorKind, path::PathBuf, str::FromStr, time::Duration};
 
-use anyhow::anyhow;
+use anyhow::{Result, anyhow};
 use dirs::config_dir;
-use rubiks_cube::{Algorithm, Cube3x3, ParseSequenceError, Solution, SolutionSegment};
+use rubiks_cube::{Algorithm, Cube3x3, MethodSolution, Reconstruction};
 use serde_with::{DeserializeFromStr, SerializeDisplay};
 
 use crate::{
@@ -15,35 +15,24 @@ pub struct SolveList(Vec<(usize, TimedSolve)>);
 
 #[derive(Debug, Clone, PartialEq, Eq, SerializeDisplay, DeserializeFromStr)]
 pub struct TimedSolve {
-    moves: ReconWithScramble,
+    recon: Reconstruction<Cube3x3, ValidMethods>,
     time: Duration,
-    method: ValidMethods,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ReconWithScramble {
-    scramble: Algorithm<Cube3x3>,
-    solution: Solution<Cube3x3>,
 }
 
 impl TimedSolve {
     #[must_use]
-    pub const fn new(moves: ReconWithScramble, time: Duration, method: ValidMethods) -> Self {
-        Self {
-            moves,
-            time,
-            method,
-        }
+    pub const fn new(recon: Reconstruction<Cube3x3, ValidMethods>, time: Duration) -> Self {
+        Self { recon, time }
     }
 
     #[must_use]
     pub const fn scramble(&self) -> &Algorithm<Cube3x3> {
-        self.moves.scramble()
+        self.recon.scramble()
     }
 
     #[must_use]
-    pub const fn solution(&self) -> &Solution<Cube3x3> {
-        self.moves.solution()
+    pub const fn solution(&self) -> &MethodSolution<Cube3x3> {
+        self.recon.solution()
     }
 
     #[must_use]
@@ -53,24 +42,7 @@ impl TimedSolve {
 
     #[must_use]
     pub const fn method(&self) -> &ValidMethods {
-        &self.method
-    }
-}
-
-impl ReconWithScramble {
-    #[must_use]
-    pub const fn new(scramble: Algorithm<Cube3x3>, solution: Solution<Cube3x3>) -> Self {
-        Self { scramble, solution }
-    }
-
-    #[must_use]
-    pub const fn scramble(&self) -> &Algorithm<Cube3x3> {
-        &self.scramble
-    }
-
-    #[must_use]
-    pub const fn solution(&self) -> &Solution<Cube3x3> {
-        &self.solution
+        self.recon.method()
     }
 }
 
@@ -140,43 +112,38 @@ impl Display for TimedSolve {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{}: {}\n{}",
+            "{}({}): {}\n{}",
             to_text(*self.time()),
+            self.method(),
             self.scramble(),
             self.solution()
         )
     }
 }
 
-impl FromStr for ReconWithScramble {
-    type Err = anyhow::Error;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self {
-            scramble: s
-                .lines()
-                .next()
-                .ok_or_else(|| anyhow::format_err!("reconstruction has no first line"))?
-                .parse()?,
-            solution: s
-                .lines()
-                .skip(1)
-                .map(str::parse::<SolutionSegment<Cube3x3>>)
-                .collect::<Result<Vec<_>, ParseSequenceError>>()?
-                .into_iter()
-                .collect(),
-        })
-    }
-}
-
 impl FromStr for TimedSolve {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some((time, solve)) = s.rsplit_once(':') {
-            Ok(Self::new(
-                solve.parse()?,
-                to_duration(time)?,
-                ValidMethods::Roux,
-            ))
+        if let Some(((time, Some(method)), solve)) = s.rsplit_once(':').and_then(|(pre, post)| {
+            pre.rsplit_once('(')
+                .map(|(s1, s2)| ((s1, s2.strip_suffix(')')), post))
+        }) {
+            let mut lines = solve.lines();
+            let mut recon = Reconstruction::new(
+                lines
+                    .next()
+                    .ok_or_else(|| anyhow!("no first line"))?
+                    .parse()?,
+                method.parse()?,
+            );
+            recon.extend(
+                lines
+                    .map(|l| Ok(l.parse::<Algorithm<Cube3x3>>()?.into_iter()))
+                    .collect::<Result<Vec<_>>>()?
+                    .into_iter()
+                    .flat_map(IntoIterator::into_iter),
+            );
+            Ok(Self::new(recon, to_duration(time)?))
         } else {
             Err(anyhow::format_err!("invalid solve: {s}"))
         }
@@ -196,7 +163,7 @@ impl FromStr for SolveList {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self(
-            s.split("\n\n")
+            s.split_terminator("\n\n")
                 .flat_map(|s| {
                     let (number, solve) = s
                         .split_once('.')
@@ -234,18 +201,20 @@ mod tests {
         let solves = (0..10)
             .map(|i| -> anyhow::Result<TimedSolve> {
                 let scramble = Algorithm::from_static(SCRAMBLES[i]);
+                let mut recon = Reconstruction::new(scramble.clone(), ValidMethods::Roux);
+                recon.extend(
+                    Roux::new()
+                        .solve(
+                            &mut Cube3x3::from_moves(&scramble.to_string())
+                                .with_context(|| format!("{scramble:?}"))?,
+                        )
+                        .with_context(|| format!("{scramble:?}"))?
+                        .iter()
+                        .flat_map(|s| s.iter().copied()),
+                );
                 Ok(TimedSolve::new(
-                    ReconWithScramble::new(
-                        scramble.clone(),
-                        Roux::new()
-                            .solve(
-                                &mut Cube3x3::from_moves(&scramble.to_string())
-                                    .with_context(|| format!("{scramble:?}"))?,
-                            )
-                            .with_context(|| format!("{scramble:?}"))?,
-                    ),
+                    Reconstruction::new(scramble, ValidMethods::Roux),
                     Duration::from_millis(fastrand::u64(0..2 * 3_600_000)),
-                    ValidMethods::Roux,
                 ))
             })
             .collect::<anyhow::Result<Vec<_>>>()?;

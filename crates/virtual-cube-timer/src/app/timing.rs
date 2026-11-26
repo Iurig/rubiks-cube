@@ -9,25 +9,23 @@ use std::{
 };
 
 use crossterm::event::{KeyCode, KeyEvent};
-use rubiks_cube::{Algorithm, Cube3x3, Puzzle, Solution, Technique};
+use rubiks_cube::{Algorithm, Cube3x3, Puzzle, Reconstruction};
 
 use crate::{
     ValidMethods,
     event::Event,
     keybinds::{KeyPress, Keybinds},
     message::{CubeMessage, Message, TimingMessage},
-    solves::{ReconWithScramble, SolveList, TimedSolve},
+    solves::{SolveList, TimedSolve},
 };
 
 #[derive(Debug)]
 pub struct TimingApp {
     pub cube: Cube3x3,
-    pub technique: Technique<Cube3x3>,
     pub keybinds: Keybinds,
-    pub step_number: usize,
     pub solves: Arc<Mutex<SolveList>>,
     pub curr_solve_scramble: VecDeque<Receiver<Algorithm<Cube3x3>>>,
-    pub curr_solve_moves: Solution<Cube3x3>,
+    pub curr_solve_moves: Algorithm<Cube3x3>,
     pub starting_time: Instant,
     pub timer_number: Duration,
     pub timer_state: TimerState,
@@ -60,14 +58,13 @@ impl TimingApp {
                 let solve_time = self.timer_number;
                 thread::spawn(move || {
                     let mut unlocked_solves = solves_to_send.lock().expect("mutex should be clean");
-                    let solve = TimedSolve::new(
-                        ReconWithScramble::new(
-                            scramble_receiver.recv().expect("failed to save solve"),
-                            solve_moves,
-                        ),
-                        solve_time,
+                    let mut recon = Reconstruction::new(
+                        scramble_receiver.recv().expect("failed to save solve"),
                         ValidMethods::Roux,
                     );
+                    recon.extend(solve_moves);
+
+                    let solve = TimedSolve::new(recon, solve_time);
                     unlocked_solves.push(solve);
                 });
             }
@@ -108,18 +105,9 @@ impl TimingApp {
                         .keybinds
                         .as_move(&KeyPress::with_modifiers(code, modifiers)) =>
                     {
-                        while self
-                            .technique
-                            .steps()
-                            .nth(self.step_number)
-                            .is_some_and(|s| s.is_done(&self.cube))
-                        {
-                            self.step_number += 1;
-                        }
-
                         self.update(&TimingMessage::Cube(CubeMessage::Apply(m)));
 
-                        self.curr_solve_moves[self.step_number].push(m);
+                        self.curr_solve_moves.push(m);
 
                         if self.timer_state == TimerState::Scrambled {
                             self.update(&TimingMessage::Start);
@@ -144,7 +132,7 @@ impl TimingApp {
 #[cfg(test)]
 mod tests {
 
-    use rubiks_cube::{Method, Move3x3, MoveModifier, Roux, SolutionSegment, Step};
+    use rubiks_cube::{Method, MethodSolution, Move3x3, MoveModifier, Roux, StepSolution};
 
     use crate::keybinds::key_press;
 
@@ -171,14 +159,10 @@ mod tests {
 
         let mut app = TimingApp {
             cube: scrambled_cube,
-            technique: Roux::default().to_technique(),
             keybinds: Keybinds::default(),
-            step_number: 0,
             solves: Arc::new(Mutex::new(SolveList::new())),
             curr_solve_scramble: VecDeque::from([receiver]),
-            curr_solve_moves: Solution::with_empty_steps(
-                Roux::default().to_technique().steps().map(Step::name),
-            ),
+            curr_solve_moves: Algorithm::new(),
             starting_time: Instant::now(),
             timer_number: Duration::ZERO,
             timer_state: TimerState::Scrambled,
@@ -192,7 +176,7 @@ mod tests {
         let expanded_cube_recon = cube_recon
             .iter()
             .map(|s| {
-                SolutionSegment::with_moves(
+                StepSolution::new(
                     s.name(),
                     s.iter()
                         .flat_map(|m| {
@@ -206,7 +190,7 @@ mod tests {
                         .collect::<Algorithm<Cube3x3>>(),
                 )
             })
-            .collect::<Solution<Cube3x3>>();
+            .collect::<MethodSolution<Cube3x3>>();
 
         for m in expanded_cube_recon.moves() {
             let key = move_to_key(&Keybinds::default(), *m).unwrap_or_else(|| panic!("{m}"));
@@ -214,7 +198,13 @@ mod tests {
         }
 
         assert!(app.cube.is_solved());
-        assert_eq!(expanded_cube_recon, app.curr_solve_moves);
+        assert_eq!(
+            expanded_cube_recon
+                .moves()
+                .copied()
+                .collect::<Algorithm<_>>(),
+            app.curr_solve_moves
+        );
 
         app.update_with_message(Event::Key(key_press(KeyCode::Char(' '))));
 
