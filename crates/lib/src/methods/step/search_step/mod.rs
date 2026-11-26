@@ -267,10 +267,6 @@ impl<P: Puzzle> SearchStep<P> {
     }
 
     /// [`Self::solve_bfs`], also returning what the path costs.
-    #[expect(
-        clippy::significant_drop_tightening,
-        reason = "the memo is read and deepened on every round, so the lock is held for the whole search"
-    )]
     fn search(&self, p: &mut P) -> Result<(Cost, Algorithm<P>), StepError> {
         let mut memo = self
             .memo
@@ -279,7 +275,6 @@ impl<P: Puzzle> SearchStep<P> {
         let mut investigated: FxMap<Mask<P>, Reached<'_, P>> = FxMap::default();
         let mut to_search = BTreeMap::from([(Cost::ZERO, vec![(self.mask(p), p.clone(), None)])]);
         let mut best = None;
-
         // No path can cost less than the two sides' next costs together, so past that `best` is
         // final. A side with nothing left has seen everything it can reach.
         while let (Some((&cost, level)), Some(memo_cost)) =
@@ -297,24 +292,24 @@ impl<P: Puzzle> SearchStep<P> {
                     &self.search_algs,
                     &self.free_search_algs,
                     |mask, tail_cost, tail| {
-                        if let Some(state) = investigated.get(mask) {
-                            keep_cheaper(&mut best, state.cost.plus(tail_cost), || {
-                                let mut path = self.path_to(&state.cube, &investigated);
-                                path.extend(tail.iter().copied());
-                                (path, state.cube.apply(tail))
-                            });
-                        }
+                        self.seen(mask, tail_cost, tail, &investigated, &mut best);
                     },
                 );
             } else if let Some((cost, level)) = to_search.pop_first() {
-                self.next_level(
-                    cost,
-                    level,
-                    &memo,
-                    &mut investigated,
-                    &mut to_search,
-                    &mut best,
-                );
+                let next_cost = memo.next_cost();
+                drop(memo);
+                self.next_level(cost, level, &mut investigated, &mut to_search, &mut best)?;
+                memo = self
+                    .memo
+                    .lock()
+                    .map_err(|_memo_error| StepError::Custom(Box::new(MemoPoisoned)))?;
+                if next_cost != memo.next_cost() {
+                    for mask in investigated.keys() {
+                        if let Some((tail_cost, tail)) = memo.settled(mask) {
+                            self.seen(mask, tail_cost, tail, &investigated, &mut best);
+                        }
+                    }
+                }
             }
             log::trace!(
                 "Step: {}\t forward cost: {cost:?}\t states: {}\t memo frontier: {}",
@@ -323,6 +318,7 @@ impl<P: Puzzle> SearchStep<P> {
                 memo.frontier_len()
             );
         }
+        drop(memo);
 
         let best = best.ok_or(StepError::UnreachableGoal)?;
         *p = best.end;
@@ -334,29 +330,35 @@ impl<P: Puzzle> SearchStep<P> {
         &'a self,
         cost: Cost,
         level: Vec<ForwardState<'a, P>>,
-        memo: &BfsMemo<P>,
         investigated: &mut FxMap<Mask<P>, Reached<'a, P>>,
         to_search: &mut BTreeMap<Cost, Vec<ForwardState<'a, P>>>,
         best: &mut Option<Best<P>>,
-    ) {
+    ) -> Result<(), StepError> {
         let mut settled = Vec::new();
-        for (mask, cube, via) in level {
+        let memo = self
+            .memo
+            .lock()
+            .map_err(|_memo_error| StepError::Custom(Box::new(MemoPoisoned)))?;
+        for (mask, puzzle, via) in level {
             if let Entry::Vacant(e) = investigated.entry(mask.clone()) {
                 e.insert(Reached {
                     cost,
                     via,
-                    cube: cube.clone(),
+                    cube: puzzle.clone(),
                 });
+
                 if let Some((tail_cost, tail)) = memo.settled(&mask) {
                     keep_cheaper(best, cost.plus(tail_cost), || {
-                        let mut path = self.path_to(&cube, investigated);
+                        let mut path = self.path_to(&puzzle, investigated);
                         path.extend(tail.iter().copied());
-                        (path, cube.apply(tail))
+                        (path, puzzle.apply(tail))
                     });
                 }
-                settled.push(cube);
+
+                settled.push(puzzle);
             }
         }
+        drop(memo);
 
         let sequences_by_cost = [
             (cost.after_free(), self.free_search_algs.algs()),
@@ -364,17 +366,22 @@ impl<P: Puzzle> SearchStep<P> {
         ];
         for (next_cost, sequences) in sequences_by_cost {
             let known = &*investigated;
-            let candidates: Vec<_> = settled
-                .par_iter()
-                .flat_map_iter(|p| {
-                    sequences.iter().filter_map(move |s| {
-                        let moved = p.apply(s);
-                        let mask = self.mask(&moved);
-                        (!known.contains_key(&mask)).then_some((p, mask, s, moved))
+            let candidates: Vec<_> = {
+                settled
+                    .par_iter()
+                    .flat_map_iter(|p| {
+                        sequences.iter().filter_map(move |s| {
+                            let moved = p.apply(s);
+                            let mask = self.mask(&moved);
+                            (!known.contains_key(&mask)).then_some((p, mask, s, moved))
+                        })
                     })
-                })
-                .collect();
-
+                    .collect()
+            };
+            let memo = self
+                .memo
+                .lock()
+                .map_err(|_memo_error| StepError::Custom(Box::new(MemoPoisoned)))?;
             for (parent, mask, sequence, moved) in candidates {
                 if let Some((tail_cost, tail)) = memo.settled(&mask) {
                     keep_cheaper(best, next_cost.plus(tail_cost), || {
@@ -389,6 +396,25 @@ impl<P: Puzzle> SearchStep<P> {
                     .or_default()
                     .push((mask, moved, Some(sequence)));
             }
+            drop(memo);
+        }
+        Ok(())
+    }
+
+    fn seen(
+        &self,
+        mask: &Mask<P>,
+        tail_cost: Cost,
+        tail: &Algorithm<P>,
+        investigated: &FxMap<Mask<P>, Reached<'_, P>>,
+        best: &mut Option<Best<P>>,
+    ) {
+        if let Some(state) = investigated.get(mask) {
+            keep_cheaper(best, state.cost.plus(tail_cost), || {
+                let mut path = self.path_to(&state.cube, investigated);
+                path.extend(tail.iter().copied());
+                (path, state.cube.apply(tail))
+            });
         }
     }
 
