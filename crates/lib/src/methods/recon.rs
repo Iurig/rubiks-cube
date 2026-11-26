@@ -1,4 +1,4 @@
-use crate::{Algorithm, Method, MethodSolution, Puzzle, Step};
+use crate::{Algorithm, FromAlg, Method, MethodSolution, Puzzle, Step, Technique};
 
 /// A (possibly incomplete) reconstruction of a solve.
 ///
@@ -9,6 +9,7 @@ pub struct Reconstruction<P: Puzzle, M: Method<P>> {
     scramble: Algorithm<P>,
     solution: MethodSolution<P>,
     method: M,
+    puzzle: P,
 }
 
 impl<P: Puzzle, M: Method<P> + Clone> Clone for Reconstruction<P, M> {
@@ -17,6 +18,7 @@ impl<P: Puzzle, M: Method<P> + Clone> Clone for Reconstruction<P, M> {
             scramble: self.scramble().clone(),
             solution: self.solution().clone(),
             method: self.method.clone(),
+            puzzle: self.puzzle.clone(),
         }
     }
 }
@@ -32,6 +34,7 @@ impl<P: Puzzle, M: Method<P>> Reconstruction<P, M> {
     #[must_use]
     pub fn new(scramble: Algorithm<P>, method: M) -> Self {
         Self {
+            puzzle: P::from_alg(&scramble),
             scramble,
             solution: MethodSolution::with_empty_steps(
                 method.to_technique().steps().map(Step::name),
@@ -57,36 +60,36 @@ impl<P: Puzzle, M: Method<P>> Reconstruction<P, M> {
 
     /// Pushes a [`Puzzle`]s move at the end of the reconstruction, checking which step that applies
     /// to automatically using [`Reconstruction::method`].
-    #[expect(clippy::indexing_slicing, reason = "panics on broken invariant only")]
     pub fn push(&mut self, m: P::Move) {
-        let mut candidate_step_index = self.solution.len();
-        let cubes = (0..self.solution().len())
-            .map(|index| {
-                let mut cube = P::default().apply(&self.scramble);
-                for i in 0..index {
-                    cube = cube.apply(self.solution()[i].moves());
-                }
-                cube
-            })
-            .collect::<Vec<_>>();
-        let step_to_push = self.solution.iter().enumerate().rev();
-        for (index, solution) in step_to_push {
-            let cube = cubes[index].apply(solution.moves());
-            if !self.method.to_technique()[index].is_done(&cube) {
-                candidate_step_index = index;
-            }
-            if !solution.is_empty() {
-                break;
-            }
+        let technique = self.method.to_technique();
+        self.push_with_technique(m, &technique);
+    }
+
+    fn push_with_technique(&mut self, m: P::Move, technique: &Technique<P>) {
+        let mut candidate_step_index = self
+            .solution
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|(_, s)| !s.is_empty())
+            .map_or(0, |(i, _)| i);
+
+        while technique[candidate_step_index].is_done(&self.puzzle) {
+            candidate_step_index += 1;
         }
+
         self.solution[candidate_step_index].push(m);
+        self.puzzle = self.puzzle.clone() * m;
     }
 
     /// Pushes all moves in the given iterator on the [`Reconstruction`], checking the appropriate
     /// step for each one.
+    ///
+    /// More performant than repeated [`push`](Reconstruction::push)ing.
     pub fn extend(&mut self, moves: impl IntoIterator<Item = P::Move>) {
+        let technique = self.method.to_technique();
         for m in moves {
-            self.push(m);
+            self.push_with_technique(m, &technique);
         }
     }
 }

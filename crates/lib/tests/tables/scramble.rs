@@ -3,6 +3,7 @@ use rubiks_cube::*;
 use rubiks_cube::{Cube3x3, FromAlg, Method, Puzzle, Reconstruction};
 
 #[test]
+#[ntest::timeout(20000)]
 fn scramble_and_solve_with_parsing_round_trip() -> anyhow::Result<()> {
     let scramble = Cube3x3::scramble_with_seed(0)?;
     let solution = Roux::default()
@@ -24,7 +25,7 @@ fn a_random_scramble_algorithm_leaves_the_cube_unsolved() -> anyhow::Result<()> 
 }
 
 #[test]
-// #[ntest::timeout(7000)]
+#[ntest::timeout(15000)]
 fn every_roux_option_agrees_with_recon() -> anyhow::Result<()> {
     use rubiks_cube::roux::*;
     let seeds = 4;
@@ -46,7 +47,7 @@ fn every_roux_option_agrees_with_recon() -> anyhow::Result<()> {
                     .first_block(fb.clone())
                     .second_block(sb.clone())
                     .cmll(cmll);
-                scrambles.par_iter().for_each(|scramble| {
+                scrambles.iter().for_each(|scramble| {
                     let mut scrambled_cube = Cube3x3::from_alg(scramble);
                     let expected = roux.clone().solve(&mut scrambled_cube).unwrap();
                     let mut recon = Reconstruction::new(scramble.clone(), roux.clone());
