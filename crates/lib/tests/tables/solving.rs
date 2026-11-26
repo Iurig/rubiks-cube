@@ -1,9 +1,8 @@
-use rubiks_cube::{Cube3x3, FromAlg, Method, Puzzle, Reconstruction};
+use rubiks_cube::{Cube3x3, FromAlg, Method, Puzzle, Reconstruction, roux::*};
 
 #[test]
 #[ntest::timeout(15000)]
 fn every_roux_option_agrees_with_recon() -> anyhow::Result<()> {
-    use rubiks_cube::roux::*;
     let seeds = 4;
     let scrambles = (206..206 + seeds)
         .map(Cube3x3::scramble_with_seed)
