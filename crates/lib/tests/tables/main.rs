@@ -6,3 +6,4 @@
 
 mod kociemba;
 mod scramble;
+mod solving;
