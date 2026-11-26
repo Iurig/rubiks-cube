@@ -2,6 +2,7 @@ pub mod memorization;
 use std::{
     borrow::Cow,
     collections::{BTreeMap, VecDeque, hash_map::Entry},
+    fmt::Debug,
     sync::{Arc, Mutex},
 };
 
@@ -86,7 +87,6 @@ impl<P: Puzzle> SearchCache<P> {
 /// The search meets in the middle. A forward search from the puzzle meets a backward search
 /// from the goal, which the step keeps in a memo. The memo keeps growing across solves, so
 /// later solves are faster, and methods that share this step through an `Arc` share its memo.
-#[derive(Debug)]
 pub struct SearchStep<P: Puzzle> {
     name: Cow<'static, str>,
     before: PieceSet<P>,
@@ -94,6 +94,18 @@ pub struct SearchStep<P: Puzzle> {
     search_algs: AlgSet<P>,
     free_search_algs: AlgSet<P>,
     memo: SharedMemo<P>,
+}
+
+impl<P: Puzzle> Debug for SearchStep<P> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SearchStep")
+            .field("name", &self.name)
+            .field("before", &self.before)
+            .field("after", &self.after)
+            .field("search_algs", &self.search_algs)
+            .field("free_search_algs", &self.free_search_algs)
+            .finish_non_exhaustive()
+    }
 }
 
 /// Builder for [`SearchStep`].
