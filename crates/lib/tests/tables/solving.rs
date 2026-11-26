@@ -1,3 +1,4 @@
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rubiks_cube::{Cube3x3, FromAlg, Method, Puzzle, Reconstruction, roux::*};
 
 #[test]
@@ -22,16 +23,20 @@ fn every_roux_option_agrees_with_recon() -> anyhow::Result<()> {
                     .first_block(fb.clone())
                     .second_block(sb.clone())
                     .cmll(cmll);
-                for scramble in &scrambles {
+                scrambles.par_iter().for_each(|scramble| {
                     let mut scrambled_cube = Cube3x3::from_alg(scramble);
                     let expected = roux.clone().solve(&mut scrambled_cube).unwrap();
                     let mut recon = Reconstruction::new(scramble.clone(), roux.clone());
                     recon.extend(expected.moves().copied());
                     assert_eq!(expected, recon.into());
                     assert!(scrambled_cube.is_solved());
-                }
+                });
             }
         }
     }
     Ok(())
 }
+
+#[test]
+#[ntest::timeout(200)]
+fn expand_and_push_agree() {}
