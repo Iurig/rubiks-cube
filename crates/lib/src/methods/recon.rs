@@ -37,6 +37,19 @@ impl<P: Puzzle, M: Method<P>> Display for Reconstruction<P, M> {
     }
 }
 
+/// Pushes all moves in the given iterator on the [`Reconstruction`], checking the appropriate
+/// step for each one.
+///
+/// More performant than repeated [`push`](Reconstruction::push)ing.
+impl<P: Puzzle, M: Method<P>> Extend<P::Move> for Reconstruction<P, M> {
+    fn extend<I: IntoIterator<Item = P::Move>>(&mut self, iter: I) {
+        let technique = self.method.to_technique();
+        for m in iter {
+            self.push_with_technique(m, &technique);
+        }
+    }
+}
+
 impl<P: Puzzle, M: Method<P>> Reconstruction<P, M> {
     /// Creates a new [`Reconstruction`].
     #[must_use]
@@ -88,16 +101,5 @@ impl<P: Puzzle, M: Method<P>> Reconstruction<P, M> {
 
         self.solution.index_mut(candidate_step_index).push(m);
         self.puzzle = self.puzzle.clone() * m;
-    }
-
-    /// Pushes all moves in the given iterator on the [`Reconstruction`], checking the appropriate
-    /// step for each one.
-    ///
-    /// More performant than repeated [`push`](Reconstruction::push)ing.
-    pub fn extend(&mut self, moves: impl IntoIterator<Item = P::Move>) {
-        let technique = self.method.to_technique();
-        for m in moves {
-            self.push_with_technique(m, &technique);
-        }
     }
 }
