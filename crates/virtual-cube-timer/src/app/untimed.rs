@@ -52,7 +52,7 @@ impl UntimedApp {
 #[cfg(test)]
 mod tests {
     use crossterm::event::KeyModifiers;
-    use rubiks_cube::{Algorithm, FromAlg};
+    use rubiks_cube::Algorithm;
 
     use super::*;
 
@@ -71,7 +71,7 @@ mod tests {
             );
         }
 
-        assert_eq!(app.cube, Cube3x3::from_alg(&sexy));
+        assert_eq!(app.cube, Cube3x3::from(&sexy));
 
         assert_eq!(
             app.update_with_message(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE)),

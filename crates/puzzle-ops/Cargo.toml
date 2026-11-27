@@ -1,0 +1,27 @@
+[package]
+name = "puzzle-ops"
+version = "0.1.0"
+
+categories = ["games", "simulation"]
+edition.workspace = true
+keywords = ["rubiks-cube", "derive", "macro", "operations"]
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "derive macro for Puzzle operations from rubiks-cube"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.107"
+quote = "1.0.47"
+syn = { version = "3.0.10" }
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+rubiks-cube = { path = "../lib" }
+trybuild = "1.0.125"

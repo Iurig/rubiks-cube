@@ -1,6 +1,6 @@
 mod table;
 
-use std::str::FromStr;
+use std::{ops::Mul, str::FromStr};
 
 use crate::ParseMoveError;
 #[allow(
@@ -327,9 +327,10 @@ impl FromStr for Move3x3 {
     }
 }
 
-impl From<Move3x3> for Cube3x3 {
-    fn from(m: Move3x3) -> Self {
-        cube_state(m.part, m.modifier)
+impl Mul<Move3x3> for Cube3x3 {
+    type Output = Self;
+    fn mul(self, m: Move3x3) -> Self {
+        self * cube_state(m.part, m.modifier)
     }
 }
 

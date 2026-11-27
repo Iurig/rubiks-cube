@@ -8,7 +8,10 @@ fn full_solve_and_checking_bfs() -> anyhow::Result<()> {
     let scr = "U B' D L2 U B2 R2 D2 L2 D' U2 B2 R2 L U2 F' R' B L D'\n";
     let mut scrambled = Cube3x3::from_moves(scr)?;
 
-    assert_eq!(scrambled, Cube3x3::from_alg(&scr.parse()?));
+    assert_eq!(
+        scrambled,
+        Cube3x3::from(&scr.parse::<Algorithm<Cube3x3>>()?)
+    );
 
     let recon: String = Roux::default().solve(&mut scrambled)?.to_string();
 

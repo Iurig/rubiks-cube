@@ -2,9 +2,12 @@
 pub mod color_facelets;
 pub mod facelets;
 pub mod moves;
+pub mod ops;
 pub mod pieces;
 #[cfg(feature = "ratatui")]
 pub mod widget;
+
+use puzzle_ops::PuzzleOps;
 
 #[allow(
     clippy::wildcard_imports,
@@ -14,14 +17,11 @@ use self::{moves::*, pieces::*};
 
 use crate::{
     Algorithm, Indexed, Method, ParseSequenceError, Piece, SolveError,
-    methods::cube3x3::kociemba::Kociemba,
-    ops::{Inv, Pow},
-    puzzles::Puzzle,
-    zn::Zn,
+    methods::cube3x3::kociemba::Kociemba, ops::Inv, puzzles::Puzzle, zn::Zn,
 };
 
 /// A 3x3x3 cube state; `a * b` applies `a` then `b`.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Clone, PuzzleOps, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Cube3x3 {
     /// `CENTER_ORIENTATION_COUNT` is 1, centers are considered without orientation
     centers: CenterConfiguration,
@@ -103,44 +103,6 @@ impl Indexed for Piece3x3 {
     }
     fn from_index(index: usize) -> Self {
         *Cube3x3::ALL_PIECES.get(index).expect("index in 0..COUNT")
-    }
-}
-
-impl std::ops::Mul for Cube3x3 {
-    type Output = Self;
-    /// Applies the state (permutations and orientations) that is the second argument to the first
-    /// argument, which is a cube.
-    ///
-    /// IMPORTANT: associative, but non-commutative
-    fn mul(self, rhs: Self) -> Self::Output {
-        Self {
-            centers: self.centers.then(&rhs.centers),
-            corners: self.corners.then(&rhs.corners),
-            edges: self.edges.then(&rhs.edges),
-        }
-    }
-}
-
-impl std::ops::Mul<Move3x3> for Cube3x3 {
-    type Output = Self;
-    fn mul(self, m: Move3x3) -> Self::Output {
-        self * Self::from(m)
-    }
-}
-
-impl Pow for Cube3x3 {
-    fn identity() -> Self {
-        Self::default()
-    }
-}
-
-impl Inv for Cube3x3 {
-    fn inv(self) -> Self {
-        Self {
-            centers: self.centers.inv(),
-            corners: self.corners.inv(),
-            edges: self.edges.inv(),
-        }
     }
 }
 
@@ -287,7 +249,7 @@ impl Cube3x3 {
 )]
 mod tests {
 
-    use crate::{Piece, indexed::assert_round_trips, piece::index};
+    use crate::{Piece, Pow, indexed::assert_round_trips, piece::index};
 
     use super::*;
 

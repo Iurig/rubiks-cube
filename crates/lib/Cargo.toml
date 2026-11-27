@@ -17,6 +17,7 @@ fastrand = "2.5.0"
 itertools = "0.15.0"
 log = "0.4.34"
 papaya = "0.2.5"
+puzzle-ops = { version = "^0.1.0", path = "../puzzle-ops" }
 ratatui = { version = "0.30.2", optional = true }
 ratatui-core = { version = "0.1.2", features = ["anstyle"], optional = true }
 rayon = "1.12.0"
