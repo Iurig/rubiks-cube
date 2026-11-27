@@ -5,9 +5,25 @@
     reason = "benchmarks follow the same convention as tests"
 )]
 
-use rubiks_cube::{Cube3x3, Kociemba, Method, Puzzle, Roux, ZZ};
+use std::hint::black_box;
+
+use divan::Bencher;
+use rubiks_cube::{Cube3x3, Kociemba, Method, Move3x3, Puzzle, Roux, ZZ};
 fn main() {
     divan::main();
+}
+
+#[divan::bench]
+fn to_technique(bencher: Bencher) {
+    let roux = &Roux::default();
+    bencher.bench_local(move || black_box(roux).to_technique());
+}
+
+#[divan::bench(sample_size = 10000, sample_count = 1000)]
+fn cube_multiplications(bencher: Bencher) {
+    let cube = Cube3x3::default();
+    let m: Move3x3 = "R".parse().unwrap();
+    bencher.bench_local(move || black_box(cube) * black_box(m));
 }
 
 #[divan::bench(sample_count = 1)]
