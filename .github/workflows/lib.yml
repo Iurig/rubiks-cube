@@ -33,7 +33,7 @@ jobs:
       - run: cargo clippy -p rubiks-cube --all-targets --features serde,anstyle -- -D warnings
       - run: cargo clippy -p rubiks-cube --all-targets --features serde,ratatui -- -D warnings
       - run: cargo clippy -p rubiks-cube --all-targets --features serde,ratatui,anstyle -- -D warnings
-      - run: cargo clippy -p rubiks-cube --all-targets --features -- -D warnings
+      - run: cargo clippy -p rubiks-cube --all-targets -- -D warnings
 
   test:
     name: test (${{ matrix.os }})
