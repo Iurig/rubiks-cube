@@ -26,7 +26,14 @@ jobs:
       - run: rustup toolchain install nightly-2026-11-16 --profile minimal --component rustfmt --no-self-update
       - run: cargo +nightly-2026-11-16 fmt -p rubiks-cube -- --check
       # `ratatui` turns on `anstyle`, so this lints the code behind every feature but `sketch`.
-      - run: cargo clippy -p rubiks-cube --all-targets --features ratatui,serde -- -D warnings
+      - run: cargo clippy -p rubiks-cube --all-targets --features anstyle -- -D warnings
+      - run: cargo clippy -p rubiks-cube --all-targets --features ratatui -- -D warnings
+      - run: cargo clippy -p rubiks-cube --all-targets --features ratatui,anstyle -- -D warnings
+      - run: cargo clippy -p rubiks-cube --all-targets --features serde -- -D warnings
+      - run: cargo clippy -p rubiks-cube --all-targets --features serde,anstyle -- -D warnings
+      - run: cargo clippy -p rubiks-cube --all-targets --features serde,ratatui -- -D warnings
+      - run: cargo clippy -p rubiks-cube --all-targets --features serde,ratatui,anstyle -- -D warnings
+      - run: cargo clippy -p rubiks-cube --all-targets --features -- -D warnings
 
   test:
     name: test (${{ matrix.os }})
@@ -43,12 +50,6 @@ jobs:
           cache: false
           rustflags: ""
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build -p rubiks-cube --all-targets
-      - run: cargo test -p rubiks-cube
-      - run: cargo build -p rubiks-cube --all-targets --features anstyle
-      - run: cargo test -p rubiks-cube --features anstyle
-      - run: cargo build -p rubiks-cube --all-targets --features ratatui
-      - run: cargo test -p rubiks-cube --features ratatui
       - run: cargo build -p rubiks-cube --all-targets --features ratatui,anstyle
       - run: cargo test -p rubiks-cube --features ratatui,anstyle
 

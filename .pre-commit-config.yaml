@@ -47,9 +47,11 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
       - id: clippy
-        name: clippy (as CI)
+        name: clippy per feature set (as CI)
         language: system
-        entry: cargo clippy --workspace --all-targets -- -D warnings
+        entry: >-
+          bash -c 'for f in "" anstyle ratatui ratatui,anstyle serde serde,anstyle serde,ratatui serde,ratatui,anstyle; do
+          RUSTDOCFLAGS="-D warnings" cargo clippy --workspace --all-targets --features "$f" || exit 1; done'
         types_or: [rust, toml]
         pass_filenames: false
         stages: [manual]
@@ -68,11 +70,9 @@ repos:
         pass_filenames: false
         stages: [manual]
       - id: lib-tests
-        name: lib tests per feature set (as CI)
+        name: lib tests
         language: system
-        entry: >-
-          bash -c 'for f in "" anstyle ratatui ratatui,anstyle; do
-          RUSTDOCFLAGS="-D warnings" cargo test -p rubiks-cube --features "$f" || exit 1; done'
+        entry: env "RUSTFLAGS=-D warnings" cargo test --all-features
         types_or: [rust, toml, markdown]
         pass_filenames: false
         stages: [manual]
