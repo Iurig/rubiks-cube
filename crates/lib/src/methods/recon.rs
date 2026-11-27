@@ -1,4 +1,4 @@
-use crate::{Algorithm, FromAlg, Method, MethodSolution, Puzzle, Step, Technique};
+use crate::{Algorithm, Method, MethodSolution, Puzzle, Step, Technique};
 
 use std::{fmt::Display, hash::Hash};
 
@@ -73,7 +73,7 @@ impl<P: Puzzle, M: Method<P>> Reconstruction<P, M> {
     pub fn new(scramble: Algorithm<P>, method: M) -> Self {
         let technique = method.to_technique();
         Self {
-            puzzle: P::from_alg(&scramble),
+            puzzle: P::default().apply(&scramble),
             scramble,
             solution: MethodSolution::with_empty_steps(technique.steps().map(Step::name)),
             method,

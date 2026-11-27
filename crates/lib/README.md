@@ -77,22 +77,22 @@ makes the whole call return an `Err` naming that token.
 runs a method's steps in order and returns a `Solution`, with one segment per step:
 
 ```rust
-use rubiks_cube::{Cube3x3, Method, Puzzle, Roux, FromAlg, Algorithm};
+use rubiks_cube::{Cube3x3, Method, Puzzle, Roux,  Algorithm};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let scramble: Algorithm<Cube3x3> = "D2 F2 R2 U L2 D R2 U' B2 L2 B L2 F' L D2 U R' B D2".parse()?;
     let roux = Roux::default();
 
-    let mut cube = Cube3x3::from_alg(&scramble);
+    let mut cube = Cube3x3::from(&scramble);
     let solution = roux.solve(&mut cube)?;
     assert!(cube.is_solved());
 
     // A printed solution is notation, so the scramble followed by it replays to solved.
-    let replayed = Cube3x3::from_alg(&scramble).apply_moves(&solution.to_string())?;
+    let replayed = Cube3x3::from(&scramble).apply_moves(&solution.to_string())?;
     assert!(replayed.is_solved());
 
     // The same solve, one step per `next()`.
-    let mut cube = Cube3x3::from_alg(&scramble);
+    let mut cube = Cube3x3::from(&scramble);
     for segment in roux.solve_steps(&mut cube) {
         print!("{}", segment?);
     }

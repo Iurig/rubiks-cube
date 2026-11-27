@@ -1,11 +1,11 @@
 use std::{
     fmt::{Debug, Display},
     hash::Hash,
-    ops::{Add, Mul, MulAssign},
+    ops::{Add, Mul},
     str::FromStr,
 };
 
-use crate::{Algorithm, Cube3x3, Move3x3, ParseMoveError, SolveError, indexed::Indexed};
+use crate::{Algorithm, ParseMoveError, SolveError, indexed::Indexed};
 
 pub mod algorithm;
 pub mod algset;
@@ -104,27 +104,3 @@ pub trait Puzzle:
         alg.iter().fold(self.clone(), |p, &m| p * m)
     }
 }
-
-impl Mul<Algorithm<Self>> for Cube3x3 {
-    type Output = Self;
-    fn mul(self, rhs: Algorithm<Self>) -> Self::Output {
-        rhs.iter().fold(self, |p, &m| p * m)
-    }
-}
-
-impl MulAssign<Move3x3> for Cube3x3 {
-    fn mul_assign(&mut self, rhs: Move3x3) {
-        *self = *self * rhs;
-    }
-}
-
-/// Conversion from [`Algorithm`] to [`Puzzle`], starting from the default puzzle state.
-pub trait FromAlg: Puzzle {
-    /// The conversion function.
-    #[must_use]
-    fn from_alg(alg: &Algorithm<Self>) -> Self {
-        Self::default().apply(alg)
-    }
-}
-
-impl<P: Puzzle> FromAlg for P {}

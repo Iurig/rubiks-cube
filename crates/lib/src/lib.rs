@@ -93,6 +93,8 @@ mod piece;
 mod puzzles;
 pub mod zn;
 
+extern crate self as rubiks_cube;
+
 pub use error::{
     BuildStepError, ParseMoveError, ParseSequenceError, PermutationError, SearchStepError,
     SolveError, SolveErrorKind, StepError, TechniqueError,
@@ -114,6 +116,7 @@ pub use methods::{
 };
 pub use ops::{Inv, Pow};
 pub use piece::{Piece, PieceConfiguration};
+pub use puzzle_ops::PuzzleOps;
 pub use puzzles::cube3x3::{
     Cube3x3,
     facelets::Facelets,
@@ -121,7 +124,7 @@ pub use puzzles::cube3x3::{
     pieces::{Center, Corner, Edge, Face, Orientation3x3, Piece3x3},
 };
 pub use puzzles::{
-    FromAlg, Puzzle,
+    Puzzle,
     algorithm::Algorithm,
     algset::AlgSet,
     label::{ByIdentity, ByMembership, Labeled, Marker, Mask, PieceSet},
