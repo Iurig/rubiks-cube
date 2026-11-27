@@ -22,7 +22,7 @@ fn to_technique(bencher: Bencher) {
 #[divan::bench(sample_size = 10000, sample_count = 1000)]
 fn cube_multiplications(bencher: Bencher) {
     let cube = Cube3x3::default();
-    let m: Move3x3 = "R".parse().unwrap();
+    let m: Move3x3 = "R".parse().expect("manually typed");
     bencher.bench_local(move || black_box(cube) * black_box(m));
 }
 
