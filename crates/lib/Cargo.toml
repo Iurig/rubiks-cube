@@ -38,6 +38,7 @@ required-features = ["sketch"]
 
 [dev-dependencies]
 anyhow = "1.0.104"
+criterion = "0.8.2"
 divan = "0.1.21"
 env_logger = { version = "0.11.11" }
 ntest = "0.10.0"
