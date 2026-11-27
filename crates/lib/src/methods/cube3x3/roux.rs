@@ -2,7 +2,8 @@ use std::sync::{Arc, LazyLock};
 
 use super::helpers::{chain_steps, set_options};
 use crate::{
-    AlgSet, Cube3x3, Indexed, Method, Piece3x3, PieceSet, SearchStep, Step, methods::Technique,
+    AlgSet, BuildContext, Cube3x3, Indexed, Method, Piece3x3, PieceSet, SearchStep, Step,
+    methods::Technique,
 };
 
 /// The Roux method for the 3x3 Rubik's Cube: first block, second block, CMLL, then the last six
@@ -18,12 +19,13 @@ use crate::{
 ///     .first_block(roux::FirstBlock::SquarePair)
 ///     .cmll(roux::Cmll::TwoLook);
 /// ```
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+#[derive(Debug, Default, PartialEq, Eq, Hash, Clone)]
 pub struct Roux {
     first_block: FirstBlock,
     second_block: SecondBlock,
     cmll: Cmll,
     lse: Lse,
+    build_context: &'static BuildContext,
 }
 
 impl Roux {
@@ -31,6 +33,12 @@ impl Roux {
     set_options!("second block", second_block, SecondBlock);
     set_options!("CMLL", cmll, Cmll);
     set_options!("LSE", lse, Lse);
+    /// Changes the build context of the current method.
+    #[must_use]
+    pub const fn build_context(mut self, build_context: &'static BuildContext) -> Self {
+        self.build_context = build_context;
+        self
+    }
 }
 
 /// How [`Roux`] builds the first block, the 1x2x3 block on the left.
@@ -182,7 +190,7 @@ mod tests {
     use itertools::iproduct;
 
     use super::*;
-    use crate::{Cube3x3, Inv};
+    use crate::{Cube3x3, Inv, methods::context::GLOBAL};
 
     #[test]
     #[ntest::timeout(200)]
@@ -297,6 +305,7 @@ mod tests {
             second_block: sb,
             cmll,
             lse: Lse::Eolr,
+            build_context: &GLOBAL,
         })
     }
 

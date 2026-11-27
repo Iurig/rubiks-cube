@@ -1,5 +1,7 @@
 use std::{
     any::{Any, TypeId},
+    hash::Hash,
+    ptr::from_ref,
     sync::{Arc, LazyLock, Mutex},
 };
 
@@ -46,6 +48,26 @@ pub type UntypedCache = Arc<dyn Any + Send + Sync>;
 #[derive(Default, Debug)]
 pub struct BuildContext {
     caches: Mutex<FxMap<TypeId, UntypedCache>>,
+}
+
+impl Default for &BuildContext {
+    fn default() -> Self {
+        &GLOBAL
+    }
+}
+
+impl PartialEq for &BuildContext {
+    fn eq(&self, other: &Self) -> bool {
+        from_ref(&self) == from_ref(&other)
+    }
+}
+
+impl Eq for &BuildContext {}
+
+impl Hash for &BuildContext {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        from_ref(&self).hash(state);
+    }
 }
 
 impl BuildContext {
