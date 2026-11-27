@@ -1,0 +1,540 @@
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+U' B D' M' B' D2 F'    // FB
+U' R' U M' U R2 U M R U Rw'    // SB
+U R' U' R U' R' U2 R U'    // CMLL
+U' M' U M' U2 M U2 M' U M U' M    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+U F U' R2 D F D2    // FB
+R U R' M' U Rw2 U Rw' U Rw2    // SB
+R U R' U R' F R F' R U2 R' U    // CMLL
+U2 M U' M U' M U M2 U' M'    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+U2 M' D M2 B F    // FB
+U' M' U' R U2 Rw2 U M2 R U R2    // SB
+U' R U2 R D R' U2 R D' R2 U2    // CMLL
+M' U2 M U2 M' U M U' M' U' M' U M2    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+F' D2 B2 M' D B R' F    // FB
+U M' U R U Rw' U' Rw' U2 R'    // SB
+U' F R' F' R U R U' R' U'    // CMLL
+M U M U' M U2 M' U' M U2 M2 U' M' U2    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+U' B D' M' B' D2 F'    // FB
+U' R' U M' U R2 U M R U Rw'    // SB
+U R' U' R U' R' U2 R    // CO
+R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R'    // CP
+U M' U2 M U' M' U' M' U2 M U M    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+U F U' R2 D F D2    // FB
+R U R' M' U Rw2 U Rw' U Rw2    // SB
+U2 R U R' U R U2 R'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U2 M' U M U M' U M U2 M2 U M2    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+U2 M' D M2 B F    // FB
+U' M' U' R U2 Rw2 U M2 R U R2    // SB
+F' Rw U Rw' U' Rw' F Rw    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U2 M' U2 M U' M U M U2 M U M U    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U F L2 M U B' D' F    // FB
+U M' U Rw2 U' R U' Rw U Rw    // SB
+R' U' R U' R' U2 R    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U' M' U' M' U' M U' M2 U' M' U    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+U' B D' M' B' D2 F'    // FB
+R' U Rw U R2    // SB Square
+M' U' M2 U2 Rw' U' R    // SB Pair
+F R U R' U' R U R' U' F'    // CMLL
+U M U' M U M U M U2    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+U F U' R2 D F D2    // FB
+M U Rw U' R2 U2 R2    // SB Square
+U2 Rw U' Rw' U2 Rw U Rw'    // SB Pair
+F R U' R' U' R U R' F' R U R' U' R' F R F'    // CMLL
+U M U M2 U2 M U' M U2 M U' M2    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+U2 M' D M2 B F    // FB
+U' Rw U2 R U' R    // SB Square
+Rw U Rw' U' Rw U Rw'    // SB Pair
+U2 F R' F' R U R U' R' U'    // CMLL
+U' M U2 M2 U M2 U2 M'    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U F L2 M U B' D' F    // FB
+U' Rw U' R' U2 R'    // SB Square
+U' M' R' U' M R    // SB Pair
+Rw U' Rw' F R' F' R U'    // CMLL
+U' M U M U2 M U2 M' U' M' U M'    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+U' B D' M' B' D2 F'    // FB
+R' U Rw U R2    // SB Square
+M' U' M2 U2 Rw' U' R    // SB Pair
+F R U R' U' R U R' U' F'    // CO
+    // CP
+U M U' M U M U M U2    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+U F U' R2 D F D2    // FB
+M U Rw U' R2 U2 R2    // SB Square
+U2 Rw U' Rw' U2 Rw U Rw'    // SB Pair
+    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U M U M2 U2 M U' M U2 M U' M2    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+U2 M' D M2 B F    // FB
+U' Rw U2 R U' R    // SB Square
+Rw U Rw' U' Rw U Rw'    // SB Pair
+U' F' Rw U Rw' U' Rw' F Rw    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U' M' U M U M' U2 M U    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U F L2 M U B' D' F    // FB
+U' Rw U' R' U2 R'    // SB Square
+U' M' R' U' M R    // SB Pair
+R U R' U R U2 R'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R'    // CP
+U2 M' U M' U2 M U' M' U' M' U M'    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+U' B D' M' B' D2 F'    // FB
+R' U M' U R2    // DR
+R2 U' R U R2    // SB Square
+M' U' M2 U2 Rw' U' R    // SB Pair
+F R U R' U' R U R' U' F'    // CMLL
+U M U' M U M U M U2    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+U F U' R2 D F D2    // FB
+U M' U R2    // DR
+M' U2 Rw' U' R    // SB Square
+Rw U' M2 U' R'    // SB Pair
+U R' U' R' F R F' R U' R' U2 R U2    // CMLL
+U M U2 M U M' U M U M' U' M' U'    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+U2 M' D M2 B F    // FB
+U R2    // DR
+U2 R' M' U R    // SB Square
+Rw U Rw' U' Rw U Rw'    // SB Pair
+U2 R' U2 R' D' R U2 R' D R2 U2    // CMLL
+U2 M U2 M' U M2 U M U' M U'    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U F L2 M U B' D' F    // FB
+M' U' R2    // DR
+R' U2 Rw' R' U' R'    // SB Square
+U M2 U Rw' U2 R    // SB Pair
+U' R U R2 F' Rw F R U' Rw2 F Rw U    // CMLL
+M U M2 U' M U' M' U M    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+U' B D' M' B' D2 F'    // FB
+R' U M' U R2    // DR
+R2 U' R U R2    // SB Square
+M' U' M2 U2 Rw' U' R    // SB Pair
+F R U R' U' R U R' U' F'    // CO
+    // CP
+U M U' M U M U M U2    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+U F U' R2 D F D2    // FB
+U M' U R2    // DR
+M' U2 Rw' U' R    // SB Square
+Rw U' M2 U' R'    // SB Pair
+U2 F R U R' U' R U R' U' F'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+M2 U M U' M U' M U M'    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+U2 M' D M2 B F    // FB
+U R2    // DR
+U2 R' M' U R    // SB Square
+Rw U Rw' U' Rw U Rw'    // SB Pair
+F' Rw U Rw' U' Rw' F Rw    // CO
+R U R' F' R U R' U' R' F R2 U' R'    // CP
+U' M' U M U M' U2 M U' M' U2 M    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U F L2 M U B' D' F    // FB
+M' U' R2    // DR
+R' U2 Rw' R' U' R'    // SB Square
+U M2 U Rw' U2 R    // SB Pair
+U2 R' U' R U' R' U2 R    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R'    // CP
+M U2 M2 U M U2 M U' M'    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+R' U' B D    // FB Square
+F2 M2 F    // FB Pair
+U2 M U' R M2 U R U' Rw    // SB
+U2 F R' F' R U2 R U' R' U R U2 R' U2    // CMLL
+M U M' U' M' U2 M' U' M' U' M'    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F' M2 F' D F    // FB Square
+B R2 U' R B'    // FB Pair
+U' Rw' U' M U' Rw' U2 R2 U Rw U2 R    // SB
+U2 Rw U' Rw' F R' F' R    // CMLL
+U2 M' U2 M' U M U' M    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+M D' R2 B'    // FB Square
+F U2 F2    // FB Pair
+U' R' M' U' Rw' U Rw' U2 M2 U R    // SB
+U2 F' L F L' U2 L' U2 L U    // CMLL
+U' M' U M2 U' M' U2 M' U' M    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U' R L U' B    // FB Square
+F M' F U2 F2    // FB Pair
+U2 Rw2 U Rw U' Rw2 U' M2 R U' R    // SB
+U Rw' U Rw U2 R2 F R F' R U'    // CMLL
+M' U M' U M U M2 U M'    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+R' U' B D    // FB Square
+F2 M2 F    // FB Pair
+U2 M U' M2 R U R U' Rw    // SB
+U F R U R' U' R U R' U' F'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U' M U M' U' M' U2 M2 U' M'    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F' M2 F' D F    // FB Square
+B R2 U' R B'    // FB Pair
+U M U R' U2 Rw' U' M2 U' Rw' U Rw'    // SB
+U' F R U R' U' R U R' U' F'    // CO
+R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+M U' M U' M2 U M' U2 M' U2 M U M    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+M D' R2 B'    // FB Square
+F U2 F2    // FB Pair
+U' R' M' U' Rw' U Rw' U2 M2 U R    // SB
+R' U' R U' R' U2 R    // CO
+R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U' M2 U2 M' U M2 U2 M    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U' R L U' B    // FB Square
+F M' F U2 F2    // FB Pair
+U2 Rw2 U Rw U' Rw2 U' M2 R U' R    // SB
+R U R' U' R' F R F'    // CO
+R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U' M U M2 U' M U' M U2 M'    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+R' U' B D    // FB Square
+F2 M2 F    // FB Pair
+U2 Rw U R U' R    // SB Square
+U M2 R U' Rw'    // SB Pair
+U' F R' F' R U2 R U2 R'    // CMLL
+M U M2 U2 M U M U M' U'    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F' M2 F' D F    // FB Square
+B R2 U' R B'    // FB Pair
+R U M' U2 M2 U' R    // SB Square
+U' R U' M U' R'    // SB Pair
+U Rw U' Rw' F R' F' R    // CMLL
+U' M U' M2 U' M' U' M2    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+M D' R2 B'    // FB Square
+F U2 F2    // FB Pair
+U' M' R' U' R'    // SB Square
+U Rw' U2 M2 U M R    // SB Pair
+U2 F' L F L' U2 L' U2 L U    // CMLL
+M2 U M' U M' U' M U' M'    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U' R L U' B    // FB Square
+F M' F U2 F2    // FB Pair
+U2 R2 U Rw' U' R2    // SB Square
+U M' U2 Rw2 R U' Rw    // SB Pair
+U' Rw U' Rw2 D' Rw U' Rw' D Rw2 U Rw' U'    // CMLL
+M U' M' U M' U2 M' U M U M    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+R' U' B D    // FB Square
+F2 M2 F    // FB Pair
+U2 Rw U R U' R    // SB Square
+U M2 R U' Rw'    // SB Pair
+U' R U R' U R U2 R'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U M' U' M' U M2 U'    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F' M2 F' D F    // FB Square
+B R2 U' R B'    // FB Pair
+R U M' U2 M2 U' R    // SB Square
+U' R U' M U' R'    // SB Pair
+U R U R' U R U2 R'    // CO
+R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R'    // CP
+M U M' U M U2 M U M U' M    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+M D' R2 B'    // FB Square
+F U2 F2    // FB Pair
+U' M' R' U' R'    // SB Square
+U Rw' U2 M2 U M R    // SB Pair
+R' U' R U' R' U2 R    // CO
+R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U2 M U' M' U M' U M2 U' M U2 M2    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U' R L U' B    // FB Square
+F M' F U2 F2    // FB Pair
+U2 R2 U Rw' U' R2    // SB Square
+U M' U2 Rw2 R U' Rw    // SB Pair
+U U R U R' U R U' R' U R U2 R'    // CO
+R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U M U' M' U M2 U2 M U' M' U2 M2    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+R' U' B D    // FB Square
+F2 M2 F    // FB Pair
+M U' R2    // DR
+R' U R U2 R' U R    // SB Square
+U M2 U' Rw U2 R'    // SB Pair
+Rw U' Rw' U Rw' D' Rw U' Rw' D Rw U2    // CMLL
+M U2 M U M' U M U' M' U' M' U2    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F' M2 F' D F    // FB Square
+B R2 U' R B'    // FB Pair
+R2    // DR
+U' M2 U2 Rw' U R    // SB Square
+U' R U2 R' U' Rw U R'    // SB Pair
+U' R' F2 D R2 U' R2 D' F2 R U2    // CMLL
+U2 M U2 M' U' M2 U' M' U2 M'    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+M D' R2 B'    // FB Square
+F U2 F2    // FB Pair
+U' R2    // DR
+Rw U' R'    // SB Square
+U Rw' U2 M2 U M R    // SB Pair
+U2 F' L F L' U2 L' U2 L U    // CMLL
+M2 U M' U M' U' M U' M'    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U' R L U' B    // FB Square
+F M' F U2 F2    // FB Pair
+U M' U R2    // DR
+U2 M R U R'    // SB Square
+U2 Rw2 R U' Rw    // SB Pair
+U' R' F2 D R2 U R2 D' F2 R    // CMLL
+U' M' U' M U' M' U' M    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+R' U' B D    // FB Square
+F2 M2 F    // FB Pair
+M U' R2    // DR
+R' U R U2 R' U R    // SB Square
+U M2 U' Rw U2 R'    // SB Pair
+U F R U R' U' F'    // CO
+R U R' F' R U R' U' R' F R2 U' R'    // CP
+U M U' M' U2 M2 U' M U' M    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F' M2 F' D F    // FB Square
+B R2 U' R B'    // FB Pair
+R2    // DR
+U' M2 U2 Rw' U R    // SB Square
+U' R U2 R' U' Rw U R'    // SB Pair
+U' F R U R' U' R U R' U' F'    // CO
+R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R'    // CP
+U M U' M U M2 U M' U2 M U' M U M'    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+M D' R2 B'    // FB Square
+F U2 F2    // FB Pair
+U' R2    // DR
+Rw U' R'    // SB Square
+U Rw' U2 M2 U M R    // SB Pair
+R' U' R U' R' U2 R    // CO
+R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U2 M U' M' U M' U M2 U' M U2 M2    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+U' R L U' B    // FB Square
+F M' F U2 F2    // FB Pair
+U M' U R2    // DR
+U2 M R U R'    // SB Square
+U2 Rw2 R U' Rw    // SB Pair
+U U R U R' U R U' R' U R U2 R'    // CO
+R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R'    // CP
+U2 M' U' M U' M' U' M U2 M' U M U2    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+B D    // DL
+F2 M' R' F    // FB Square
+M' B M B'    // FB Pair
+M2 U2 M' U Rw2 U2 Rw' U Rw' R'    // SB
+U2 R U R' F' R U R' U' R' F R2 U' R'    // CMLL
+U M2 U' M' U M' U M U M' U    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F D'    // DL
+L D2 L' F    // FB Square
+B U2 R B'    // FB Pair
+U2 R M2 U R2 U M' U' Rw    // SB
+U F R' F' R U2 R U2 R' U'    // CMLL
+M U M U2 M' U' M' U M2 U M U2 M U2    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+F' L    // DL
+R F' M F'    // FB Square
+L U L' B    // FB Pair
+M2 U M2 U2 Rw2 U Rw U Rw U' Rw    // SB
+F R' F' R U2 R U' R' U R U2 R'    // CMLL
+M U M2 U2 M' U M U2 M U2    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+L    // DL
+F' R' B' M' F    // FB Square
+B2 R B'    // FB Pair
+U R U2 R Rw2 U M' R' U' R'    // SB
+U2 Rw' D' Rw U Rw' D Rw U' Rw U Rw' U2    // CMLL
+U M2 U M' U' M U M2 U2    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+B D    // DL
+F2 M' R' F    // FB Square
+M' B M B'    // FB Pair
+M2 U2 M' U Rw2 U2 Rw' U Rw' R'    // SB
+    // CO
+R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+M U M U2 M U M' U M2 U'    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F D'    // DL
+L D2 L' F    // FB Square
+B U2 R B'    // FB Pair
+U2 R M2 U R2 U M' U' Rw    // SB
+U R U R' U R U2 R'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+M' U M U'    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+F' L    // DL
+R F' M F'    // FB Square
+L U L' B    // FB Pair
+M2 U M2 U2 Rw2 U Rw U Rw U' Rw    // SB
+U' F R U R' U' R U R' U' F'    // CO
+R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+M2 U2 M U M' U2 M' U2 M' U    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+L    // DL
+F' R' B' M' F    // FB Square
+B2 R B'    // FB Pair
+U R U2 R Rw2 U M' R' U' R'    // SB
+U R U R' U' R' F R F'    // CO
+R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R'    // CP
+M2 U' M' U M U2 M' U2 M U M2 U'    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+B D    // DL
+F2 M' R' F    // FB Square
+M' B M B'    // FB Pair
+M U' Rw U2 R2 U' R2    // SB Square
+M2 U2 Rw U R'    // SB Pair
+U' R' F2 D R2 U R2 D' F2 R U    // CMLL
+M U' M U M U M' U2 M' U M2 U M U'    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F D'    // DL
+L D2 L' F    // FB Square
+B U2 R B'    // FB Pair
+Rw' U' M2 U R    // SB Square
+U M' U' M2 U2 R U R'    // SB Pair
+U F R' F' R U2 R U2 R' U'    // CMLL
+M U M' U M U M' U' M' U2 M    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+F' L    // DL
+R F' M F'    // FB Square
+L U L' B    // FB Pair
+R2 U' Rw' U' R U' R    // SB Square
+M2 U2 Rw U Rw'    // SB Pair
+U L' U' L U L F' L' F U'    // CMLL
+M U2 M U2 M' U M' U M' U2 M    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+L    // DL
+F' R' B' M' F    // FB Square
+B2 R B'    // FB Pair
+U M' U2 Rw' U' R2    // SB Square
+R U2 Rw2 R U2 Rw U R'    // SB Pair
+U' Rw' D' Rw U Rw' D Rw U' Rw U Rw' U2    // CMLL
+M U M' U M U2 M U' M2 U    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+B D    // DL
+F2 M' R' F    // FB Square
+M' B M B'    // FB Pair
+M U' Rw U2 R2 U' R2    // SB Square
+M2 U2 Rw U R'    // SB Pair
+U U R U R' U R U' R' U R U2 R'    // CO
+R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R'    // CP
+U M2 U' M' U2 M' U' M' U M U2    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F D'    // DL
+L D2 L' F    // FB Square
+B U2 R B'    // FB Pair
+Rw' U' M2 U R    // SB Square
+U M' U' M2 U2 R U R'    // SB Pair
+U R U R' U R U2 R'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+M U M2 U' M' U' M' U M U M U' M    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+F' L    // DL
+R F' M F'    // FB Square
+L U L' B    // FB Pair
+R2 U' Rw' U' R U' R    // SB Square
+M2 U2 Rw U Rw'    // SB Pair
+U' R U R' U' R' F R F'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+M U2 M U2 M' U M' U M' U2 M    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+L    // DL
+F' R' B' M' F    // FB Square
+B2 R B'    // FB Pair
+U M' U2 Rw' U' R2    // SB Square
+R U2 Rw2 R U2 Rw U R'    // SB Pair
+U2 R U R' U' R' F R F'    // CO
+R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R'    // CP
+U M U' M U2 M U2 M    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+B D    // DL
+F2 M' R' F    // FB Square
+M' B M B'    // FB Pair
+U M U' R2    // DR
+U2 Rw U2 R2 U' R    // SB Square
+R U' R' U Rw U' Rw2 R    // SB Pair
+U' R2 D R' U2 R D' R' U2 R' U2    // CMLL
+U M U' M U' M' U M U' M U M    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F D'    // DL
+L D2 L' F    // FB Square
+B U2 R B'    // FB Pair
+    // DR
+Rw' U' M2 U R    // SB Square
+U M' U' M2 U2 R U R'    // SB Pair
+U F R' F' R U2 R U2 R' U'    // CMLL
+M U M' U M U M' U' M' U2 M    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+F' L    // DL
+R F' M F'    // FB Square
+L U L' B    // FB Pair
+R2 U M' U R2    // DR
+R2 U R' U' R U' R    // SB Square
+U2 M R U M' R'    // SB Pair
+U L' U' L U L F' L' F U'    // CMLL
+U M' U2 M U M' U2 M2 U M U M2    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+L    // DL
+F' R' B' M' F    // FB Square
+B2 R B'    // FB Pair
+M2 U R2    // DR
+U2 R' M' U Rw2 U' R'    // SB Square
+U' M2 U' Rw' U Rw    // SB Pair
+R U R' F' R U R' U' R' F R2 U' R'    // CMLL
+U M' U2 M U M' U' M' U' M U M U    // LSE
+D2 U' F2 D' L2 U' F2 L2 B2 D R2 B2 F2 U' R' B' U' L' B' U2 F L2 R2
+B D    // DL
+F2 M' R' F    // FB Square
+M' B M B'    // FB Pair
+U M U' R2    // DR
+U2 Rw U2 R2 U' R    // SB Square
+R U' R' U Rw U' Rw2 R    // SB Pair
+F R U R' U' F'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R'    // CP
+U M U M' U2 M U' M' U' M U' M' U'    // LSE
+U' B2 D L2 R2 B2 L2 R2 U' L2 D' L2 F2 U' B' R' B' F' D' B' R B F2
+F D'    // DL
+L D2 L' F    // FB Square
+B U2 R B'    // FB Pair
+    // DR
+Rw' U' M2 U R    // SB Square
+U M' U' M2 U2 R U R'    // SB Pair
+U R U R' U R U2 R'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F' R U R' F' R U R' U' R' F R2 U' R' R U R' F' R U R' U' R' F R2 U' R' F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+M U M2 U' M' U' M' U M U M U' M    // LSE
+F2 L2 U B2 U' F2 R2 U2 R2 U' F2 R2 F2 L2 R' B L2 U2 F' R' B' D U
+F' L    // DL
+R F' M F'    // FB Square
+L U L' B    // FB Pair
+R2 U M' U R2    // DR
+R2 U R' U' R U' R    // SB Square
+U2 M R U M' R'    // SB Pair
+U' R U R' U' R' F R F'    // CO
+F R U' R' U' R U R' F' R U R' U' R' F R F'    // CP
+U M' U2 M U M' U2 M2 U M U M2    // LSE
+D L2 D2 L2 U R2 F2 L2 D2 F2 D B2 U2 B' L2 R2 D' R B U L D' F'
+L    // DL
+F' R' B' M' F    // FB Square
+B2 R B'    // FB Pair
+M2 U R2    // DR
+U2 R' M' U Rw2 U' R'    // SB Square
+U' M2 U' Rw' U Rw    // SB Pair
+    // CO
+R U R' F' R U R' U' R' F R2 U' R'    // CP
+U M' U2 M U M' U' M' U' M U M U    // LSE
